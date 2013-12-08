@@ -7,6 +7,7 @@ object Form1: TForm1
   ClientHeight = 531
   ClientWidth = 884
   Menu = MainMenu1
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   LCLVersion = '1.0.14.0'
@@ -87,6 +88,7 @@ object Form1: TForm1
     Align = alClient
     PopupMenu = PopupMenu1
     TabOrder = 4
+    OnChange = PageControl1Change
   end
   object SynHTMLSyn1: TSynHTMLSyn
     DefaultFilter = 'HTML-Dokumente (*.htm,*.html)|*.htm;*.html'
@@ -113,6 +115,10 @@ object Form1: TForm1
       object mnuPfadOeffnen: TMenuItem
         Caption = 'Select directory'
         OnClick = mnuPfadOeffnenClick
+      end
+      object mnuSaveall: TMenuItem
+        Caption = 'SaveAll'
+        OnClick = mnuSaveallClick
       end
     end
     object MenuItem1: TMenuItem
@@ -710,6 +716,7 @@ object Form1: TForm1
     end
     object mnuPathToClipboard: TMenuItem
       Caption = 'Copy Path to clipboard'
+      OnClick = mnuPathToClipboardClick
     end
   end
 end

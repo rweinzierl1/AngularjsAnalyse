@@ -35,8 +35,10 @@ type
   TFrmMainController = class
   private
     slDJKeyWords : Tstringlist;
+
     function loeseCamelCaseAuf(sSuchtext: string): string;
     function SchluesselwortInZeileGefundenUndStringInKlammern(sZeile,sSchluesselwort: string; oneFileInfo : TOneFileInfo ;iImageindex : integer): boolean;
+
     procedure WerteDateiInhaltAus(sDateiname: string; oneFileInfo : TOneFileInfo);
   public
       sPfad : string;
@@ -61,6 +63,10 @@ type
       procedure AddOneFileInSL(sPath : string ; treenode : TObject);
       function sucheoneFileInfoZuDataPointer(p: TObject): TOneFileInfo;
       procedure FuelleSlMitDateinDieDiesesWortEnthalten(sl: TStringlist; sSuchtext: string);
+      procedure SaveAll;
+      function SynMemoModifiedAvailable: boolean;
+      procedure SetzeActiveTabsheet(ActivePage : TTabSheet);
+      function GetActiveFilePath: string;
       constructor create;
       destructor destroy; override;
   end;
@@ -428,8 +434,79 @@ for i := 0 to slAllFilesFound.count -1 do
   end;
 end;
 
+procedure TFrmMainController.SaveAll;
+var i : integer;
+OneTabsheet : TOneTabsheet;
+begin
+
+for i := 0 to slGeoffnetteTabsheets.Count -1 do
+  begin
+  OneTabsheet := TOneTabsheet(slGeoffnetteTabsheets.Objects[i]) ;
+
+  if OneTabsheet.SynMemo.Modified then
+    begin
+    OneTabsheet.SynMemo.lines.SaveToFile(slGeoffnetteTabsheets[i]);
+    OneTabsheet.SynMemo.Modified := false;
+    end;
+  end;
 
 
+end;
+
+function TFrmMainController.SynMemoModifiedAvailable : boolean;
+var i : integer;
+OneTabsheet : TOneTabsheet;
+begin
+result := false;
+
+for i := 0 to slGeoffnetteTabsheets.Count -1 do
+  begin
+  OneTabsheet := TOneTabsheet(slGeoffnetteTabsheets.Objects[i]) ;
+
+  if OneTabsheet.SynMemo.Modified then
+    begin
+    result := true;
+    break;
+    end;
+  end;
+
+
+end;
+
+procedure TFrmMainController.SetzeActiveTabsheet(ActivePage: TTabSheet);
+var i : integer;
+OneTabsheet : TOneTabsheet;
+begin
+for i := 0 to slGeoffnetteTabsheets.Count -1 do
+  begin
+  OneTabsheet := TOneTabsheet(slGeoffnetteTabsheets.Objects[i]) ;
+  if OneTabsheet.Tabsheet = ActivePage then
+    begin
+    myActiveTabsheet := OneTabsheet.Tabsheet ;
+    myActiveSynMemo := OneTabsheet.SynMemo ;
+    break;
+    end;
+  end;
+
+end;
+
+function TFrmMainController.GetActiveFilePath: string;
+var
+  i: integer;
+  myOneTabsheet: TOneTabsheet;
+begin
+result := '';
+
+  for i := 0 to slGeoffnetteTabsheets.Count - 1 do
+  begin
+  myOneTabsheet := TOneTabsheet(slGeoffnetteTabsheets.Objects[i]) ;
+    if myOneTabsheet.Tabsheet = myActiveTabsheet then
+    begin
+    result := slGeoffnetteTabsheets[i] ;
+    end;
+  end;
+
+end;
 
 
 end.
