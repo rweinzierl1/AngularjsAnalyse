@@ -7,8 +7,9 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynHighlighterHTML, SynMemo, SynEdit,
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
+  SynEditTypes, SynEditMarks ,strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
-  SynHighlighterJava, SynHighlighterCpp,Clipbrd, angFrmMainController;
+  SynHighlighterJava, SynHighlighterCpp, Clipbrd, angFrmMainController;
 
 type
 
@@ -54,6 +55,7 @@ type
     procedure PageControl1Change(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
+    procedure ToolButton3Click(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1DblClick(Sender: TObject);
   private
@@ -67,6 +69,8 @@ type
     treenodeConfig: TTreenode;
     treenodeDependencyInjectionWords: TTreenode;
     frmMainController: TFrmMainController;
+    procedure AddEditMarkToLine(iImageindex, iLine: integer);
+    procedure MarkLineContainsThisWord(sWord: string);
     procedure SucheTabsheetOderErstelleNeue(sDateiname: string);
     function ErmittleItemindexAnhandDateiendung(sDateiname: string): integer;
     procedure FuegeAngularJSDateienAlsKnotenEin(myTreeNode: TTreenode;
@@ -95,13 +99,13 @@ procedure TForm1.mnuInfoClick(Sender: TObject);
 begin
   ShowMessage('Simple tool to anlyse AngularJS projekt stucture. ' +
     #13#10 + 'Freeware/ Open source' + #13#10 +
-    'https://github.com/rweinzierl1/AngularjsAnalyse ' +
-    #13#10 + 'Developed by  Weinzierl Reinhold');
+    'https://github.com/rweinzierl1/AngularjsAnalyse ' + #13#10 +
+    'Developed by  Weinzierl Reinhold');
 end;
 
 procedure TForm1.mnuPathToClipboardClick(Sender: TObject);
 begin
-  Clipboard.AsText := frmMainController.GetActiveFilePath  ;
+  Clipboard.AsText := frmMainController.GetActiveFilePath;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -121,11 +125,15 @@ begin
 
   if pos(FindDialog1.FindText, frmMainController.myActiveSynMemo.Lines.Text) > 0 then
   begin
-    SynAnySyn1.KeyWords.Clear;
-    SynAnySyn1.Constants.Clear;
-    s := uppercase(FindDialog1.FindText);
-    SynAnySyn1.Constants.add(s);
-    frmMainController.myActiveSynMemo.Refresh;
+
+    frmMainController.myActiveSynMemo.SetFocus;
+
+
+
+ // frmMainController.myActiveSynMemo.SelLength := Length(FindDialog1.FindText);
+
+
+    MarkLineContainsThisWord(FindDialog1.FindText);
     FindDialog1.CloseDialog;
   end;
 
@@ -220,19 +228,19 @@ begin
   TreeView1.Items.Clear;
 
 
-  treenodeModule := TreeView1.Items.AddChild(nil, 'Module');
+  treenodeModule := TreeView1.Items.AddChild(nil, 'angular.module');
   treenodeModule.ImageIndex := constItemIndexModule;
-  treenodeController := TreeView1.Items.AddChild(nil, 'Controller');
+  treenodeController := TreeView1.Items.AddChild(nil, '.controller');
   treenodeController.ImageIndex := constItemIndexController;
-  treenodeService := TreeView1.Items.AddChild(nil, 'Service');
+  treenodeService := TreeView1.Items.AddChild(nil, '.service');
   treenodeService.ImageIndex := constItemIndexService;
-  treenodeFactory := TreeView1.Items.AddChild(nil, 'Factory');
+  treenodeFactory := TreeView1.Items.AddChild(nil, '.factory');
   treenodeFactory.ImageIndex := constItemIndexFactory;
-  treenodeFilter := TreeView1.Items.AddChild(nil, 'Filter');
+  treenodeFilter := TreeView1.Items.AddChild(nil, '.filter');
   treenodeFilter.ImageIndex := constItemIndexFilter;
-  treenodeDirectives := TreeView1.Items.AddChild(nil, 'Directives');
+  treenodeDirectives := TreeView1.Items.AddChild(nil, '.directive');
   treenodeDirectives.ImageIndex := constItemIndexDirective;
-  treenodeConfig := TreeView1.Items.AddChild(nil, 'Config');
+  treenodeConfig := TreeView1.Items.AddChild(nil, '.config');
   treenodeConfig.ImageIndex := constItemIndexConfig;
 
   treenodeDependencyInjectionWords :=
@@ -374,6 +382,11 @@ begin
 
 end;
 
+procedure TForm1.ToolButton3Click(Sender: TObject);
+begin
+
+end;
+
 procedure TForm1.SucheTabsheetOderErstelleNeue(sDateiname: string);
 var
   i: integer;
@@ -385,8 +398,6 @@ begin
     if frmMainController.slGeoffnetteTabsheets[i] = sDateiname then
     begin
       myOneTabsheet := TOneTabsheet(frmMainController.slGeoffnetteTabsheets.Objects[i]);
-      //   frmMainController.myActiveTabsheet := myOneTabsheet.Tabsheet;
-      //   frmMainController.myActiveSynMemo := myOneTabsheet.SynMemo;
       self.PageControl1.ActivePage := myOneTabsheet.Tabsheet;
       exit;
     end;
@@ -444,6 +455,7 @@ procedure TForm1.TreeView1DblClick(Sender: TObject);
 var
   treenode: TTreenode;
   sPfad: string;
+  parentNode : TTreenode;
 begin
 
   treenode := TreeView1.Selected;
@@ -466,9 +478,9 @@ begin
     frmMainController.myActiveSynMemo.Highlighter := SynAnySyn1;
     if pos('.JS', uppercase(treenode.Text)) > 0 then
     begin
-{      SynAnySyn1.KeyWords.Clear;
-      SynAnySyn1.KeyWords.add('ANGULAR');
-      SynAnySyn1.KeyWords.add('MODULE');   }
+      SynAnySyn1.KeyWords.Clear;
+      SynAnySyn1.KeyWords.add('angular');
+
 
 
       frmMainController.myActiveSynMemo.Refresh;
@@ -477,6 +489,14 @@ begin
 
   frmMainController.myActiveTabsheet.Caption := extractfilename(sPfad);
   frmMainController.myActiveSynMemo.Lines.LoadFromFile(sPfad);
+
+
+  parentNode := treenode.parent;
+  if parentNode <> nil then
+    begin
+    MarkLineContainsThisWord(parentNode.Text);
+
+    end;
 end;
 
 
@@ -511,7 +531,75 @@ begin
   FindClose(sr);
 end;
 
+procedure TForm1.MarkLineContainsThisWord(sWord : string );
+var
+i,n : integer;
+ipos : integer;
+s : string;
+m: TSynEditMark;
+sWord2 : string;
+gefunden : boolean ;
+begin
+  sWord2 :=   frmMainController.loeseCamelCaseAuf(sWord);
+  gefunden := false;
 
+  for i := frmMainController.myActiveSynMemo.Marks.Count -1 downto 0 do
+    begin
+    m := frmMainController.myActiveSynMemo.Marks[i];
+    if m.ImageIndex = constItemIndexMarkFound then
+       frmMainController.myActiveSynMemo.Marks.Delete(i);
+    end;
+
+  for i := 0 to frmMainController.myActiveSynMemo.Lines.Count - 1 do
+    begin
+    s := frmMainController.myActiveSynMemo.lines[i];
+    ipos := pos(sWord,s) ;
+    if ipos = 0 then
+      ipos := pos(sWord2,s) ;
+
+    if ipos > 0 then
+      begin
+
+      AddEditMarkToLine(constItemIndexMarkFound, i +1) ;
+
+      if not gefunden then
+        begin
+       // for n := 1 to length(s) do
+       //   if s[n] = #39 then
+
+        s := ansireplacestr(s,#9,'        '); // TODO make it better
+        ipos := pos(sWord,s) ;
+        if ipos = 0 then
+          ipos := pos(sWord2,s) ;
+
+
+        frmMainController.myActiveSynMemo.CaretY := i +1;
+        frmMainController.myActiveSynMemo.CaretX := ipos ;
+
+        frmMainController.myActiveSynMemo.setfocus;
+        frmMainController.myActiveSynMemo.SelectWord;
+        gefunden := true;
+        end;
+
+
+      end;
+
+
+    end;
+
+end;
+
+procedure TForm1.AddEditMarkToLine(iImageindex, iLine: integer);
+var
+  m: TSynEditMark;
+begin
+  m := TSynEditMark.Create(frmMainController.myActiveSynMemo);
+  m.Line := iLine;
+  m.ImageList := ImageList1;
+  m.ImageIndex := iImageindex;
+  m.Visible := True;
+  frmMainController.myActiveSynMemo.Marks.Add(m);
+end;
 
 
 end.

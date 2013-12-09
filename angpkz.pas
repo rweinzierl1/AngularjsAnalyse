@@ -25,6 +25,14 @@ constItemIndexUnknownFileWithPath = 12;
 constItemIndexDirective = 13;
 constItemIndexConfig = 14;
 constItemIndexKey = 15;
+constItemIndexMarkFound = 16;
+constItemIndexfree1 = 16;
+constItemIndexfree2 = 17;
+constItemIndexfree3 = 18;
+constItemIndexfree4 = 19;
+constItemIndexfree5 = 20;
+
+
 
 implementation
 
