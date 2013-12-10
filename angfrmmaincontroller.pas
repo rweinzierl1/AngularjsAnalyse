@@ -50,23 +50,23 @@ type
     slConfig: TStringList;
     myActiveTabsheet: TTabSheet;
     myActiveSynMemo: TsynMemo;
-    slGeoffnetteTabsheets: TStringList;
-    sLastSearch  : string;
+    slOpendTabsheets: TStringList;
+    sLastSearch: string;
 
-    function loeseCamelCaseAuf(sSuchtext: string): string;
+    function ChangeCamelCaseToMinusString(sSuchtext: string): string;
     function GetslDJKeyWords: TStringList;
     procedure ClearAll;
-    function sucheDateinameZuDataPointer(p: TObject): string;
+    function findFileNameToDataPointer(p: TObject): string;
     procedure AddOneFileInSL(sPath: string; treenode: TObject);
-    function sucheoneFileInfoZuDataPointer(p: TObject): TOneFileInfo;
-    procedure FuelleSlMitDateinDieDiesesWortEnthalten(sl: TStringList;
-      sSuchtext: string);
+    function FindOneFileInfoToDataPointer(p: TObject): TOneFileInfo;
+    procedure FillSlWithFilesContainsThisWord(sl: TStringList; sSuchtext: string);
     procedure SaveAll;
     function SynMemoModifiedAvailable: boolean;
-    procedure SetzeActiveTabsheet(ActivePage: TTabSheet);
+    procedure SetActiveTabsheet(ActivePage: TTabSheet);
     function GetActiveFilePath: string;
-    function PostitionOfTextInText(const Substr: AnsiString;
-      const Source: AnsiString): integer;
+    function PostitionOfTextInText(const Substr: ansistring;
+      const Source: ansistring): integer;
+    function GetImageindexForFileIfItContainsOnlyTheSameType(sFilename: string): integer;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -106,8 +106,8 @@ begin
   slConfig := TStringList.Create;
   slDJKeyWords := TStringList.Create;
 
-  slGeoffnetteTabsheets := TStringList.Create;
-  slGeoffnetteTabsheets.OwnsObjects := True;
+  slOpendTabsheets := TStringList.Create;
+  slOpendTabsheets.OwnsObjects := True;
 end;
 
 destructor TFrmMainController.Destroy;
@@ -123,7 +123,7 @@ begin
   slConfig.Free;
   slDJKeyWords.Free;
 
-  slGeoffnetteTabsheets.Free;
+  slOpendTabsheets.Free;
 
 
   inherited Destroy;
@@ -213,7 +213,8 @@ begin
   else
   if sExt = '.JS' then
   begin
-    sDateiNameOhneRootPfad := copy(sDateiname, length(self.sPfad) + 1, length(sDateiname));
+    sDateiNameOhneRootPfad := copy(sDateiname, length(self.sPfad) +
+      1, length(sDateiname));
 
 
     oneFileInfo.slFileInhalt.loadfromfile(sDateiname);
@@ -332,7 +333,7 @@ begin
 
 end;
 
-function TFrmMainController.sucheDateinameZuDataPointer(p: TObject): string;
+function TFrmMainController.findFileNameToDataPointer(p: TObject): string;
 var
   i: integer;
   oneFileInfo: TOneFileInfo;
@@ -349,7 +350,7 @@ begin
   end;
 end;
 
-function TFrmMainController.sucheoneFileInfoZuDataPointer(p: TObject): TOneFileInfo;
+function TFrmMainController.FindOneFileInfoToDataPointer(p: TObject): TOneFileInfo;
 var
   i: integer;
   oneFileInfo: TOneFileInfo;
@@ -389,7 +390,7 @@ begin
   Result := slDJKeyWords;
 end;
 
-function TFrmMainController.loeseCamelCaseAuf(sSuchtext: string): string;
+function TFrmMainController.ChangeCamelCaseToMinusString(sSuchtext: string): string;
 var
   i: integer;
   boolGross: boolean;
@@ -411,7 +412,7 @@ begin
 end;
 
 
-procedure TFrmMainController.FuelleSlMitDateinDieDiesesWortEnthalten(sl: TStringList;
+procedure TFrmMainController.FillSlWithFilesContainsThisWord(sl: TStringList;
   sSuchtext: string);
 var
   i: integer;
@@ -422,7 +423,7 @@ var
   sCamelCaseAufgeloest: string;
 begin
 
-  sCamelCaseAufgeloest := loeseCamelCaseAuf(sSuchtext);
+  sCamelCaseAufgeloest := ChangeCamelCaseToMinusString(sSuchtext);
 
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
@@ -442,8 +443,8 @@ begin
 
     if gefunden then
     begin
-      sDateiNameOhneRootPfad := copy(slAllFilesFound[i], length(self.sPfad) +
-        1, length(slAllFilesFound[i]));
+      sDateiNameOhneRootPfad :=
+        copy(slAllFilesFound[i], length(self.sPfad) + 1, length(slAllFilesFound[i]));
       sl.AddObject(sDateiNameOhneRootPfad, oneFileInfo.pTreenodeInView);
 
     end;
@@ -456,13 +457,13 @@ var
   OneTabsheet: TOneTabsheet;
 begin
 
-  for i := 0 to slGeoffnetteTabsheets.Count - 1 do
+  for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    OneTabsheet := TOneTabsheet(slGeoffnetteTabsheets.Objects[i]);
+    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
 
     if OneTabsheet.SynMemo.Modified then
     begin
-      OneTabsheet.SynMemo.Lines.SaveToFile(slGeoffnetteTabsheets[i]);
+      OneTabsheet.SynMemo.Lines.SaveToFile(slOpendTabsheets[i]);
       OneTabsheet.SynMemo.Modified := False;
     end;
   end;
@@ -476,9 +477,9 @@ var
 begin
   Result := False;
 
-  for i := 0 to slGeoffnetteTabsheets.Count - 1 do
+  for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    OneTabsheet := TOneTabsheet(slGeoffnetteTabsheets.Objects[i]);
+    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
 
     if OneTabsheet.SynMemo.Modified then
     begin
@@ -489,14 +490,14 @@ begin
 
 end;
 
-procedure TFrmMainController.SetzeActiveTabsheet(ActivePage: TTabSheet);
+procedure TFrmMainController.SetActiveTabsheet(ActivePage: TTabSheet);
 var
   i: integer;
   OneTabsheet: TOneTabsheet;
 begin
-  for i := 0 to slGeoffnetteTabsheets.Count - 1 do
+  for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    OneTabsheet := TOneTabsheet(slGeoffnetteTabsheets.Objects[i]);
+    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
     if OneTabsheet.Tabsheet = ActivePage then
     begin
       myActiveTabsheet := OneTabsheet.Tabsheet;
@@ -514,49 +515,86 @@ var
 begin
   Result := '';
 
-  for i := 0 to slGeoffnetteTabsheets.Count - 1 do
+  for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    myOneTabsheet := TOneTabsheet(slGeoffnetteTabsheets.Objects[i]);
+    myOneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
     if myOneTabsheet.Tabsheet = myActiveTabsheet then
     begin
-      Result := slGeoffnetteTabsheets[i];
+      Result := slOpendTabsheets[i];
     end;
   end;
 
 end;
 
 
-function TFrmMainController.PostitionOfTextInText(const Substr : AnsiString; const Source : AnsiString) : integer;
-var iPos,iEnd : integer;
-  c : char;
+function TFrmMainController.PostitionOfTextInText(const Substr: ansistring;
+  const Source: ansistring): integer;
+var
+  iPos, iEnd: integer;
+  c: char;
 begin
-iPos := pos(Substr,Source);
-if iPos > 0 then
+  iPos := pos(Substr, Source);
+  if iPos > 0 then
   begin
-  if iPos > 1 then
-    begin
-    c := Source[iPos -1];
-    if (c in ['a'..'z'] ) or (c in ['A'..'Z']  ) then
-      iPos := 0;
-
     if iPos > 1 then
+    begin
+      c := Source[iPos - 1];
+      if (c in ['a'..'z']) or (c in ['A'..'Z']) then
+        iPos := 0;
+
+      if iPos > 1 then
       begin
-      iEnd := iPos + length(Substr) ;
-      if iEnd < length(Source) then
+        iEnd := iPos + length(Substr);
+        if iEnd < length(Source) then
         begin
-        c := Source[iEnd];
-        if (c in ['a'..'z'] ) or (c in ['A'..'Z']  ) then
-          iPos := 0;
+          c := Source[iEnd];
+          if (c in ['a'..'z']) or (c in ['A'..'Z']) then
+            iPos := 0;
         end;
       end;
 
     end;
 
-
   end;
 
-result := iPos;
+  Result := iPos;
 
+end;
+
+function TFrmMainController.GetImageindexForFileIfItContainsOnlyTheSameType(
+  sFilename: string): integer;
+var
+  i, n, i1: integer;
+  oneFileInfo: TOneFileInfo;
+  sl: TStringList;
+  iResult: integer;
+begin
+  iResult := -1;
+
+  for i := 0 to slAllFilesFound.Count - 1 do
+  begin
+    if slAllFilesFound[i] = sFilename then
+    begin
+      oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+      sl := oneFileInfo.slDependencyInjektionNamen;
+
+      for n := 0 to sl.Count - 1 do
+      begin
+        i1 := integer(sl.Objects[n]);
+        if iResult = -1 then
+          iResult := i1
+        else
+        if iResult >= 0 then
+          if iResult <> i1 then
+            iResult := -2;
+      end;
+    end;
+  end;
+
+  if iResult >= 0 then
+    Result := iResult
+  else
+    Result := -1;
 
 end;
 

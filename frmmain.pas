@@ -9,18 +9,21 @@ uses
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
    SynEditMarks, strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
-  SynHighlighterJava, SynHighlighterCpp, Clipbrd, angFrmMainController;
+  SynHighlighterJava, SynHighlighterCpp, Clipbrd, angFrmMainController,angDatamodul,angKeyWords;
 
 type
 
-  { TForm1 }
+  { TfrmMainView }
 
-  TForm1 = class(TForm)
+  TfrmMainView = class(TForm)
     FindDialog1: TFindDialog;
-    ImageList1: TImageList;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
-    MenuItem2: TMenuItem;
+    mnuDJKeywords: TMenuItem;
+    mnuSave1: TMenuItem;
+    mnuSave: TMenuItem;
+    mnuFind: TMenuItem;
+    mnuCloseActivepage: TMenuItem;
     mnuFindNext: TMenuItem;
     mnuSearchPath: TMenuItem;
     mnuSearchBottom: TMenuItem;
@@ -50,8 +53,12 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure MenuItem2Click(Sender: TObject);
+    procedure mnuDJKeywordsClick(Sender: TObject);
+    procedure mnuFindClick(Sender: TObject);
+    procedure mnuCloseActivepageClick(Sender: TObject);
     procedure mnuFindNextClick(Sender: TObject);
+    procedure mnuSave1Click(Sender: TObject);
+    procedure mnuSaveClick(Sender: TObject);
     procedure mnuSearchPathClick(Sender: TObject);
     procedure mnuSearchBottomClick(Sender: TObject);
     procedure mnuSearchTopClick(Sender: TObject);
@@ -83,32 +90,34 @@ type
     procedure AddAngularJSKeyWordsInTreeview;
     procedure AddEditMarkToLine(iImageindex, iLine: integer);
     procedure AddSearchInPathToTree(const s: string);
+    procedure DoCloseActivePagecontrolPage;
+    procedure DoSaveActivePage;
     procedure MarkLineContainsThisWord(sWord: string);
-    function SucheTabsheetOderErstelleNeue(sDateiname: string): boolean ;
-    function ErmittleItemindexAnhandDateiendung(sDateiname: string): integer;
-    procedure FuegeAngularJSDateienAlsKnotenEin(myTreeNode: TTreenode;
+    function SearchTabsheetOrCreateNew(sMyFileName: string): boolean ;
+    function CalculateIndexOfFileExtension(sMyFileName: string): integer;
+    procedure AddAngularJSFilesAsTreenode(myTreeNode: TTreenode;
       sl: TStringList; iImageindex: integer);
-    procedure LesePfadInTreeviewEin(myItemRoot: TTreenode; sPfad: string);
-    procedure SorgeFuerModuleFilterInTreeview;
-    procedure StartePfadAnalyse;
+    procedure ReadPathToTreeview(myItemRoot: TTreenode; sPfad: string);
+    procedure AddRootTreenodesToTreeview;
+    procedure StartPathAnalyse;
   public
   end;
 
 var
-  Form1: TForm1;
+  frmMainView: TfrmMainView;
 
 implementation
 
 {$R *.lfm}
 
-{ TForm1 }
+{ TfrmMainView }
 
-procedure TForm1.mnuDateiClick(Sender: TObject);
+procedure TfrmMainView.mnuDateiClick(Sender: TObject);
 begin
 
 end;
 
-procedure TForm1.mnuInfoClick(Sender: TObject);
+procedure TfrmMainView.mnuInfoClick(Sender: TObject);
 begin
   ShowMessage('Simple tool to anlyse AngularJS projekt stucture. ' +
     #13#10 + 'Freeware/ Open source' + #13#10 +
@@ -116,17 +125,21 @@ begin
     'Developed by  Weinzierl Reinhold');
 end;
 
-procedure TForm1.mnuPathToClipboardClick(Sender: TObject);
+procedure TfrmMainView.mnuPathToClipboardClick(Sender: TObject);
 begin
   Clipboard.AsText := frmMainController.GetActiveFilePath;
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TfrmMainView.FormCreate(Sender: TObject);
 begin
   frmMainController := TFrmMainController.Create;
+
+  if not fileexists(extractfilepath(Paramstr(0)) + 'test.txt') then
+    ToolBar1.visible := false;
+
 end;
 
-procedure TForm1.FindDialog1Find(Sender: TObject);
+procedure TfrmMainView.FindDialog1Find(Sender: TObject);
 {var
   srOptions: TSynSearchOptions;  }
 
@@ -158,7 +171,7 @@ end else
   SHowMessage('No');      }
 end;
 
-procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: boolean);
+procedure TfrmMainView.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 var
   iAnswer: integer;
 begin
@@ -174,12 +187,28 @@ begin
 
 end;
 
-procedure TForm1.FormDestroy(Sender: TObject);
+procedure TfrmMainView.FormDestroy(Sender: TObject);
 begin
   frmMainController.Free;
 end;
 
-procedure TForm1.MenuItem2Click(Sender: TObject);
+procedure TfrmMainView.mnuDJKeywordsClick(Sender: TObject);
+begin
+  Application.CreateForm(TfrmSelectKeywords, frmSelectKeywordsObj);
+
+  frmSelectKeywordsObj.Initialize(frmMainController.GetslDJKeyWords);
+
+  frmSelectKeywordsObj.showmodal;
+  if  frmSelectKeywordsObj.ModalResult = mrOK then
+    begin
+    frmMainController.myActiveSynMemo.InsertTextAtCaret(frmSelectKeywordsObj.GetSelectedKeyWords );
+
+    end;
+
+  frmSelectKeywordsObj.free;
+end;
+
+procedure TfrmMainView.mnuFindClick(Sender: TObject);
 begin
   if frmMainController.myActiveSynMemo = nil then
     exit;
@@ -191,7 +220,12 @@ begin
 
 end;
 
-procedure TForm1.mnuFindNextClick(Sender: TObject);
+procedure TfrmMainView.mnuCloseActivepageClick(Sender: TObject);
+begin
+  DoCloseActivePagecontrolPage;
+end;
+
+procedure TfrmMainView.mnuFindNextClick(Sender: TObject);
 var mySyn : TsynMemo;
   i,iPos  : integer;
 begin
@@ -211,7 +245,40 @@ begin
     end;
 end;
 
-procedure TForm1.mnuSearchPathClick(Sender: TObject);
+procedure TfrmMainView.mnuSave1Click(Sender: TObject);
+begin
+  DoSaveActivePage
+end;
+
+procedure TfrmMainView.DoSaveActivePage;
+var
+  i: integer;
+  myOneTabsheet: TOneTabsheet;
+begin
+  if pagecontrol1.PageCount = 0 then exit;
+
+
+  for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
+  begin
+    myOneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[i]);
+    if Pagecontrol1.ActivePage = myOneTabsheet.Tabsheet then
+    begin
+      if myOneTabsheet.SynMemo.Modified then
+      begin
+          myOneTabsheet.SynMemo.Lines.SaveToFile(
+            frmMainController.slOpendTabsheets[i]);
+          myOneTabsheet.SynMemo.Modified := False;
+      end;
+    end;
+  end;
+end;
+
+procedure TfrmMainView.mnuSaveClick(Sender: TObject);
+begin
+  DoSaveActivePage
+end;
+
+procedure TfrmMainView.mnuSearchPathClick(Sender: TObject);
     var mySyn : TsynMemo;
   s : string;
   point : TPoint;
@@ -233,7 +300,7 @@ begin
 
 end;
 
-procedure TForm1.mnuSearchBottomClick(Sender: TObject);
+procedure TfrmMainView.mnuSearchBottomClick(Sender: TObject);
   var mySyn : TsynMemo;
   s : string;
   point : TPoint;
@@ -256,7 +323,7 @@ begin
     end;
 end;
 
-procedure TForm1.mnuSearchTopClick(Sender: TObject);
+procedure TfrmMainView.mnuSearchTopClick(Sender: TObject);
 var mySyn : TsynMemo;
   s : string;
   point : TPoint;
@@ -282,15 +349,22 @@ begin
 
 end;
 
-procedure TForm1.mnuCloseClick(Sender: TObject);
+procedure TfrmMainView.mnuCloseClick(Sender: TObject);
+begin
+  DoCloseActivePagecontrolPage
+end;
+
+procedure TfrmMainView.DoCloseActivePagecontrolPage;
 var
   i, iAnswer: integer;
   myOneTabsheet: TOneTabsheet;
 begin
+  if pagecontrol1.PageCount = 0 then exit;
 
-  for i := 0 to frmMainController.slGeoffnetteTabsheets.Count - 1 do
+
+  for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
   begin
-    myOneTabsheet := TOneTabsheet(frmMainController.slGeoffnetteTabsheets.Objects[i]);
+    myOneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[i]);
     if Pagecontrol1.ActivePage = myOneTabsheet.Tabsheet then
     begin
       if myOneTabsheet.SynMemo.Modified then
@@ -303,12 +377,12 @@ begin
         if iAnswer = mrYes then
         begin
           myOneTabsheet.SynMemo.Lines.SaveToFile(
-            frmMainController.slGeoffnetteTabsheets[i]);
+            frmMainController.slOpendTabsheets[i]);
           myOneTabsheet.SynMemo.Modified := False;
         end;
       end;
 
-      frmMainController.slGeoffnetteTabsheets.Delete(i);
+      frmMainController.slOpendTabsheets.Delete(i);
       break;
     end;
   end;
@@ -320,7 +394,7 @@ end;
 
 
 
-procedure TForm1.SorgeFuerModuleFilterInTreeview;
+procedure TfrmMainView.AddRootTreenodesToTreeview;
 begin
   TreeView1.Items.Clear;
 
@@ -357,7 +431,7 @@ begin
 
 end;
 
-procedure TForm1.AddAngularJSKeyWordsInTreeview;
+procedure TfrmMainView.AddAngularJSKeyWordsInTreeview;
 var
   sl: TStringList;
   i: integer;
@@ -386,24 +460,24 @@ begin
 end;
 
 
-procedure TForm1.mnuPfadOeffnenClick(Sender: TObject);
+procedure TfrmMainView.mnuPfadOeffnenClick(Sender: TObject);
 var
   chosenDirectory: string;
 begin
   if SelectDirectory('Select a directory', 'C:\', chosenDirectory) then
   begin
     frmMainController.sPfad := chosenDirectory;
-    StartePfadAnalyse;
+    StartPathAnalyse;
   end;
 
 end;
 
-procedure TForm1.mnuSaveallClick(Sender: TObject);
+procedure TfrmMainView.mnuSaveallClick(Sender: TObject);
 begin
   frmMainController.SaveAll;
 end;
 
-procedure TForm1.PageControl1Change(Sender: TObject);
+procedure TfrmMainView.PageControl1Change(Sender: TObject);
 begin
   if PageControl1.ActivePage = nil then
   begin
@@ -411,12 +485,12 @@ begin
     frmMainController.myActiveSynMemo := nil;
   end
   else
-    frmMainController.SetzeActiveTabsheet(PageControl1.ActivePage);
+    frmMainController.SetActiveTabsheet(PageControl1.ActivePage);
 end;
 
 
 
-procedure TForm1.FuegeAngularJSDateienAlsKnotenEin(myTreeNode: TTreenode;
+procedure TfrmMainView.AddAngularJSFilesAsTreenode(myTreeNode: TTreenode;
   sl: TStringList; iImageindex: integer);
 var
   i, n: integer;
@@ -430,7 +504,7 @@ begin
     treenode.ImageIndex := iImageindex;
     treenode.Data := sl.Objects[i];
 
-    OneFileInfo := frmMainController.sucheoneFileInfoZuDataPointer(
+    OneFileInfo := frmMainController.FindOneFileInfoToDataPointer(
       TObject(treenode.Data));
 
     if OneFileInfo <> nil then
@@ -445,13 +519,13 @@ begin
 
 end;
 
-function TForm1.ErmittleItemindexAnhandDateiendung(sDateiname: string): integer;
+function TfrmMainView.CalculateIndexOfFileExtension(sMyFileName: string): integer;
 var
   sExt: string;
 begin
   Result := constItemIndexUnknownFile;
 
-  sExt := uppercase(ExtractFileExt(sDateiname));
+  sExt := uppercase(ExtractFileExt(sMyFileName));
   if sExt = '.JS' then
     Result := constItemIndexJavascript;
   if pos('.HTM', sExt) > 0 then
@@ -462,32 +536,32 @@ end;
 
 
 
-procedure TForm1.StartePfadAnalyse;
+procedure TfrmMainView.StartPathAnalyse;
 var
   i: integer;
   sl: TStringList;
   treenode: TTreenode;
 begin
-  SorgeFuerModuleFilterInTreeview;
+  AddRootTreenodesToTreeview;
   frmMainController.ClearAll;
 
   statusbar1.Panels[0].Text := frmMainController.sPfad;
   TreeView1.BeginUpdate;
-  LesePfadInTreeviewEin(treenodeAllFiles, frmMainController.sPfad);
+  ReadPathToTreeview(treenodeAllFiles, frmMainController.sPfad);
 
-  FuegeAngularJSDateienAlsKnotenEin(treenodeConfig, frmMainController.slConfig,
+  AddAngularJSFilesAsTreenode(treenodeConfig, frmMainController.slConfig,
     constItemIndexConfig);
-  FuegeAngularJSDateienAlsKnotenEin(treenodeModule, frmMainController.slModule,
+  AddAngularJSFilesAsTreenode(treenodeModule, frmMainController.slModule,
     constItemIndexModule);
-  FuegeAngularJSDateienAlsKnotenEin(treenodeController, frmMainController.slController,
+  AddAngularJSFilesAsTreenode(treenodeController, frmMainController.slController,
     constItemIndexController);
-  FuegeAngularJSDateienAlsKnotenEin(treenodeService, frmMainController.slService,
+  AddAngularJSFilesAsTreenode(treenodeService, frmMainController.slService,
     constItemIndexService);
-  FuegeAngularJSDateienAlsKnotenEin(treenodeFactory, frmMainController.slFactory,
+  AddAngularJSFilesAsTreenode(treenodeFactory, frmMainController.slFactory,
     constItemIndexFactory);
-  FuegeAngularJSDateienAlsKnotenEin(treenodeDirectives, frmMainController.slDirective,
+  AddAngularJSFilesAsTreenode(treenodeDirectives, frmMainController.slDirective,
     constItemIndexDirective);
-  FuegeAngularJSDateienAlsKnotenEin(treenodeFilter, frmMainController.slFilter,
+  AddAngularJSFilesAsTreenode(treenodeFilter, frmMainController.slFilter,
     constItemIndexFilter);
 
   SynAnySyn1.Constants.Clear;
@@ -501,39 +575,43 @@ begin
     SynAnySyn1.Constants.add(uppercase(sl[i]));
   end;
   TreeView1.EndUpdate;
+
+  mnuFind.Enabled := true;
+
+
 end;
 
 
 
-procedure TForm1.ToolButton1Click(Sender: TObject);
+procedure TfrmMainView.ToolButton1Click(Sender: TObject);
 begin
   frmMainController.sPfad := 'C:\temp\KonfigWeb';
-  StartePfadAnalyse;
+  StartPathAnalyse;
 end;
 
-procedure TForm1.ToolButton2Click(Sender: TObject);
+procedure TfrmMainView.ToolButton2Click(Sender: TObject);
 begin
 
 end;
 
-procedure TForm1.ToolButton3Click(Sender: TObject);
+procedure TfrmMainView.ToolButton3Click(Sender: TObject);
 begin
 frmMainController.sPfad := 'D:\BesuchHerrRammer\Konfigurator\Src';
-StartePfadAnalyse;
+StartPathAnalyse;
 end;
 
-function TForm1.SucheTabsheetOderErstelleNeue(sDateiname: string) : boolean;
+function TfrmMainView.SearchTabsheetOrCreateNew(sMyFileName: string) : boolean;
 var
-  i: integer;
+  i,i2: integer;
   myOneTabsheet: TOneTabsheet;
 begin
 result := false;
 
-  for i := 0 to frmMainController.slGeoffnetteTabsheets.Count - 1 do
+  for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
   begin
-    if frmMainController.slGeoffnetteTabsheets[i] = sDateiname then
+    if frmMainController.slOpendTabsheets[i] = sMyFileName then
     begin
-      myOneTabsheet := TOneTabsheet(frmMainController.slGeoffnetteTabsheets.Objects[i]);
+      myOneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[i]);
       self.PageControl1.ActivePage := myOneTabsheet.Tabsheet;
       exit;
     end;
@@ -554,14 +632,24 @@ result := false;
   myOneTabsheet.SynMemo := frmMainController.myActiveSynMemo;
   myOneTabsheet.Tabsheet := frmMainController.myActiveTabsheet;
 
-  frmMainController.slGeoffnetteTabsheets.AddObject(sDateiname, myOneTabsheet);
+  frmMainController.myActiveTabsheet.ImageIndex := CalculateIndexOfFileExtension(sMyFileName)  ;
+
+  i2 := frmMainController.GetImageindexForFileIfItContainsOnlyTheSameType(sMyFileName);
+
+  if i2 >= 0 then
+    frmMainController.myActiveTabsheet.ImageIndex := i2;
+
+  frmMainController.slOpendTabsheets.AddObject(sMyFileName, myOneTabsheet);
 
   self.PageControl1.ActivePage := frmMainController.myActiveTabsheet;
   result := true;
 
+  mnuSave.enabled := true;
+  mnuSaveall.enabled := true;
+
 end;
 
-procedure TForm1.TreeView1Click(Sender: TObject);
+procedure TfrmMainView.TreeView1Click(Sender: TObject);
 var
   treenode, treenodeNeu: TTreenode;
   sl: TStringList;
@@ -575,12 +663,12 @@ begin
     if not treenode.HasChildren then
     begin
       sl := TStringList.Create;
-      frmMainController.FuelleSlMitDateinDieDiesesWortEnthalten(sl, treenode.Text);
+      frmMainController.FillSlWithFilesContainsThisWord(sl, treenode.Text);
 
       for i := 0 to sl.Count - 1 do
       begin
         treenodeNeu := TreeView1.Items.AddChild(treenode, sl[i]);
-        treenodeNeu.ImageIndex := ErmittleItemindexAnhandDateiendung(sl[i]);
+        treenodeNeu.ImageIndex := CalculateIndexOfFileExtension(sl[i]);
         treenodeNeu.Data := sl.Objects[i];
         //In Data immer den Zeiger auf den Konten aller Dateien ablegen
       end;
@@ -592,7 +680,7 @@ begin
 
 end;
 
-procedure TForm1.TreeView1DblClick(Sender: TObject);
+procedure TfrmMainView.TreeView1DblClick(Sender: TObject);
 var
   treenode: TTreenode;
   sPfad: string;
@@ -618,9 +706,9 @@ begin
   if treenode.Data = nil then
     exit;
 
-  sPfad := frmMainController.sucheDateinameZuDataPointer(TObject(treenode.Data));
+  sPfad := frmMainController.findFileNameToDataPointer(TObject(treenode.Data));
 
-  if SucheTabsheetOderErstelleNeue(sPfad) then
+  if SearchTabsheetOrCreateNew(sPfad) then
     begin
     if pos('.HTM', uppercase(sPfad)) > 0 then
       frmMainController.myActiveSynMemo.Highlighter := SynHTMLSyn1
@@ -653,7 +741,7 @@ end;
 
 
 
-procedure TForm1.LesePfadInTreeviewEin(myItemRoot: TTreenode; sPfad: string);
+procedure TfrmMainView.ReadPathToTreeview(myItemRoot: TTreenode; sPfad: string);
 var
   sr: TSearchRec;
   i: integer;
@@ -668,13 +756,13 @@ begin
       begin
         myItem := TreeView1.Items.AddChild(myItemRoot, sr.Name);
         myItem.ImageIndex := constItemIndexFolder;
-        LesePfadInTreeviewEin(myItem, sPfad + '\' + sr.Name);
+        ReadPathToTreeview(myItem, sPfad + '\' + sr.Name);
       end;
     end
     else
     begin
       myItem := TreeView1.Items.AddChild(myItemRoot, sr.Name);
-      myItem.ImageIndex := ErmittleItemindexAnhandDateiendung(sr.Name);
+      myItem.ImageIndex := CalculateIndexOfFileExtension(sr.Name);
       myItem.Data := myItem;
       frmMainController.AddOneFileInSL(sPfad + '\' + sr.Name, myItem);
     end;
@@ -683,7 +771,7 @@ begin
   FindClose(sr);
 end;
 
-procedure TForm1.MarkLineContainsThisWord(sWord: string);
+procedure TfrmMainView.MarkLineContainsThisWord(sWord: string);
 var
   i: integer;
   ipos: integer;
@@ -692,7 +780,7 @@ var
   sWord2: string;
   gefunden: boolean;
 begin
-  sWord2 := frmMainController.loeseCamelCaseAuf(sWord);
+  sWord2 := frmMainController.ChangeCamelCaseToMinusString(sWord);
   gefunden := False;
 
   for i := frmMainController.myActiveSynMemo.Marks.Count - 1 downto 0 do
@@ -739,19 +827,19 @@ begin
 
 end;
 
-procedure TForm1.AddEditMarkToLine(iImageindex, iLine: integer);
+procedure TfrmMainView.AddEditMarkToLine(iImageindex, iLine: integer);
 var
   m: TSynEditMark;
 begin
   m := TSynEditMark.Create(frmMainController.myActiveSynMemo);
   m.Line := iLine;
-  m.ImageList := ImageList1;
+  m.ImageList := DataModule1.ImageList1;
   m.ImageIndex := iImageindex;
   m.Visible := True;
   frmMainController.myActiveSynMemo.Marks.Add(m);
 end;
 
-procedure TForm1.AddSearchInPathToTree(const s: string);
+procedure TfrmMainView.AddSearchInPathToTree(const s: string);
 var
   treenodeSearch: TTreenode;
 begin

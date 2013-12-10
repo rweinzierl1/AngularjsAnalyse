@@ -31,7 +31,11 @@ constItemIndexfree2 = 18;
 constItemIndexfree3 = 19;
 constItemIndexSerchInPath1 = 20;
 constItemIndexSearchInPath = 21;
-
+constItemIndexSaveAll = 22;
+constItemIndexInfo = 23;
+constItemIndexNew = 24;
+constItemIndexSave = 25;
+constItemScope = 26;
 
 
 implementation

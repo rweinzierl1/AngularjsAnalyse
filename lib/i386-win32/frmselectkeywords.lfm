@@ -1,0 +1,30 @@
+object frmSelectKeywords: TfrmSelectKeywords
+  Left = 348
+  Height = 362
+  Top = 146
+  Width = 467
+  Caption = 'Select Keywords'
+  ClientHeight = 362
+  ClientWidth = 467
+  Position = poScreenCenter
+  LCLVersion = '1.0.14.0'
+  object Panel1: TPanel
+    Left = 0
+    Height = 50
+    Top = 312
+    Width = 467
+    Align = alBottom
+    Caption = 'Panel1'
+    TabOrder = 0
+  end
+  object ListView1: TListView
+    Left = 0
+    Height = 312
+    Top = 0
+    Width = 467
+    Align = alClient
+    Checkboxes = True
+    Columns = <>
+    TabOrder = 1
+  end
+end
