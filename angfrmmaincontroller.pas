@@ -51,6 +51,8 @@ type
     myActiveTabsheet: TTabSheet;
     myActiveSynMemo: TsynMemo;
     slGeoffnetteTabsheets: TStringList;
+    sLastSearch  : string;
+
     function loeseCamelCaseAuf(sSuchtext: string): string;
     function GetslDJKeyWords: TStringList;
     procedure ClearAll;
@@ -63,6 +65,8 @@ type
     function SynMemoModifiedAvailable: boolean;
     procedure SetzeActiveTabsheet(ActivePage: TTabSheet);
     function GetActiveFilePath: string;
+    function PostitionOfTextInText(const Substr: AnsiString;
+      const Source: AnsiString): integer;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -522,6 +526,38 @@ begin
 end;
 
 
+function TFrmMainController.PostitionOfTextInText(const Substr : AnsiString; const Source : AnsiString) : integer;
+var iPos,iEnd : integer;
+  c : char;
+begin
+iPos := pos(Substr,Source);
+if iPos > 0 then
+  begin
+  if iPos > 1 then
+    begin
+    c := Source[iPos -1];
+    if (c in ['a'..'z'] ) or (c in ['A'..'Z']  ) then
+      iPos := 0;
 
+    if iPos > 1 then
+      begin
+      iEnd := iPos + length(Substr) ;
+      if iEnd < length(Source) then
+        begin
+        c := Source[iEnd];
+        if (c in ['a'..'z'] ) or (c in ['A'..'Z']  ) then
+          iPos := 0;
+        end;
+      end;
+
+    end;
+
+
+  end;
+
+result := iPos;
+
+
+end;
 
 end.

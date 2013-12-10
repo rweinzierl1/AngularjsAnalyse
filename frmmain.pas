@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynHighlighterHTML, SynMemo, SynEdit,
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
-  SynEditTypes, SynEditMarks ,strutils,
+   SynEditMarks, strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
   SynHighlighterJava, SynHighlighterCpp, Clipbrd, angFrmMainController;
 
@@ -21,6 +21,10 @@ type
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    mnuFindNext: TMenuItem;
+    mnuSearchPath: TMenuItem;
+    mnuSearchBottom: TMenuItem;
+    mnuSearchTop: TMenuItem;
     mnuSaveall: TMenuItem;
     mnuInfo: TMenuItem;
     mnuHelp: TMenuItem;
@@ -31,6 +35,7 @@ type
     OpenDialog1: TOpenDialog;
     PageControl1: TPageControl;
     PopupMenu1: TPopupMenu;
+    PopupMenuSynedit: TPopupMenu;
     Splitter1: TSplitter;
     StatusBar1: TStatusBar;
     SynAnySyn1: TSynAnySyn;
@@ -46,6 +51,10 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure MenuItem2Click(Sender: TObject);
+    procedure mnuFindNextClick(Sender: TObject);
+    procedure mnuSearchPathClick(Sender: TObject);
+    procedure mnuSearchBottomClick(Sender: TObject);
+    procedure mnuSearchTopClick(Sender: TObject);
     procedure mnuCloseClick(Sender: TObject);
     procedure mnuDateiClick(Sender: TObject);
     procedure mnuInfoClick(Sender: TObject);
@@ -68,10 +77,14 @@ type
     treenodeDirectives: TTreenode;
     treenodeConfig: TTreenode;
     treenodeDependencyInjectionWords: TTreenode;
+    treenodeAngularWords: TTreenode;
+    treenodeSearchInPath: TTreenode;
     frmMainController: TFrmMainController;
+    procedure AddAngularJSKeyWordsInTreeview;
     procedure AddEditMarkToLine(iImageindex, iLine: integer);
+    procedure AddSearchInPathToTree(const s: string);
     procedure MarkLineContainsThisWord(sWord: string);
-    procedure SucheTabsheetOderErstelleNeue(sDateiname: string);
+    function SucheTabsheetOderErstelleNeue(sDateiname: string): boolean ;
     function ErmittleItemindexAnhandDateiendung(sDateiname: string): integer;
     procedure FuegeAngularJSDateienAlsKnotenEin(myTreeNode: TTreenode;
       sl: TStringList; iImageindex: integer);
@@ -116,8 +129,7 @@ end;
 procedure TForm1.FindDialog1Find(Sender: TObject);
 {var
   srOptions: TSynSearchOptions;  }
-var
-  s: string;
+
 begin
   if frmMainController.myActiveSynMemo = nil then
     exit;
@@ -125,15 +137,9 @@ begin
 
   if pos(FindDialog1.FindText, frmMainController.myActiveSynMemo.Lines.Text) > 0 then
   begin
-
+    frmMainController.sLastSearch:= FindDialog1.FindText;
     frmMainController.myActiveSynMemo.SetFocus;
-
-
-
- // frmMainController.myActiveSynMemo.SelLength := Length(FindDialog1.FindText);
-
-
-    MarkLineContainsThisWord(FindDialog1.FindText);
+    MarkLineContainsThisWord(frmMainController.sLastSearch);
     FindDialog1.CloseDialog;
   end;
 
@@ -182,6 +188,97 @@ begin
   begin
 
   end;
+
+end;
+
+procedure TForm1.mnuFindNextClick(Sender: TObject);
+var mySyn : TsynMemo;
+  i,iPos  : integer;
+begin
+  mySyn := frmMainController.myActiveSynMemo;
+
+
+  for i := mySyn.CaretY  to mySyn.lines.Count -1  do
+    begin
+    iPos :=  pos(frmMainController.sLastSearch,mySyn.Lines[i]);
+    if iPos > 0 then
+      begin
+      mySyn.CaretY := i+1;
+      mySyn.CaretX := iPos;
+      mySyn.SelectWord;
+      break;
+      end;
+    end;
+end;
+
+procedure TForm1.mnuSearchPathClick(Sender: TObject);
+    var mySyn : TsynMemo;
+  s : string;
+  point : TPoint;
+begin
+  mySyn := frmMainController.myActiveSynMemo;
+  s := mySyn.SelText;
+
+  if s = '' then
+    begin
+    point.x := mySyn.CaretX;
+    point.y := mySyn.CaretY;
+    s := trim(mySyn.GetWordAtRowCol(point)) ;
+    end;
+
+  if s <> '' then
+    begin
+    AddSearchInPathToTree(s);
+    end;
+
+end;
+
+procedure TForm1.mnuSearchBottomClick(Sender: TObject);
+  var mySyn : TsynMemo;
+  s : string;
+  point : TPoint;
+  i,iPos  : integer;
+begin
+  mySyn := frmMainController.myActiveSynMemo;
+  point.x := mySyn.CaretX;
+  point.y := mySyn.CaretY;
+  s := trim(mySyn.GetWordAtRowCol(point)) ;
+
+  for i := mySyn.CaretY  to mySyn.lines.Count -1  do
+    begin
+    iPos :=  frmMainController.PostitionOfTextInText(s,mySyn.Lines[i]);
+    if iPos > 0 then
+      begin
+      mySyn.CaretY := i+1;
+      mySyn.CaretX := iPos;
+      break;
+      end;
+    end;
+end;
+
+procedure TForm1.mnuSearchTopClick(Sender: TObject);
+var mySyn : TsynMemo;
+  s : string;
+  point : TPoint;
+  i,iPos  : integer;
+begin
+  mySyn := frmMainController.myActiveSynMemo;
+  point.x := mySyn.CaretX;
+  point.y := mySyn.CaretY;
+  s := trim(mySyn.GetWordAtRowCol(point)) ;
+
+  for i := mySyn.CaretY -2 downto 0 do
+    begin
+    iPos :=  frmMainController.PostitionOfTextInText(s,mySyn.Lines[i]);
+
+
+    if iPos > 0 then
+      begin
+      mySyn.CaretY := i+1;
+      mySyn.CaretX := iPos;
+      break;
+      end;
+    end;
 
 end;
 
@@ -247,10 +344,47 @@ begin
     TreeView1.Items.AddChild(nil, 'Dependency Injection Key Words');
   treenodeDependencyInjectionWords.ImageIndex := constItemIndexKey;
 
+
+  treenodeAngularWords := TreeView1.Items.AddChild(nil, 'AngularJS Keywords');
+  treenodeAngularWords.ImageIndex := constItemIndexAngular;
+  AddAngularJSKeyWordsInTreeview;
+
   treenodeAllFiles := TreeView1.Items.AddChild(nil, 'All Files');
   treenodeAllFiles.ImageIndex := constItemIndexFolder;
 
+  treenodeSearchInPath := TreeView1.Items.AddChild(nil, 'Search In Path (dblClick)');
+  treenodeSearchInPath.ImageIndex := constItemIndexSearchInPath;
+
 end;
+
+procedure TForm1.AddAngularJSKeyWordsInTreeview;
+var
+  sl: TStringList;
+  i: integer;
+  treenodeAngularSchluessel: TTreenode;
+begin
+  sl :=  TStringList.create;
+  sl.add('$apply');
+  sl.add('$scope.');
+  sl.add('$watch');
+  sl.add('$emit');
+  sl.add('$broadcast');
+  sl.add('.bind');
+  sl.add('.$on');
+
+  for i := 0 to sl.Count - 1 do
+  begin
+    treenodeAngularSchluessel :=
+      TreeView1.Items.AddChild(treenodeAngularWords, sl[i]);
+    treenodeAngularSchluessel.ImageIndex := constItemIndexAngular;
+
+  end;
+
+
+
+  sl.Free;
+end;
+
 
 procedure TForm1.mnuPfadOeffnenClick(Sender: TObject);
 var
@@ -384,14 +518,16 @@ end;
 
 procedure TForm1.ToolButton3Click(Sender: TObject);
 begin
-
+frmMainController.sPfad := 'D:\BesuchHerrRammer\Konfigurator\Src';
+StartePfadAnalyse;
 end;
 
-procedure TForm1.SucheTabsheetOderErstelleNeue(sDateiname: string);
+function TForm1.SucheTabsheetOderErstelleNeue(sDateiname: string) : boolean;
 var
   i: integer;
   myOneTabsheet: TOneTabsheet;
 begin
+result := false;
 
   for i := 0 to frmMainController.slGeoffnetteTabsheets.Count - 1 do
   begin
@@ -411,6 +547,8 @@ begin
   frmMainController.myActiveSynMemo.Visible := True;
   frmMainController.myActiveSynMemo.Parent := frmMainController.myActiveTabsheet;
 
+  frmMainController.myActiveSynMemo.PopupMenu := PopupMenuSynedit;
+
 
   myOneTabsheet := TOneTabsheet.Create;
   myOneTabsheet.SynMemo := frmMainController.myActiveSynMemo;
@@ -419,6 +557,7 @@ begin
   frmMainController.slGeoffnetteTabsheets.AddObject(sDateiname, myOneTabsheet);
 
   self.PageControl1.ActivePage := frmMainController.myActiveTabsheet;
+  result := true;
 
 end;
 
@@ -449,54 +588,67 @@ begin
       sl.Free;
     end;
 
+  treenode.Expand(false);
+
 end;
 
 procedure TForm1.TreeView1DblClick(Sender: TObject);
 var
   treenode: TTreenode;
   sPfad: string;
-  parentNode : TTreenode;
+  parentNode: TTreenode;
+  s : string;
 begin
 
   treenode := TreeView1.Selected;
   if treenode = nil then
     exit;
+
+
+  if treenode = treenodeSearchInPath then
+    begin
+    s := '';
+    if inputquery('','',s) then
+      begin
+      AddSearchInPathToTree(s);
+      exit;
+      end;
+    end;
+
   if treenode.Data = nil then
     exit;
 
   sPfad := frmMainController.sucheDateinameZuDataPointer(TObject(treenode.Data));
 
-  SucheTabsheetOderErstelleNeue(sPfad);
-
-  if pos('.HTM', uppercase(sPfad)) > 0 then
-    frmMainController.myActiveSynMemo.Highlighter := SynHTMLSyn1
-  else
-  if pos('.CSS', uppercase(sPfad)) > 0 then
-    frmMainController.myActiveSynMemo.Highlighter := SynCssSyn1
-  else
-  begin
-    frmMainController.myActiveSynMemo.Highlighter := SynAnySyn1;
-    if pos('.JS', uppercase(treenode.Text)) > 0 then
+  if SucheTabsheetOderErstelleNeue(sPfad) then
     begin
-      SynAnySyn1.KeyWords.Clear;
-      SynAnySyn1.KeyWords.add('angular');
-
-
-
-      frmMainController.myActiveSynMemo.Refresh;
+    if pos('.HTM', uppercase(sPfad)) > 0 then
+      frmMainController.myActiveSynMemo.Highlighter := SynHTMLSyn1
+    else
+    if pos('.CSS', uppercase(sPfad)) > 0 then
+      frmMainController.myActiveSynMemo.Highlighter := SynCssSyn1
+    else
+    begin
+      frmMainController.myActiveSynMemo.Highlighter := SynAnySyn1;
+      if pos('.JS', uppercase(treenode.Text)) > 0 then
+      begin
+        {
+        SynAnySyn1.KeyWords.Clear;
+        SynAnySyn1.KeyWords.add('ANGULAR');          }
+        frmMainController.myActiveSynMemo.Refresh;
+      end;
     end;
-  end;
 
-  frmMainController.myActiveTabsheet.Caption := extractfilename(sPfad);
-  frmMainController.myActiveSynMemo.Lines.LoadFromFile(sPfad);
-
+    frmMainController.myActiveTabsheet.Caption := extractfilename(sPfad);
+    frmMainController.myActiveSynMemo.Lines.LoadFromFile(sPfad);
+    end;
 
   parentNode := treenode.parent;
   if parentNode <> nil then
-    begin
+  begin
     MarkLineContainsThisWord(parentNode.Text);
 
-    end;
+  end;
 end;
 
 
@@ -531,61 +683,59 @@ begin
   FindClose(sr);
 end;
 
-procedure TForm1.MarkLineContainsThisWord(sWord : string );
+procedure TForm1.MarkLineContainsThisWord(sWord: string);
 var
-i,n : integer;
-ipos : integer;
-s : string;
-m: TSynEditMark;
-sWord2 : string;
-gefunden : boolean ;
+  i: integer;
+  ipos: integer;
+  s: string;
+  m: TSynEditMark;
+  sWord2: string;
+  gefunden: boolean;
 begin
-  sWord2 :=   frmMainController.loeseCamelCaseAuf(sWord);
-  gefunden := false;
+  sWord2 := frmMainController.loeseCamelCaseAuf(sWord);
+  gefunden := False;
 
-  for i := frmMainController.myActiveSynMemo.Marks.Count -1 downto 0 do
-    begin
+  for i := frmMainController.myActiveSynMemo.Marks.Count - 1 downto 0 do
+  begin
     m := frmMainController.myActiveSynMemo.Marks[i];
     if m.ImageIndex = constItemIndexMarkFound then
-       frmMainController.myActiveSynMemo.Marks.Delete(i);
-    end;
+      frmMainController.myActiveSynMemo.Marks.Delete(i);
+  end;
 
   for i := 0 to frmMainController.myActiveSynMemo.Lines.Count - 1 do
-    begin
-    s := frmMainController.myActiveSynMemo.lines[i];
-    ipos := pos(sWord,s) ;
+  begin
+    s := frmMainController.myActiveSynMemo.Lines[i];
+    ipos := pos(sWord, s);
     if ipos = 0 then
-      ipos := pos(sWord2,s) ;
+      ipos := pos(sWord2, s);
 
     if ipos > 0 then
-      begin
+    begin
 
-      AddEditMarkToLine(constItemIndexMarkFound, i +1) ;
+      AddEditMarkToLine(constItemIndexMarkFound, i + 1);
 
       if not gefunden then
-        begin
-       // for n := 1 to length(s) do
-       //   if s[n] = #39 then
+      begin
+        // for n := 1 to length(s) do
+        //   if s[n] = #39 then
 
-        s := ansireplacestr(s,#9,'        '); // TODO make it better
-        ipos := pos(sWord,s) ;
+        s := ansireplacestr(s, #9, '        '); // TODO make it better
+        ipos := pos(sWord, s);
         if ipos = 0 then
-          ipos := pos(sWord2,s) ;
+          ipos := pos(sWord2, s);
 
 
-        frmMainController.myActiveSynMemo.CaretY := i +1;
-        frmMainController.myActiveSynMemo.CaretX := ipos ;
+        frmMainController.myActiveSynMemo.CaretY := i + 1;
+        frmMainController.myActiveSynMemo.CaretX := ipos;
 
-        frmMainController.myActiveSynMemo.setfocus;
+        frmMainController.myActiveSynMemo.SetFocus;
         frmMainController.myActiveSynMemo.SelectWord;
-        gefunden := true;
-        end;
-
-
+        gefunden := True;
       end;
 
-
     end;
+
+  end;
 
 end;
 
@@ -599,6 +749,20 @@ begin
   m.ImageIndex := iImageindex;
   m.Visible := True;
   frmMainController.myActiveSynMemo.Marks.Add(m);
+end;
+
+procedure TForm1.AddSearchInPathToTree(const s: string);
+var
+  treenodeSearch: TTreenode;
+begin
+  treenodeSearchInPath.Collapse(true);
+  treenodeSearch :=       TreeView1.Items.AddChild(treenodeSearchInPath, s);
+  treenodeSearch.ImageIndex := constItemIndexSerchInPath1;
+  TreeView1.Selected := treenodeSearch;
+  TreeView1Click(TreeView1);
+
+  treenodeSearchInPath.Expand(false);
+
 end;
 
 
