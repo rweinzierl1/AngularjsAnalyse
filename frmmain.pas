@@ -7,9 +7,10 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynHighlighterHTML, SynMemo, SynEdit,
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
-   SynEditMarks, strutils,
+  SynEditMarks, strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
-  SynHighlighterJava, SynHighlighterCpp, Clipbrd, angFrmMainController,angDatamodul,angKeyWords;
+  SynHighlighterJava, SynHighlighterCpp, Clipbrd,
+  angFrmMainController, angDatamodul, angKeyWords;
 
 type
 
@@ -86,6 +87,8 @@ type
     treenodeDependencyInjectionWords: TTreenode;
     treenodeAngularWords: TTreenode;
     treenodeSearchInPath: TTreenode;
+
+
     frmMainController: TFrmMainController;
     procedure AddAngularJSKeyWordsInTreeview;
     procedure AddEditMarkToLine(iImageindex, iLine: integer);
@@ -93,7 +96,7 @@ type
     procedure DoCloseActivePagecontrolPage;
     procedure DoSaveActivePage;
     procedure MarkLineContainsThisWord(sWord: string);
-    function SearchTabsheetOrCreateNew(sMyFileName: string): boolean ;
+    function SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
     function CalculateIndexOfFileExtension(sMyFileName: string): integer;
     procedure AddAngularJSFilesAsTreenode(myTreeNode: TTreenode;
       sl: TStringList; iImageindex: integer);
@@ -134,8 +137,8 @@ procedure TfrmMainView.FormCreate(Sender: TObject);
 begin
   frmMainController := TFrmMainController.Create;
 
-  if not fileexists(extractfilepath(Paramstr(0)) + 'test.txt') then
-    ToolBar1.visible := false;
+  if not fileexists(extractfilepath(ParamStr(0)) + 'test.txt') then
+    ToolBar1.Visible := False;
 
 end;
 
@@ -150,7 +153,7 @@ begin
 
   if pos(FindDialog1.FindText, frmMainController.myActiveSynMemo.Lines.Text) > 0 then
   begin
-    frmMainController.sLastSearch:= FindDialog1.FindText;
+    frmMainController.sLastSearch := FindDialog1.FindText;
     frmMainController.myActiveSynMemo.SetFocus;
     MarkLineContainsThisWord(frmMainController.sLastSearch);
     FindDialog1.CloseDialog;
@@ -199,13 +202,14 @@ begin
   frmSelectKeywordsObj.Initialize(frmMainController.GetslDJKeyWords);
 
   frmSelectKeywordsObj.showmodal;
-  if  frmSelectKeywordsObj.ModalResult = mrOK then
-    begin
-    frmMainController.myActiveSynMemo.InsertTextAtCaret(frmSelectKeywordsObj.GetSelectedKeyWords );
+  if frmSelectKeywordsObj.ModalResult = mrOk then
+  begin
+    frmMainController.myActiveSynMemo.InsertTextAtCaret(
+      frmSelectKeywordsObj.GetSelectedKeyWords);
 
-    end;
+  end;
 
-  frmSelectKeywordsObj.free;
+  frmSelectKeywordsObj.Free;
 end;
 
 procedure TfrmMainView.mnuFindClick(Sender: TObject);
@@ -226,28 +230,29 @@ begin
 end;
 
 procedure TfrmMainView.mnuFindNextClick(Sender: TObject);
-var mySyn : TsynMemo;
-  i,iPos  : integer;
+var
+  mySyn: TsynMemo;
+  i, iPos: integer;
 begin
   mySyn := frmMainController.myActiveSynMemo;
 
 
-  for i := mySyn.CaretY  to mySyn.lines.Count -1  do
-    begin
-    iPos :=  pos(frmMainController.sLastSearch,mySyn.Lines[i]);
+  for i := mySyn.CaretY to mySyn.Lines.Count - 1 do
+  begin
+    iPos := pos(frmMainController.sLastSearch, mySyn.Lines[i]);
     if iPos > 0 then
-      begin
-      mySyn.CaretY := i+1;
+    begin
+      mySyn.CaretY := i + 1;
       mySyn.CaretX := iPos;
       mySyn.SelectWord;
       break;
-      end;
     end;
+  end;
 end;
 
 procedure TfrmMainView.mnuSave1Click(Sender: TObject);
 begin
-  DoSaveActivePage
+  DoSaveActivePage;
 end;
 
 procedure TfrmMainView.DoSaveActivePage;
@@ -255,7 +260,8 @@ var
   i: integer;
   myOneTabsheet: TOneTabsheet;
 begin
-  if pagecontrol1.PageCount = 0 then exit;
+  if pagecontrol1.PageCount = 0 then
+    exit;
 
 
   for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
@@ -265,9 +271,9 @@ begin
     begin
       if myOneTabsheet.SynMemo.Modified then
       begin
-          myOneTabsheet.SynMemo.Lines.SaveToFile(
-            frmMainController.slOpendTabsheets[i]);
-          myOneTabsheet.SynMemo.Modified := False;
+        myOneTabsheet.SynMemo.Lines.SaveToFile(
+          frmMainController.slOpendTabsheets[i]);
+        myOneTabsheet.SynMemo.Modified := False;
       end;
     end;
   end;
@@ -275,83 +281,86 @@ end;
 
 procedure TfrmMainView.mnuSaveClick(Sender: TObject);
 begin
-  DoSaveActivePage
+  DoSaveActivePage;
 end;
 
 procedure TfrmMainView.mnuSearchPathClick(Sender: TObject);
-    var mySyn : TsynMemo;
-  s : string;
-  point : TPoint;
+var
+  mySyn: TsynMemo;
+  s: string;
+  point: TPoint;
 begin
   mySyn := frmMainController.myActiveSynMemo;
   s := mySyn.SelText;
 
   if s = '' then
-    begin
+  begin
     point.x := mySyn.CaretX;
     point.y := mySyn.CaretY;
-    s := trim(mySyn.GetWordAtRowCol(point)) ;
-    end;
+    s := trim(mySyn.GetWordAtRowCol(point));
+  end;
 
   if s <> '' then
-    begin
+  begin
     AddSearchInPathToTree(s);
-    end;
+  end;
 
 end;
 
 procedure TfrmMainView.mnuSearchBottomClick(Sender: TObject);
-  var mySyn : TsynMemo;
-  s : string;
-  point : TPoint;
-  i,iPos  : integer;
+var
+  mySyn: TsynMemo;
+  s: string;
+  point: TPoint;
+  i, iPos: integer;
 begin
   mySyn := frmMainController.myActiveSynMemo;
   point.x := mySyn.CaretX;
   point.y := mySyn.CaretY;
-  s := trim(mySyn.GetWordAtRowCol(point)) ;
+  s := trim(mySyn.GetWordAtRowCol(point));
 
-  for i := mySyn.CaretY  to mySyn.lines.Count -1  do
-    begin
-    iPos :=  frmMainController.PostitionOfTextInText(s,mySyn.Lines[i]);
+  for i := mySyn.CaretY to mySyn.Lines.Count - 1 do
+  begin
+    iPos := frmMainController.PostitionOfTextInText(s, mySyn.Lines[i]);
     if iPos > 0 then
-      begin
-      mySyn.CaretY := i+1;
+    begin
+      mySyn.CaretY := i + 1;
       mySyn.CaretX := iPos;
       break;
-      end;
     end;
+  end;
 end;
 
 procedure TfrmMainView.mnuSearchTopClick(Sender: TObject);
-var mySyn : TsynMemo;
-  s : string;
-  point : TPoint;
-  i,iPos  : integer;
+var
+  mySyn: TsynMemo;
+  s: string;
+  point: TPoint;
+  i, iPos: integer;
 begin
   mySyn := frmMainController.myActiveSynMemo;
   point.x := mySyn.CaretX;
   point.y := mySyn.CaretY;
-  s := trim(mySyn.GetWordAtRowCol(point)) ;
+  s := trim(mySyn.GetWordAtRowCol(point));
 
-  for i := mySyn.CaretY -2 downto 0 do
-    begin
-    iPos :=  frmMainController.PostitionOfTextInText(s,mySyn.Lines[i]);
+  for i := mySyn.CaretY - 2 downto 0 do
+  begin
+    iPos := frmMainController.PostitionOfTextInText(s, mySyn.Lines[i]);
 
 
     if iPos > 0 then
-      begin
-      mySyn.CaretY := i+1;
+    begin
+      mySyn.CaretY := i + 1;
       mySyn.CaretX := iPos;
       break;
-      end;
     end;
+  end;
 
 end;
 
 procedure TfrmMainView.mnuCloseClick(Sender: TObject);
 begin
-  DoCloseActivePagecontrolPage
+  DoCloseActivePagecontrolPage;
 end;
 
 procedure TfrmMainView.DoCloseActivePagecontrolPage;
@@ -359,7 +368,8 @@ var
   i, iAnswer: integer;
   myOneTabsheet: TOneTabsheet;
 begin
-  if pagecontrol1.PageCount = 0 then exit;
+  if pagecontrol1.PageCount = 0 then
+    exit;
 
 
   for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
@@ -437,7 +447,7 @@ var
   i: integer;
   treenodeAngularSchluessel: TTreenode;
 begin
-  sl :=  TStringList.create;
+  sl := TStringList.Create;
   sl.add('$apply');
   sl.add('$scope.');
   sl.add('$watch');
@@ -494,8 +504,9 @@ procedure TfrmMainView.AddAngularJSFilesAsTreenode(myTreeNode: TTreenode;
   sl: TStringList; iImageindex: integer);
 var
   i, n: integer;
-  treenode, treenodeDISchluessel: TTreenode;
+  treenode, treenodeDISchluessel, treenodeScopeLokal: TTreenode;
   OneFileInfo: TOneFileInfo;
+  treenodeScope: TTreenode;
 begin
 
   for i := 0 to sl.Count - 1 do
@@ -508,6 +519,7 @@ begin
       TObject(treenode.Data));
 
     if OneFileInfo <> nil then
+    begin
       for n := 0 to OneFileInfo.slDependencyInjektionNamen.Count - 1 do
       begin
         treenodeDISchluessel :=
@@ -515,6 +527,23 @@ begin
         treenodeDISchluessel.ImageIndex := constItemIndexKey;
       end;
 
+
+      if OneFileInfo.slScopeActions.Count > 0 then
+      begin
+        treenodeScope := TreeView1.Items.AddChild(treenode, 'scope.');
+        treenodeScope.ImageIndex := constItemScope;
+
+        for n := 0 to OneFileInfo.slScopeActions.Count - 1 do
+        begin
+
+          treenodeScopeLokal :=
+            TreeView1.Items.AddChild(treenodeScope, OneFileInfo.slScopeActions[n]);
+          treenodeScopeLokal.ImageIndex := constItemScope;
+        end;
+
+      end;
+
+    end;
   end;
 
 end;
@@ -576,8 +605,7 @@ begin
   end;
   TreeView1.EndUpdate;
 
-  mnuFind.Enabled := true;
-
+  mnuFind.Enabled := True;
 
 end;
 
@@ -596,16 +624,16 @@ end;
 
 procedure TfrmMainView.ToolButton3Click(Sender: TObject);
 begin
-frmMainController.sPfad := 'D:\BesuchHerrRammer\Konfigurator\Src';
-StartPathAnalyse;
+  frmMainController.sPfad := 'D:\BesuchHerrRammer\Konfigurator\Src';
+  StartPathAnalyse;
 end;
 
-function TfrmMainView.SearchTabsheetOrCreateNew(sMyFileName: string) : boolean;
+function TfrmMainView.SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
 var
-  i,i2: integer;
+  i, i2: integer;
   myOneTabsheet: TOneTabsheet;
 begin
-result := false;
+  Result := False;
 
   for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
   begin
@@ -632,7 +660,8 @@ result := false;
   myOneTabsheet.SynMemo := frmMainController.myActiveSynMemo;
   myOneTabsheet.Tabsheet := frmMainController.myActiveTabsheet;
 
-  frmMainController.myActiveTabsheet.ImageIndex := CalculateIndexOfFileExtension(sMyFileName)  ;
+  frmMainController.myActiveTabsheet.ImageIndex :=
+    CalculateIndexOfFileExtension(sMyFileName);
 
   i2 := frmMainController.GetImageindexForFileIfItContainsOnlyTheSameType(sMyFileName);
 
@@ -642,10 +671,10 @@ result := false;
   frmMainController.slOpendTabsheets.AddObject(sMyFileName, myOneTabsheet);
 
   self.PageControl1.ActivePage := frmMainController.myActiveTabsheet;
-  result := true;
+  Result := True;
 
-  mnuSave.enabled := true;
-  mnuSaveall.enabled := true;
+  mnuSave.Enabled := True;
+  mnuSaveall.Enabled := True;
 
 end;
 
@@ -676,7 +705,7 @@ begin
       sl.Free;
     end;
 
-  treenode.Expand(false);
+  treenode.Expand(False);
 
 end;
 
@@ -685,7 +714,7 @@ var
   treenode: TTreenode;
   sPfad: string;
   parentNode: TTreenode;
-  s : string;
+  s: string;
 begin
 
   treenode := TreeView1.Selected;
@@ -694,14 +723,14 @@ begin
 
 
   if treenode = treenodeSearchInPath then
-    begin
+  begin
     s := '';
-    if inputquery('','',s) then
-      begin
+    if inputquery('', '', s) then
+    begin
       AddSearchInPathToTree(s);
       exit;
-      end;
     end;
+  end;
 
   if treenode.Data = nil then
     exit;
@@ -709,7 +738,7 @@ begin
   sPfad := frmMainController.findFileNameToDataPointer(TObject(treenode.Data));
 
   if SearchTabsheetOrCreateNew(sPfad) then
-    begin
+  begin
     if pos('.HTM', uppercase(sPfad)) > 0 then
       frmMainController.myActiveSynMemo.Highlighter := SynHTMLSyn1
     else
@@ -729,7 +758,7 @@ begin
 
     frmMainController.myActiveTabsheet.Caption := extractfilename(sPfad);
     frmMainController.myActiveSynMemo.Lines.LoadFromFile(sPfad);
-    end;
+  end;
 
   parentNode := treenode.parent;
   if parentNode <> nil then
@@ -843,13 +872,13 @@ procedure TfrmMainView.AddSearchInPathToTree(const s: string);
 var
   treenodeSearch: TTreenode;
 begin
-  treenodeSearchInPath.Collapse(true);
-  treenodeSearch :=       TreeView1.Items.AddChild(treenodeSearchInPath, s);
+  treenodeSearchInPath.Collapse(True);
+  treenodeSearch := TreeView1.Items.AddChild(treenodeSearchInPath, s);
   treenodeSearch.ImageIndex := constItemIndexSerchInPath1;
   TreeView1.Selected := treenodeSearch;
   TreeView1Click(TreeView1);
 
-  treenodeSearchInPath.Expand(false);
+  treenodeSearchInPath.Expand(False);
 
 end;
 

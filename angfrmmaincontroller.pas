@@ -17,6 +17,7 @@ type
   public
     slFileInhalt: TStringList;
     slDependencyInjektionNamen: TStringList;
+    slScopeActions: TStringList;
 
     pTreenodeInView: TObject;
     constructor Create;
@@ -34,6 +35,7 @@ type
   TFrmMainController = class
   private
     slDJKeyWords: TStringList;
+    procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
     function SchluesselwortInZeileGefundenUndStringInKlammern(
       sZeile, sSchluesselwort: string; oneFileInfo: TOneFileInfo;
       iImageindex: integer): boolean;
@@ -80,12 +82,14 @@ constructor TOneFileInfo.Create;
 begin
   slFileInhalt := TStringList.Create;
   slDependencyInjektionNamen := TStringList.Create;
+  slScopeActions             := TStringList.create;
 end;
 
 destructor TOneFileInfo.Destroy;
 begin
   slFileInhalt.Free;
   slDependencyInjektionNamen.Free;
+  slScopeActions.free;
   inherited Destroy;
 end;
 
@@ -224,7 +228,8 @@ begin
       ZeileVerarbeitet := False;
 
       if i < 5 then  //  ignore  Angular Files
-        if pos('Google, Inc. http://angularjs.org', s) > 0 then
+        if pos('Google',s) > 0 then
+        if pos('Inc. http://angularjs.org', s) > 0 then
           if pos('(c)', s) > 0 then
             break;
 
@@ -301,10 +306,34 @@ begin
             ZeileVerarbeitet := True;
           end;
 
+          LookForScopeInString(s, oneFileInfo );
+
+
     end;
 
   end;
 
+end;
+
+
+procedure TFrmMainController.LookForScopeInString(sLine : string ; oneFileInfo : TOneFileInfo) ;
+var i,i2 : integer;
+s : string;
+boolOK : boolean ;
+begin
+  i := pos('scope.',sLine) ;
+  if  i > 0 then
+    begin
+    boolOK := true;
+    i2 := pos('//',sLine) ;
+    if i2 > 0 then
+      if i2 < i then
+          boolOK := false; //Todo To simple
+
+    if boolOK then
+      oneFileInfo.slScopeActions.Add(trim(sLine) );
+
+    end;
 end;
 
 procedure TFrmMainController.ClearAll;
