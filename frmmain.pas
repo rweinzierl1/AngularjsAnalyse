@@ -18,6 +18,7 @@ type
 
   TfrmMainView = class(TForm)
     FindDialog1: TFindDialog;
+    imgBookMarks: TImageList;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     mnuDJKeywords: TMenuItem;
@@ -54,6 +55,7 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure mnuBookMark1Click(Sender: TObject);
     procedure mnuDJKeywordsClick(Sender: TObject);
     procedure mnuFindClick(Sender: TObject);
     procedure mnuCloseActivepageClick(Sender: TObject);
@@ -195,6 +197,11 @@ begin
   frmMainController.Free;
 end;
 
+procedure TfrmMainView.mnuBookMark1Click(Sender: TObject);
+begin
+// self.frmMainController.myActiveSynMemo.SetBookMark(1, 1, frmMainController.myActiveSynMemo.CaretY );
+end;
+
 procedure TfrmMainView.mnuDJKeywordsClick(Sender: TObject);
 begin
   Application.CreateForm(TfrmSelectKeywords, frmSelectKeywordsObj);
@@ -233,6 +240,7 @@ procedure TfrmMainView.mnuFindNextClick(Sender: TObject);
 var
   mySyn: TsynMemo;
   i, iPos: integer;
+  point : TPoint;
 begin
   mySyn := frmMainController.myActiveSynMemo;
 
@@ -242,8 +250,9 @@ begin
     iPos := pos(frmMainController.sLastSearch, mySyn.Lines[i]);
     if iPos > 0 then
     begin
-      mySyn.CaretY := i + 1;
-      mySyn.CaretX := iPos;
+      point.y :=  i + 1;
+      point.X := iPos;
+      mySyn.LogicalCaretXY := point;
       mySyn.SelectWord;
       break;
     end;
@@ -295,8 +304,7 @@ begin
 
   if s = '' then
   begin
-    point.x := mySyn.CaretX;
-    point.y := mySyn.CaretY;
+    point := mySyn.LogicalCaretXY ;
     s := trim(mySyn.GetWordAtRowCol(point));
   end;
 
@@ -315,20 +323,22 @@ var
   i, iPos: integer;
 begin
   mySyn := frmMainController.myActiveSynMemo;
-  point.x := mySyn.CaretX;
-  point.y := mySyn.CaretY;
+  point :=  mySyn.LogicalCaretXY;
   s := trim(mySyn.GetWordAtRowCol(point));
 
   for i := mySyn.CaretY to mySyn.Lines.Count - 1 do
   begin
     iPos := frmMainController.PostitionOfTextInText(s, mySyn.Lines[i]);
+
     if iPos > 0 then
     begin
-      mySyn.CaretY := i + 1;
-      mySyn.CaretX := iPos;
+      point.y:= i + 1 ;
+      point.x:= iPos ;
+      mySyn.LogicalCaretXY := point;
       break;
     end;
   end;
+
 end;
 
 procedure TfrmMainView.mnuSearchTopClick(Sender: TObject);
@@ -339,19 +349,18 @@ var
   i, iPos: integer;
 begin
   mySyn := frmMainController.myActiveSynMemo;
-  point.x := mySyn.CaretX;
-  point.y := mySyn.CaretY;
+  point :=  mySyn.LogicalCaretXY;
   s := trim(mySyn.GetWordAtRowCol(point));
 
   for i := mySyn.CaretY - 2 downto 0 do
   begin
     iPos := frmMainController.PostitionOfTextInText(s, mySyn.Lines[i]);
 
-
     if iPos > 0 then
     begin
-      mySyn.CaretY := i + 1;
-      mySyn.CaretX := iPos;
+      point.y:= i + 1 ;
+      point.x:= iPos ;
+      mySyn.LogicalCaretXY := point;
       break;
     end;
   end;
@@ -658,6 +667,12 @@ begin
 
   myOneTabsheet := TOneTabsheet.Create;
   myOneTabsheet.SynMemo := frmMainController.myActiveSynMemo;
+
+  myOneTabsheet.SynMemo.BookMarkOptions.BookmarkImages := imgBookMarks;
+
+ // myOneTabsheet.SynMemo.Options := myOneTabsheet.SynMemo.Options -  [eoTabsToSpaces];
+
+
   myOneTabsheet.Tabsheet := frmMainController.myActiveTabsheet;
 
   frmMainController.myActiveTabsheet.ImageIndex :=
@@ -808,6 +823,7 @@ var
   m: TSynEditMark;
   sWord2: string;
   gefunden: boolean;
+  point : TPoint;
 begin
   sWord2 := frmMainController.ChangeCamelCaseToMinusString(sWord);
   gefunden := False;
@@ -833,17 +849,14 @@ begin
 
       if not gefunden then
       begin
-        // for n := 1 to length(s) do
-        //   if s[n] = #39 then
-
-        s := ansireplacestr(s, #9, '        '); // TODO make it better
         ipos := pos(sWord, s);
         if ipos = 0 then
           ipos := pos(sWord2, s);
 
+        point.y := i + 1 ;
+        point.x := ipos;
 
-        frmMainController.myActiveSynMemo.CaretY := i + 1;
-        frmMainController.myActiveSynMemo.CaretX := ipos;
+        frmMainController.myActiveSynMemo.LogicalCaretXY := point;
 
         frmMainController.myActiveSynMemo.SetFocus;
         frmMainController.myActiveSynMemo.SelectWord;
