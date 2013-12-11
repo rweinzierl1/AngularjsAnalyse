@@ -36,11 +36,12 @@ type
   private
     slDJKeyWords: TStringList;
     slAllScope: TStringList;
+
     procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
     function SchluesselwortInZeileGefundenUndStringInKlammern(
       sZeile, sSchluesselwort: string; oneFileInfo: TOneFileInfo;
       iImageindex: integer): boolean;
-    procedure WerteDateiInhaltAus(sDateiname: string; oneFileInfo: TOneFileInfo);
+    procedure AnalyzeFileContent(sDateiname: string; oneFileInfo: TOneFileInfo);
   public
     sPfad: string;
     slAllFilesFound: TStringList;
@@ -57,6 +58,7 @@ type
     sLastSearch: string;
 
     function ChangeCamelCaseToMinusString(sSuchtext: string): string;
+    function GetFilenameWithoutRootPath(sDateiname : string): string;
     function GetslDJKeyWords: TStringList;
     function GetslAllScope : TStringlist;
     procedure ClearAll;
@@ -71,6 +73,8 @@ type
     function PostitionOfTextInText(const Substr: ansistring;
       const Source: ansistring): integer;
     function GetImageindexForFileIfItContainsOnlyTheSameType(sFilename: string): integer;
+    function GetFilenameToKeyword(sKeyWord: string): string;
+    function getContentToFilename(sFilename: string): string;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -177,6 +181,12 @@ begin
             end;
           end;
 
+          if pos('+',s2) > 0 then
+            result := false ; //TODO make it better
+
+          if pos(':',s2) > 0 then
+            result := false ; //TODO make it better
+
           if Result then
             oneFileInfo.slDependencyInjektionNamen.AddObject(s2, TObject(iImageindex));
 
@@ -190,7 +200,7 @@ begin
 
 end;
 
-procedure TFrmMainController.WerteDateiInhaltAus(sDateiname: string;
+procedure TFrmMainController.AnalyzeFileContent(sDateiname: string;
   oneFileInfo: TOneFileInfo);
 var
   s: string;
@@ -216,17 +226,16 @@ begin
 
   sExt := uppercase(ExtractFileExt(sDateiname));
 
-  if (sExt = '.HTML') or (sExt = '.HTM') then
+  if (sExt = '.HTML') or (sExt = '.HTM') or (sExt = '.CSS') then
     oneFileInfo.slFileInhalt.loadfromfile(sDateiname)
   else
   if sExt = '.JS' then
   begin
-    sDateiNameOhneRootPfad := copy(sDateiname, length(self.sPfad) +
-      1, length(sDateiname));
+    sDateiNameOhneRootPfad:=GetFilenameWithoutRootPath(sDateiname );
 
 
-    //if pos('angular',
-    oneFileInfo.slFileInhalt.loadfromfile(sDateiname);
+    if pos('angular',ExtractFileName(sDateiname) ) = 0 then   //  ignore  Angular Files
+      oneFileInfo.slFileInhalt.loadfromfile(sDateiname);
     for i := 0 to oneFileInfo.slFileInhalt.Count - 1 do
     begin
       s := oneFileInfo.slFileInhalt[i];
@@ -367,7 +376,7 @@ begin
 
   slAllFilesFound.AddObject(sPath, oneFileInfo);
 
-  WerteDateiInhaltAus(sPath, oneFileInfo);
+  AnalyzeFileContent(sPath, oneFileInfo);
 
 end;
 
@@ -424,6 +433,41 @@ begin
   Result := slAllScope;
 end;
 
+function TFrmMainController.GetFilenameToKeyword(sKeyWord : string) : string;
+var
+  i, n: integer;
+  oneFileInfo: TOneFileInfo;
+begin
+  Result := '';
+  for i := 0 to slAllFilesFound.Count - 1 do
+  begin
+    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    for n := 0 to oneFileInfo.slDependencyInjektionNamen.Count - 1 do
+      if oneFileInfo.slDependencyInjektionNamen[n] = sKeyWord then
+        result := slAllFilesFound[i];
+  end;
+
+
+end;
+
+
+
+function TFrmMainController.getContentToFilename(sFilename : string): string;
+var
+  i, n: integer;
+  oneFileInfo: TOneFileInfo;
+begin
+  Result := '';
+
+  for i := 0 to slAllFilesFound.Count - 1 do
+  begin
+    if slAllFilesFound[i] = sFilename then
+      begin
+      oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+      result := oneFileInfo.slFileInhalt.Text;
+      end;
+  end;
+end;
 
 function TFrmMainController.GetslDJKeyWords: TStringList;
 var
@@ -464,6 +508,15 @@ begin
       Result := Result + sSuchtext[i];
 
   end;
+end;
+
+function TFrmMainController.GetFilenameWithoutRootPath(sDateiname : string): string;
+var
+  sDateiNameOhneRootPfad: string;
+begin
+  sDateiNameOhneRootPfad := copy(sDateiname, length(self.sPfad) +
+    1, length(sDateiname));
+  Result:=sDateiNameOhneRootPfad;
 end;
 
 

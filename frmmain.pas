@@ -9,7 +9,7 @@ uses
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
   SynEditMarks, strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
-  SynHighlighterJava, SynHighlighterCpp, Clipbrd,
+   Clipbrd,
   angFrmMainController, angDatamodul, angKeyWords;
 
 type
@@ -209,7 +209,7 @@ procedure TfrmMainView.mnuDJKeywordsClick(Sender: TObject);
 begin
   Application.CreateForm(TfrmSelectKeywords, frmSelectKeywordsObj);
 
-  frmSelectKeywordsObj.Initialize(frmMainController.GetslDJKeyWords);
+  frmSelectKeywordsObj.Initialize(frmMainController,SynAnySyn1);
 
   frmSelectKeywordsObj.showmodal;
   if frmSelectKeywordsObj.ModalResult = mrOk then
@@ -502,7 +502,28 @@ end;
 procedure TfrmMainView.mnuPfadOeffnenClick(Sender: TObject);
 var
   chosenDirectory: string;
+  iAnswer: integer;
+  i: integer;
 begin
+
+  if frmMainController.SynMemoModifiedAvailable then
+  begin
+    iAnswer := MessageDlg('Save changes', mtConfirmation, [mbYes, mbNo, mbAbort], 0);
+    if iAnswer = mrAbort then
+      exit;
+    if iAnswer = mrYes then
+      frmMainController.SaveAll;
+  end;
+
+
+  for i := frmMainController.slOpendTabsheets.Count - 1 downto 0 do
+    frmMainController.slOpendTabsheets.Delete(i);
+
+
+  for i := Pagecontrol1.PageCount - 1 downto 0 do
+    Pagecontrol1.Pages[i].Free;
+
+
   if SelectDirectory('Select a directory', 'C:\', chosenDirectory) then
   begin
     frmMainController.sPfad := chosenDirectory;
@@ -774,9 +795,10 @@ begin
       end;
 
       sl.Free;
+      treenode.Expand(False);
     end;
 
-  treenode.Expand(False);
+
 
 end;
 

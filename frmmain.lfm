@@ -1,7 +1,7 @@
 object frmMainView: TfrmMainView
-  Left = 330
+  Left = 442
   Height = 551
-  Top = 254
+  Top = 231
   Width = 884
   Caption = 'AngularJS Analyse Tool'
   ClientHeight = 531
