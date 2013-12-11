@@ -36,7 +36,8 @@ constItemIndexInfo = 23;
 constItemIndexNew = 24;
 constItemIndexSave = 25;
 constItemScope = 26;
-
+constItemAbwaertsuchen= 27;
+constItemAufwaertsuchen = 28;
 
 implementation
 

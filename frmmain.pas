@@ -89,7 +89,10 @@ type
     treenodeDependencyInjectionWords: TTreenode;
     treenodeAngularWords: TTreenode;
     treenodeSearchInPath: TTreenode;
-
+    treenodeScope: TTreenode;
+    treenodeScopeNurPunkt: TTreenode;
+    treenodeScopeGleich: TTreenode;
+    treenodeScopeGleichFunction: TTreenode;
 
     frmMainController: TFrmMainController;
     procedure AddAngularJSKeyWordsInTreeview;
@@ -199,7 +202,7 @@ end;
 
 procedure TfrmMainView.mnuBookMark1Click(Sender: TObject);
 begin
-// self.frmMainController.myActiveSynMemo.SetBookMark(1, 1, frmMainController.myActiveSynMemo.CaretY );
+  // self.frmMainController.myActiveSynMemo.SetBookMark(1, 1, frmMainController.myActiveSynMemo.CaretY );
 end;
 
 procedure TfrmMainView.mnuDJKeywordsClick(Sender: TObject);
@@ -240,7 +243,7 @@ procedure TfrmMainView.mnuFindNextClick(Sender: TObject);
 var
   mySyn: TsynMemo;
   i, iPos: integer;
-  point : TPoint;
+  point: TPoint;
 begin
   mySyn := frmMainController.myActiveSynMemo;
 
@@ -250,7 +253,7 @@ begin
     iPos := pos(frmMainController.sLastSearch, mySyn.Lines[i]);
     if iPos > 0 then
     begin
-      point.y :=  i + 1;
+      point.y := i + 1;
       point.X := iPos;
       mySyn.LogicalCaretXY := point;
       mySyn.SelectWord;
@@ -304,7 +307,7 @@ begin
 
   if s = '' then
   begin
-    point := mySyn.LogicalCaretXY ;
+    point := mySyn.LogicalCaretXY;
     s := trim(mySyn.GetWordAtRowCol(point));
   end;
 
@@ -323,7 +326,7 @@ var
   i, iPos: integer;
 begin
   mySyn := frmMainController.myActiveSynMemo;
-  point :=  mySyn.LogicalCaretXY;
+  point := mySyn.LogicalCaretXY;
   s := trim(mySyn.GetWordAtRowCol(point));
 
   for i := mySyn.CaretY to mySyn.Lines.Count - 1 do
@@ -332,8 +335,8 @@ begin
 
     if iPos > 0 then
     begin
-      point.y:= i + 1 ;
-      point.x:= iPos ;
+      point.y := i + 1;
+      point.x := iPos;
       mySyn.LogicalCaretXY := point;
       break;
     end;
@@ -349,7 +352,7 @@ var
   i, iPos: integer;
 begin
   mySyn := frmMainController.myActiveSynMemo;
-  point :=  mySyn.LogicalCaretXY;
+  point := mySyn.LogicalCaretXY;
   s := trim(mySyn.GetWordAtRowCol(point));
 
   for i := mySyn.CaretY - 2 downto 0 do
@@ -358,8 +361,8 @@ begin
 
     if iPos > 0 then
     begin
-      point.y:= i + 1 ;
-      point.x:= iPos ;
+      point.y := i + 1;
+      point.x := iPos;
       mySyn.LogicalCaretXY := point;
       break;
     end;
@@ -442,6 +445,23 @@ begin
   treenodeAngularWords.ImageIndex := constItemIndexAngular;
   AddAngularJSKeyWordsInTreeview;
 
+
+  treenodeScope := TreeView1.Items.AddChild(nil, 'scope.');
+  treenodeScope.ImageIndex := constItemScope;
+
+  treenodeScopeGleichFunction :=
+    TreeView1.Items.AddChild(treenodeScope, 'scope. = function');
+  treenodeScopeGleichFunction.ImageIndex := constItemScope;
+
+  treenodeScopeGleich := TreeView1.Items.AddChild(treenodeScope,
+    'scope. =');
+  treenodeScopeGleich.ImageIndex := constItemScope;
+
+  treenodeScopeNurPunkt := TreeView1.Items.AddChild(treenodeScope,
+      'scope.');
+    treenodeScopeNurPunkt.ImageIndex := constItemScope;
+
+
   treenodeAllFiles := TreeView1.Items.AddChild(nil, 'All Files');
   treenodeAllFiles.ImageIndex := constItemIndexFolder;
 
@@ -515,7 +535,7 @@ var
   i, n: integer;
   treenode, treenodeDISchluessel, treenodeScopeLokal: TTreenode;
   OneFileInfo: TOneFileInfo;
-  treenodeScope: TTreenode;
+  treenodeScope1: TTreenode;
 begin
 
   for i := 0 to sl.Count - 1 do
@@ -539,14 +559,14 @@ begin
 
       if OneFileInfo.slScopeActions.Count > 0 then
       begin
-        treenodeScope := TreeView1.Items.AddChild(treenode, 'scope.');
-        treenodeScope.ImageIndex := constItemScope;
+        treenodeScope1 := TreeView1.Items.AddChild(treenode, 'scope.');
+        treenodeScope1.ImageIndex := constItemScope;
 
         for n := 0 to OneFileInfo.slScopeActions.Count - 1 do
         begin
 
           treenodeScopeLokal :=
-            TreeView1.Items.AddChild(treenodeScope, OneFileInfo.slScopeActions[n]);
+            TreeView1.Items.AddChild(treenodeScope1, OneFileInfo.slScopeActions[n]);
           treenodeScopeLokal.ImageIndex := constItemScope;
         end;
 
@@ -576,7 +596,7 @@ end;
 
 procedure TfrmMainView.StartPathAnalyse;
 var
-  i: integer;
+  i, i1, i2, i3: integer;
   sl: TStringList;
   treenode: TTreenode;
 begin
@@ -612,6 +632,42 @@ begin
 
     SynAnySyn1.Constants.add(uppercase(sl[i]));
   end;
+
+
+  sl := frmMainController.GetslAllScope;
+  for i := 0 to sl.Count - 1 do
+  begin
+    i1 := pos('scope', sl[i]);
+    i2 := pos('=', sl[i]);
+    i3 := pos('function', sl[i]);
+
+
+
+
+    if (i2 > 0) and (i3 > 0) and (i3 > i2) and (i2 > i1) then
+    begin
+      treenode := TreeView1.Items.AddChild(treenodeScopeGleichFunction, sl[i]);
+      treenode.ImageIndex := constItemScope;
+    end
+    else
+    begin
+      if (i2 > 0) and (i2 > i1) then
+      begin
+        treenode := TreeView1.Items.AddChild(treenodeScopeGleich, sl[i]);
+        treenode.ImageIndex := constItemScope;
+      end
+      else
+      begin
+        treenode := TreeView1.Items.AddChild(treenodeScopeNurPunkt, sl[i]);
+        treenode.ImageIndex := constItemScope;
+      end;
+    end;
+
+  end;
+
+
+
+
   TreeView1.EndUpdate;
 
   mnuFind.Enabled := True;
@@ -670,7 +726,7 @@ begin
 
   myOneTabsheet.SynMemo.BookMarkOptions.BookmarkImages := imgBookMarks;
 
- // myOneTabsheet.SynMemo.Options := myOneTabsheet.SynMemo.Options -  [eoTabsToSpaces];
+  // myOneTabsheet.SynMemo.Options := myOneTabsheet.SynMemo.Options -  [eoTabsToSpaces];
 
 
   myOneTabsheet.Tabsheet := frmMainController.myActiveTabsheet;
@@ -823,7 +879,7 @@ var
   m: TSynEditMark;
   sWord2: string;
   gefunden: boolean;
-  point : TPoint;
+  point: TPoint;
 begin
   sWord2 := frmMainController.ChangeCamelCaseToMinusString(sWord);
   gefunden := False;
@@ -853,7 +909,9 @@ begin
         if ipos = 0 then
           ipos := pos(sWord2, s);
 
-        point.y := i + 1 ;
+        point.y := i + 1;
+
+
         point.x := ipos;
 
         frmMainController.myActiveSynMemo.LogicalCaretXY := point;

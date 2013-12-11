@@ -35,6 +35,7 @@ type
   TFrmMainController = class
   private
     slDJKeyWords: TStringList;
+    slAllScope: TStringList;
     procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
     function SchluesselwortInZeileGefundenUndStringInKlammern(
       sZeile, sSchluesselwort: string; oneFileInfo: TOneFileInfo;
@@ -57,6 +58,7 @@ type
 
     function ChangeCamelCaseToMinusString(sSuchtext: string): string;
     function GetslDJKeyWords: TStringList;
+    function GetslAllScope : TStringlist;
     procedure ClearAll;
     function findFileNameToDataPointer(p: TObject): string;
     procedure AddOneFileInSL(sPath: string; treenode: TObject);
@@ -109,6 +111,7 @@ begin
   slDirective := TStringList.Create;
   slConfig := TStringList.Create;
   slDJKeyWords := TStringList.Create;
+  slAllScope := TStringList.Create;
 
   slOpendTabsheets := TStringList.Create;
   slOpendTabsheets.OwnsObjects := True;
@@ -126,6 +129,7 @@ begin
   slDirective.Free;
   slConfig.Free;
   slDJKeyWords.Free;
+  slAllScope.free;
 
   slOpendTabsheets.Free;
 
@@ -221,6 +225,7 @@ begin
       1, length(sDateiname));
 
 
+    //if pos('angular',
     oneFileInfo.slFileInhalt.loadfromfile(sDateiname);
     for i := 0 to oneFileInfo.slFileInhalt.Count - 1 do
     begin
@@ -330,6 +335,10 @@ begin
       if i2 < i then
           boolOK := false; //Todo To simple
 
+    if copy(trim(sLine),1,1) = '*' then
+      boolOK := false; //Todo To simple
+
+
     if boolOK then
       oneFileInfo.slScopeActions.Add(trim(sLine) );
 
@@ -396,7 +405,24 @@ begin
   end;
 end;
 
+function TFrmMainController.GetslAllScope: TStringList;
+var
+  i, n: integer;
+  oneFileInfo: TOneFileInfo;
+begin
+  slAllScope.Clear;
+  slAllScope.sorted := True;
 
+  for i := 0 to slAllFilesFound.Count - 1 do
+  begin
+    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    for n := 0 to oneFileInfo.slScopeActions.Count - 1 do
+      slAllScope.Add(oneFileInfo.slScopeActions[n]);
+
+  end;
+
+  Result := slAllScope;
+end;
 
 
 function TFrmMainController.GetslDJKeyWords: TStringList;
