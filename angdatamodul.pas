@@ -13,6 +13,7 @@ type
 
   TDataModule1 = class(TDataModule)
     ImageList1: TImageList;
+    imgBookMarks: TImageList;
   private
     { private declarations }
   public

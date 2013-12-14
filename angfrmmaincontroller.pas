@@ -9,9 +9,15 @@ uses
 
 type
 
-  { TFrmMainController }
 
-  { TOneFileInfo }
+    TOneBookMark = class(Tobject)
+    public
+    iBookmarkNr : integer;
+    iLineNr     : integer;
+    sLine       : string;
+    sFileName   : string;
+    boolAktiveTab : boolean;
+  end;
 
   TOneFileInfo = class
   public
@@ -32,10 +38,13 @@ type
   end;
 
 
+  { TFrmMainController }
+
   TFrmMainController = class
   private
     slDJKeyWords: TStringList;
     slAllScope: TStringList;
+
 
     procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
     function SchluesselwortInZeileGefundenUndStringInKlammern(
@@ -75,6 +84,9 @@ type
     function GetImageindexForFileIfItContainsOnlyTheSameType(sFilename: string): integer;
     function GetFilenameToKeyword(sKeyWord: string): string;
     function getContentToFilename(sFilename: string): string;
+    procedure GetAllBookmarks(slBookmarks : Tstringlist) ;
+    procedure SetTabsheetAktivForFile(sFile : string);
+    function GetSynMemoForFile(sFile: string): TSynMemo;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -468,6 +480,75 @@ begin
       end;
   end;
 end;
+
+procedure TFrmMainController.GetAllBookmarks(slBookmarks: Tstringlist);
+  var
+    i,n: integer;
+    OneTabsheet: TOneTabsheet;
+    X, Y: integer;
+    OneBookMark : TOneBookMark ;
+  begin
+
+    for i := 0 to slOpendTabsheets.Count - 1 do
+    begin
+      OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+
+      for n := 0 to  9 do
+      begin
+
+      if OneTabsheet.SynMemo.GetBookMark(n,  X, Y) then
+        begin
+        OneBookMark := TOneBookMark.create ;
+        OneBookMark.iBookmarkNr:= n;
+        OneBookMark.iLineNr:=y-1;
+        OneBookMark.sLine:= OneTabsheet.SynMemo.lines[OneBookMark.iLineNr];
+        OneBookMark.sFileName:=slOpendTabsheets[i];
+
+        if OneTabsheet.SynMemo = self.myActiveSynMemo then
+          OneBookMark.boolAktiveTab := true
+        else
+          OneBookMark.boolAktiveTab := false;
+
+
+        slBookmarks.AddObject(OneBookMark.sLine,OneBookMark)
+        end;
+      end;
+    end;
+end;
+
+procedure TFrmMainController.SetTabsheetAktivForFile(sFile: string);
+  var
+    i: integer;
+    OneTabsheet: TOneTabsheet;
+  begin
+    for i := 0 to slOpendTabsheets.Count - 1 do
+    begin
+      OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+      if slOpendTabsheets[i] = sFile then
+        begin
+        self.myActiveTabsheet := OneTabsheet.Tabsheet ;
+        self.myActiveSynMemo  := OneTabsheet.SynMemo;
+        end;
+    end;
+
+end;
+
+
+function TFrmMainController.GetSynMemoForFile(sFile: string) : TSynMemo;
+  var
+    i: integer;
+    OneTabsheet: TOneTabsheet;
+  begin
+    result := nil;
+    for i := 0 to slOpendTabsheets.Count - 1 do
+    begin
+      OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+      if slOpendTabsheets[i] = sFile then
+        result := OneTabsheet.SynMemo;
+    end;
+
+end;
+
 
 function TFrmMainController.GetslDJKeyWords: TStringList;
 var

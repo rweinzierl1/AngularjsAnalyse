@@ -1,7 +1,7 @@
 object frmSelectKeywords: TfrmSelectKeywords
-  Left = 348
+  Left = 343
   Height = 362
-  Top = 146
+  Top = 349
   Width = 524
   Caption = 'Select Keywords'
   ClientHeight = 362

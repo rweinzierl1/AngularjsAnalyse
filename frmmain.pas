@@ -10,7 +10,7 @@ uses
   SynEditMarks, strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
    Clipbrd,
-  angFrmMainController, angDatamodul, angKeyWords;
+  angFrmMainController, angDatamodul, angKeyWords,angfrmBookmarks;
 
 type
 
@@ -18,9 +18,9 @@ type
 
   TfrmMainView = class(TForm)
     FindDialog1: TFindDialog;
-    imgBookMarks: TImageList;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
+    mnuBookmarks: TMenuItem;
     mnuDJKeywords: TMenuItem;
     mnuSave1: TMenuItem;
     mnuSave: TMenuItem;
@@ -56,6 +56,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure mnuBookMark1Click(Sender: TObject);
+    procedure mnuBookmarksClick(Sender: TObject);
     procedure mnuDJKeywordsClick(Sender: TObject);
     procedure mnuFindClick(Sender: TObject);
     procedure mnuCloseActivepageClick(Sender: TObject);
@@ -203,6 +204,50 @@ end;
 procedure TfrmMainView.mnuBookMark1Click(Sender: TObject);
 begin
   // self.frmMainController.myActiveSynMemo.SetBookMark(1, 1, frmMainController.myActiveSynMemo.CaretY );
+end;
+
+procedure TfrmMainView.mnuBookmarksClick(Sender: TObject);
+var obm: TOneBookMark;
+  mys : Tsynmemo;
+  i: integer;
+begin
+    Application.CreateForm(TfrmBookmarks, frmBookmarks);
+
+    frmBookmarks.Initialize(frmMainController);
+
+
+
+  frmBookmarks.showmodal;
+  if frmBookmarks.ModalResult = mrOk then
+  begin
+
+  if frmBookmarks.iKeyPressed >= 0 then
+    frmMainController.myActiveSynMemo.SetBookMark(frmBookmarks.iKeyPressed ,frmMainController.myActiveSynMemo.CaretX ,frmMainController.myActiveSynMemo.CaretY   )
+  else
+    if frmBookmarks.obmMarked <> nil then
+      begin
+      frmMainController.SetTabsheetAktivForFile(frmBookmarks.obmMarked.sFileName );
+      self.PageControl1.ActivePage :=frmMainController.myActiveTabsheet ;
+      frmMainController.myActiveSynMemo.GotoBookMark(frmBookmarks.obmMarked.iBookmarkNr) ;
+      end;
+
+  for i := 0 to frmBookmarks.ListView1.Items.Count -1 do
+    begin
+    if not frmBookmarks.ListView1.Items[i].Checked then
+      begin
+      obm :=  TOneBookMark(frmBookmarks.ListView1.Items[i].data) ;
+      mys :=  frmMainController.GetSynMemoForFile(obm.sFileName );
+      mys.ClearBookMark(obm.iBookmarkNr );
+
+      end;
+
+    end;
+
+
+
+  end;
+
+  frmBookmarks.Free;
 end;
 
 procedure TfrmMainView.mnuDJKeywordsClick(Sender: TObject);
@@ -745,9 +790,8 @@ begin
   myOneTabsheet := TOneTabsheet.Create;
   myOneTabsheet.SynMemo := frmMainController.myActiveSynMemo;
 
-  myOneTabsheet.SynMemo.BookMarkOptions.BookmarkImages := imgBookMarks;
+  myOneTabsheet.SynMemo.BookMarkOptions.BookmarkImages := DataModule1.imgBookMarks;
 
-  // myOneTabsheet.SynMemo.Options := myOneTabsheet.SynMemo.Options -  [eoTabsToSpaces];
 
 
   myOneTabsheet.Tabsheet := frmMainController.myActiveTabsheet;

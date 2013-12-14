@@ -1,0 +1,212 @@
+object frmBookmarks: TfrmBookmarks
+  Left = 417
+  Height = 259
+  Top = 291
+  Width = 854
+  ActiveControl = ListView1
+  Caption = 'Bookmarks'
+  ClientHeight = 259
+  ClientWidth = 854
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
+  Position = poScreenCenter
+  LCLVersion = '1.0.14.0'
+  object Panel1: TPanel
+    Left = 0
+    Height = 34
+    Top = 225
+    Width = 854
+    Align = alBottom
+    ClientHeight = 34
+    ClientWidth = 854
+    TabOrder = 1
+    object BitBtn1: TBitBtn
+      Left = 160
+      Height = 30
+      Top = 0
+      Width = 128
+      Default = True
+      DefaultCaption = True
+      Kind = bkOK
+      ModalResult = 1
+      OnClick = BitBtn1Click
+      TabOrder = 0
+    end
+    object BitBtn2: TBitBtn
+      Left = 302
+      Height = 29
+      Top = 1
+      Width = 140
+      Cancel = True
+      Caption = 'Abort'
+      Kind = bkCancel
+      ModalResult = 2
+      TabOrder = 1
+    end
+  end
+  object ListView1: TListView
+    Left = 0
+    Height = 199
+    Top = 26
+    Width = 854
+    Align = alClient
+    Checkboxes = True
+    Columns = <    
+      item
+        Caption = 'Line'
+        Width = 400
+      end    
+      item
+        AutoSize = True
+        Caption = 'File'
+        Width = 30
+      end    
+      item
+        Caption = 'LineNr'
+      end>
+    GridLines = True
+    ReadOnly = True
+    RowSelect = True
+    SmallImages = DataModule1.imgBookMarks
+    TabOrder = 0
+    ViewStyle = vsReport
+    OnDblClick = ListView1DblClick
+  end
+  object ToolBar1: TToolBar
+    Left = 0
+    Height = 26
+    Top = 0
+    Width = 854
+    Caption = 'ToolBar1'
+    Images = DataModule1.imgBookMarks
+    TabOrder = 2
+    object tb0: TToolButton
+      Left = 24
+      Top = 2
+      Action = Action0
+    end
+    object tb1: TToolButton
+      Left = 47
+      Top = 2
+      Action = Action1
+    end
+    object tb2: TToolButton
+      Left = 70
+      Top = 2
+      Action = Action2
+    end
+    object tb3: TToolButton
+      Left = 93
+      Top = 2
+      Action = Action3
+    end
+    object tb4: TToolButton
+      Left = 116
+      Top = 2
+      Action = Action4
+    end
+    object tb5: TToolButton
+      Left = 139
+      Top = 2
+      Action = Action5
+    end
+    object tb6: TToolButton
+      Left = 162
+      Top = 2
+      Action = Action6
+    end
+    object tb7: TToolButton
+      Left = 185
+      Top = 2
+      Action = Action7
+    end
+    object tb8: TToolButton
+      Left = 208
+      Top = 2
+      Action = Action8
+    end
+    object tb9: TToolButton
+      Left = 231
+      Top = 2
+      Action = Action9
+    end
+    object ToolButton1: TToolButton
+      Left = 1
+      Top = 2
+      Caption = 'ToolButton1'
+      ImageIndex = 10
+      OnClick = ToolButton1Click
+    end
+  end
+  object ActionList1: TActionList
+    Images = DataModule1.imgBookMarks
+    left = 312
+    top = 40
+    object Action0: TAction
+      Caption = 'Action0'
+      ImageIndex = 0
+      OnExecute = Action0Execute
+      ShortCut = 48
+    end
+    object Action1: TAction
+      Caption = 'Action1'
+      ImageIndex = 1
+      OnExecute = Action1Execute
+      ShortCut = 49
+    end
+    object Action2: TAction
+      Caption = 'Action2'
+      ImageIndex = 2
+      OnExecute = Action2Execute
+      ShortCut = 50
+    end
+    object Action3: TAction
+      Caption = 'Action3'
+      ImageIndex = 3
+      OnExecute = Action3Execute
+      ShortCut = 51
+    end
+    object Action4: TAction
+      Caption = 'Action4'
+      ImageIndex = 4
+      OnExecute = Action4Execute
+      ShortCut = 52
+    end
+    object Action5: TAction
+      Caption = 'Action5'
+      ImageIndex = 5
+      OnExecute = Action5Execute
+      ShortCut = 53
+    end
+    object Action6: TAction
+      Caption = 'Action6'
+      ImageIndex = 6
+      OnExecute = Action6Execute
+      ShortCut = 54
+    end
+    object Action7: TAction
+      Caption = 'Action7'
+      ImageIndex = 7
+      OnExecute = Action7Execute
+      ShortCut = 55
+    end
+    object Action8: TAction
+      Caption = 'Action8'
+      ImageIndex = 8
+      OnExecute = Action8Execute
+      ShortCut = 56
+    end
+    object Action9: TAction
+      Caption = 'Action9'
+      ImageIndex = 9
+      OnExecute = Action9Execute
+      ShortCut = 57
+    end
+    object acClose: TAction
+      Caption = 'acClose'
+      OnExecute = acCloseExecute
+      ShortCut = 13
+    end
+  end
+end
