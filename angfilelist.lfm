@@ -1,0 +1,92 @@
+object frmFileList: TfrmFileList
+  Left = 448
+  Height = 263
+  Top = 349
+  Width = 769
+  Caption = 'File List'
+  ClientHeight = 263
+  ClientWidth = 769
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poScreenCenter
+  LCLVersion = '1.0.14.0'
+  object Panel1: TPanel
+    Left = 0
+    Height = 34
+    Top = 229
+    Width = 769
+    Align = alBottom
+    ClientHeight = 34
+    ClientWidth = 769
+    TabOrder = 2
+    object BitBtn1: TBitBtn
+      Left = 160
+      Height = 30
+      Top = 0
+      Width = 128
+      Default = True
+      DefaultCaption = True
+      Kind = bkOK
+      ModalResult = 1
+      OnClick = BitBtn1Click
+      TabOrder = 0
+    end
+    object BitBtn2: TBitBtn
+      Left = 302
+      Height = 29
+      Top = 1
+      Width = 140
+      Cancel = True
+      Caption = 'Abort'
+      Kind = bkCancel
+      ModalResult = 2
+      TabOrder = 1
+    end
+    object lblCount: TLabel
+      Left = 17
+      Height = 16
+      Top = 5
+      Width = 47
+      Caption = 'lblCount'
+      ParentColor = False
+    end
+  end
+  object ListView1: TListView
+    Left = 0
+    Height = 206
+    Top = 23
+    Width = 769
+    Align = alClient
+    Columns = <    
+      item
+        Caption = 'File'
+        Width = 300
+      end    
+      item
+        AutoSize = True
+        Caption = 'Path'
+        Width = 465
+      end>
+    GridLines = True
+    ReadOnly = True
+    RowSelect = True
+    SmallImages = DataModule1.ImageList1
+    TabOrder = 1
+    ViewStyle = vsReport
+    OnColumnClick = ListView1ColumnClick
+    OnCompare = ListView1Compare
+    OnDblClick = ListView1DblClick
+    OnEnter = ListView1Enter
+  end
+  object eFilter: TEdit
+    Left = 0
+    Height = 23
+    Top = 0
+    Width = 769
+    Align = alTop
+    OnKeyDown = eFilterKeyDown
+    OnKeyPress = eFilterKeyPress
+    OnKeyUp = eFilterKeyUp
+    TabOrder = 0
+  end
+end

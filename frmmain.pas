@@ -9,8 +9,8 @@ uses
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
   SynEditMarks, strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
-   Clipbrd,
-  angFrmMainController, angDatamodul, angKeyWords,angfrmBookmarks;
+  Clipbrd,
+  angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList;
 
 type
 
@@ -20,6 +20,8 @@ type
     FindDialog1: TFindDialog;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
+    mnuOpenAFile: TMenuItem;
+    mnuGotoLine: TMenuItem;
     mnuBookmarks: TMenuItem;
     mnuDJKeywords: TMenuItem;
     mnuSave1: TMenuItem;
@@ -61,6 +63,8 @@ type
     procedure mnuFindClick(Sender: TObject);
     procedure mnuCloseActivepageClick(Sender: TObject);
     procedure mnuFindNextClick(Sender: TObject);
+    procedure mnuGotoLineClick(Sender: TObject);
+    procedure mnuOpenAFileClick(Sender: TObject);
     procedure mnuSave1Click(Sender: TObject);
     procedure mnuSaveClick(Sender: TObject);
     procedure mnuSearchPathClick(Sender: TObject);
@@ -103,11 +107,11 @@ type
     procedure DoSaveActivePage;
     procedure MarkLineContainsThisWord(sWord: string);
     function SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
-    function CalculateIndexOfFileExtension(sMyFileName: string): integer;
     procedure AddAngularJSFilesAsTreenode(myTreeNode: TTreenode;
       sl: TStringList; iImageindex: integer);
     procedure ReadPathToTreeview(myItemRoot: TTreenode; sPfad: string);
     procedure AddRootTreenodesToTreeview;
+    procedure ShowFileInPagecontrolAsTabsheet(const sPfad: string);
     procedure StartPathAnalyse;
   public
   end;
@@ -207,13 +211,14 @@ begin
 end;
 
 procedure TfrmMainView.mnuBookmarksClick(Sender: TObject);
-var obm: TOneBookMark;
-  mys : Tsynmemo;
+var
+  obm: TOneBookMark;
+  mys: Tsynmemo;
   i: integer;
 begin
-    Application.CreateForm(TfrmBookmarks, frmBookmarks);
+  Application.CreateForm(TfrmBookmarks, frmBookmarks);
 
-    frmBookmarks.Initialize(frmMainController);
+  frmBookmarks.Initialize(frmMainController);
 
 
 
@@ -221,29 +226,30 @@ begin
   if frmBookmarks.ModalResult = mrOk then
   begin
 
-  if frmBookmarks.iKeyPressed >= 0 then
-    frmMainController.myActiveSynMemo.SetBookMark(frmBookmarks.iKeyPressed ,frmMainController.myActiveSynMemo.CaretX ,frmMainController.myActiveSynMemo.CaretY   )
-  else
+    if frmBookmarks.iKeyPressed >= 0 then
+      frmMainController.myActiveSynMemo.SetBookMark(
+        frmBookmarks.iKeyPressed, frmMainController.myActiveSynMemo.CaretX,
+        frmMainController.myActiveSynMemo.CaretY)
+    else
     if frmBookmarks.obmMarked <> nil then
-      begin
-      frmMainController.SetTabsheetAktivForFile(frmBookmarks.obmMarked.sFileName );
-      self.PageControl1.ActivePage :=frmMainController.myActiveTabsheet ;
-      frmMainController.myActiveSynMemo.GotoBookMark(frmBookmarks.obmMarked.iBookmarkNr) ;
-      end;
-
-  for i := 0 to frmBookmarks.ListView1.Items.Count -1 do
     begin
-    if not frmBookmarks.ListView1.Items[i].Checked then
+      frmMainController.SetTabsheetAktivForFile(frmBookmarks.obmMarked.sFileName);
+      self.PageControl1.ActivePage := frmMainController.myActiveTabsheet;
+      frmMainController.myActiveSynMemo.GotoBookMark(
+        frmBookmarks.obmMarked.iBookmarkNr);
+    end;
+
+    for i := 0 to frmBookmarks.ListView1.Items.Count - 1 do
+    begin
+      if not frmBookmarks.ListView1.Items[i].Checked then
       begin
-      obm :=  TOneBookMark(frmBookmarks.ListView1.Items[i].data) ;
-      mys :=  frmMainController.GetSynMemoForFile(obm.sFileName );
-      mys.ClearBookMark(obm.iBookmarkNr );
+        obm := TOneBookMark(frmBookmarks.ListView1.Items[i].Data);
+        mys := frmMainController.GetSynMemoForFile(obm.sFileName);
+        mys.ClearBookMark(obm.iBookmarkNr);
 
       end;
 
     end;
-
-
 
   end;
 
@@ -253,17 +259,13 @@ end;
 procedure TfrmMainView.mnuDJKeywordsClick(Sender: TObject);
 begin
   Application.CreateForm(TfrmSelectKeywords, frmSelectKeywordsObj);
-
-  frmSelectKeywordsObj.Initialize(frmMainController,SynAnySyn1);
-
+  frmSelectKeywordsObj.Initialize(frmMainController, SynAnySyn1);
   frmSelectKeywordsObj.showmodal;
   if frmSelectKeywordsObj.ModalResult = mrOk then
   begin
     frmMainController.myActiveSynMemo.InsertTextAtCaret(
       frmSelectKeywordsObj.GetSelectedKeyWords);
-
   end;
-
   frmSelectKeywordsObj.Free;
 end;
 
@@ -305,6 +307,34 @@ begin
       break;
     end;
   end;
+end;
+
+procedure TfrmMainView.mnuGotoLineClick(Sender: TObject);
+var
+  s: string;
+  i: integer;
+begin
+  if inputquery('Line Nr', 'Line Nr', s) then
+  begin
+    i := strtointdef(s, -1);
+    if i <> -1 then
+      self.frmMainController.myActiveSynMemo.CaretY := i;
+
+  end;
+
+end;
+
+procedure TfrmMainView.mnuOpenAFileClick(Sender: TObject);
+begin
+  Application.CreateForm(TfrmFileList, frmFileList);
+  frmFileList.Initialize(frmMainController);
+  frmFileList.showmodal;
+  if frmFileList.ModalResult = mrOk then
+  begin
+  ShowFileInPagecontrolAsTabsheet(frmMainController.sPfad +  frmFileList.sFilename);
+  end;
+  frmFileList.Free;
+
 end;
 
 procedure TfrmMainView.mnuSave1Click(Sender: TObject);
@@ -498,13 +528,11 @@ begin
     TreeView1.Items.AddChild(treenodeScope, 'scope. = function');
   treenodeScopeGleichFunction.ImageIndex := constItemScope;
 
-  treenodeScopeGleich := TreeView1.Items.AddChild(treenodeScope,
-    'scope. =');
+  treenodeScopeGleich := TreeView1.Items.AddChild(treenodeScope, 'scope. =');
   treenodeScopeGleich.ImageIndex := constItemScope;
 
-  treenodeScopeNurPunkt := TreeView1.Items.AddChild(treenodeScope,
-      'scope.');
-    treenodeScopeNurPunkt.ImageIndex := constItemScope;
+  treenodeScopeNurPunkt := TreeView1.Items.AddChild(treenodeScope, 'scope.');
+  treenodeScopeNurPunkt.ImageIndex := constItemScope;
 
 
   treenodeAllFiles := TreeView1.Items.AddChild(nil, 'All Files');
@@ -513,6 +541,32 @@ begin
   treenodeSearchInPath := TreeView1.Items.AddChild(nil, 'Search In Path (dblClick)');
   treenodeSearchInPath.ImageIndex := constItemIndexSearchInPath;
 
+end;
+
+procedure TfrmMainView.ShowFileInPagecontrolAsTabsheet(const sPfad: string);
+begin
+  if SearchTabsheetOrCreateNew(sPfad) then
+  begin
+    if pos('.HTM', uppercase(sPfad)) > 0 then
+      frmMainController.myActiveSynMemo.Highlighter := SynHTMLSyn1
+    else
+    if pos('.CSS', uppercase(sPfad)) > 0 then
+      frmMainController.myActiveSynMemo.Highlighter := SynCssSyn1
+    else
+    begin
+      frmMainController.myActiveSynMemo.Highlighter := SynAnySyn1;
+      if pos('.JS', uppercase(sPfad)) > 0 then
+      begin
+        {
+        SynAnySyn1.KeyWords.Clear;
+        SynAnySyn1.KeyWords.add('ANGULAR');          }
+        frmMainController.myActiveSynMemo.Refresh;
+      end;
+    end;
+
+    frmMainController.myActiveTabsheet.Caption := extractfilename(sPfad);
+    frmMainController.myActiveSynMemo.Lines.LoadFromFile(sPfad);
+  end;
 end;
 
 procedure TfrmMainView.AddAngularJSKeyWordsInTreeview;
@@ -643,20 +697,7 @@ begin
 
 end;
 
-function TfrmMainView.CalculateIndexOfFileExtension(sMyFileName: string): integer;
-var
-  sExt: string;
-begin
-  Result := constItemIndexUnknownFile;
 
-  sExt := uppercase(ExtractFileExt(sMyFileName));
-  if sExt = '.JS' then
-    Result := constItemIndexJavascript;
-  if pos('.HTM', sExt) > 0 then
-    Result := constItemIndexHTML;
-  if sExt = '.CSS' then
-    Result := constItemIndexCss;
-end;
 
 
 
@@ -666,6 +707,8 @@ var
   sl: TStringList;
   treenode: TTreenode;
 begin
+  mnuOpenAFile.enabled := true;
+
   AddRootTreenodesToTreeview;
   frmMainController.ClearAll;
 
@@ -797,7 +840,7 @@ begin
   myOneTabsheet.Tabsheet := frmMainController.myActiveTabsheet;
 
   frmMainController.myActiveTabsheet.ImageIndex :=
-    CalculateIndexOfFileExtension(sMyFileName);
+    frmMainController.CalculateIndexOfFileExtension(sMyFileName);
 
   i2 := frmMainController.GetImageindexForFileIfItContainsOnlyTheSameType(sMyFileName);
 
@@ -833,7 +876,7 @@ begin
       for i := 0 to sl.Count - 1 do
       begin
         treenodeNeu := TreeView1.Items.AddChild(treenode, sl[i]);
-        treenodeNeu.ImageIndex := CalculateIndexOfFileExtension(sl[i]);
+        treenodeNeu.ImageIndex := frmMainController.CalculateIndexOfFileExtension(sl[i]);
         treenodeNeu.Data := sl.Objects[i];
         //In Data immer den Zeiger auf den Konten aller Dateien ablegen
       end;
@@ -841,8 +884,6 @@ begin
       sl.Free;
       treenode.Expand(False);
     end;
-
-
 
 end;
 
@@ -874,28 +915,7 @@ begin
 
   sPfad := frmMainController.findFileNameToDataPointer(TObject(treenode.Data));
 
-  if SearchTabsheetOrCreateNew(sPfad) then
-  begin
-    if pos('.HTM', uppercase(sPfad)) > 0 then
-      frmMainController.myActiveSynMemo.Highlighter := SynHTMLSyn1
-    else
-    if pos('.CSS', uppercase(sPfad)) > 0 then
-      frmMainController.myActiveSynMemo.Highlighter := SynCssSyn1
-    else
-    begin
-      frmMainController.myActiveSynMemo.Highlighter := SynAnySyn1;
-      if pos('.JS', uppercase(treenode.Text)) > 0 then
-      begin
-        {
-        SynAnySyn1.KeyWords.Clear;
-        SynAnySyn1.KeyWords.add('ANGULAR');          }
-        frmMainController.myActiveSynMemo.Refresh;
-      end;
-    end;
-
-    frmMainController.myActiveTabsheet.Caption := extractfilename(sPfad);
-    frmMainController.myActiveSynMemo.Lines.LoadFromFile(sPfad);
-  end;
+  ShowFileInPagecontrolAsTabsheet(sPfad);
 
   parentNode := treenode.parent;
   if parentNode <> nil then
@@ -912,8 +932,17 @@ var
   sr: TSearchRec;
   i: integer;
   myItem: TTreenode;
+  sSeparator: string;
 begin
-  i := FindFirst(sPfad + '\*.*', faAnyFile, sr);
+
+  {$ifdef Unix}
+  sSeparator := '/';
+  {$else}
+  sSeparator := '\';
+{$endif}
+
+
+  i := FindFirst(sPfad + sSeparator + '*', faAnyFile, sr);
   while (i = 0) do
   begin
     if (sr.attr and faDirectory = faDirectory) then
@@ -922,15 +951,16 @@ begin
       begin
         myItem := TreeView1.Items.AddChild(myItemRoot, sr.Name);
         myItem.ImageIndex := constItemIndexFolder;
-        ReadPathToTreeview(myItem, sPfad + '\' + sr.Name);
+        ReadPathToTreeview(myItem, sPfad + sSeparator + sr.Name);
       end;
     end
     else
     begin
       myItem := TreeView1.Items.AddChild(myItemRoot, sr.Name);
-      myItem.ImageIndex := CalculateIndexOfFileExtension(sr.Name);
+      myItem.ImageIndex := frmMainController.CalculateIndexOfFileExtension(sr.Name);
       myItem.Data := myItem;
-      frmMainController.AddOneFileInSL(sPfad + '\' + sr.Name, myItem);
+      frmMainController.AddOneFileInSL(sPfad + sSeparator + sr.Name, myItem);
+
     end;
     i := Findnext(sr);
   end;

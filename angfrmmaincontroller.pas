@@ -44,8 +44,6 @@ type
   private
     slDJKeyWords: TStringList;
     slAllScope: TStringList;
-
-
     procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
     function SchluesselwortInZeileGefundenUndStringInKlammern(
       sZeile, sSchluesselwort: string; oneFileInfo: TOneFileInfo;
@@ -87,6 +85,7 @@ type
     procedure GetAllBookmarks(slBookmarks : Tstringlist) ;
     procedure SetTabsheetAktivForFile(sFile : string);
     function GetSynMemoForFile(sFile: string): TSynMemo;
+    function CalculateIndexOfFileExtension(sMyFileName: string): integer;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -344,7 +343,6 @@ end;
 
 procedure TFrmMainController.LookForScopeInString(sLine : string ; oneFileInfo : TOneFileInfo) ;
 var i,i2 : integer;
-s : string;
 boolOK : boolean ;
 begin
   i := pos('scope.',sLine) ;
@@ -466,7 +464,7 @@ end;
 
 function TFrmMainController.getContentToFilename(sFilename : string): string;
 var
-  i, n: integer;
+  i: integer;
   oneFileInfo: TOneFileInfo;
 begin
   Result := '';
@@ -495,6 +493,8 @@ procedure TFrmMainController.GetAllBookmarks(slBookmarks: Tstringlist);
 
       for n := 0 to  9 do
       begin
+      x := 0;
+      y := 0;
 
       if OneTabsheet.SynMemo.GetBookMark(n,  X, Y) then
         begin
@@ -785,6 +785,22 @@ begin
   else
     Result := -1;
 
+end;
+
+
+function TFrmMainController.CalculateIndexOfFileExtension(sMyFileName: string): integer;
+var
+  sExt: string;
+begin
+  Result := constItemIndexUnknownFile;
+
+  sExt := uppercase(ExtractFileExt(sMyFileName));
+  if sExt = '.JS' then
+    Result := constItemIndexJavascript;
+  if pos('.HTM', sExt) > 0 then
+    Result := constItemIndexHTML;
+  if sExt = '.CSS' then
+    Result := constItemIndexCss;
 end;
 
 end.

@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, frmMain, angPKZ, angFrmMainController, angKeyWords, angDatamodul, 
-angfrmBookmarks;
+angfrmBookmarks, angFileList;
 
 {$R *.res}
 
@@ -17,7 +17,6 @@ begin
   Application.Initialize;
   Application.CreateForm(TfrmMainView, frmMainView);
   Application.CreateForm(TDataModule1, DataModule1);
-
   Application.Run;
 end.
 

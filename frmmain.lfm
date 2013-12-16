@@ -122,6 +122,12 @@ object frmMainView: TfrmMainView
         ImageIndex = 2
         OnClick = mnuPfadOeffnenClick
       end
+      object mnuOpenAFile: TMenuItem
+        Caption = 'Open a file'
+        Enabled = False
+        ShortCut = 16463
+        OnClick = mnuOpenAFileClick
+      end
       object mnuSave: TMenuItem
         Caption = 'Save'
         Enabled = False
@@ -478,6 +484,11 @@ object frmMainView: TfrmMainView
       Caption = 'Bookmarks'
       ShortCut = 16459
       OnClick = mnuBookmarksClick
+    end
+    object mnuGotoLine: TMenuItem
+      Caption = 'Goto Line'
+      ShortCut = 16455
+      OnClick = mnuGotoLineClick
     end
   end
 end
