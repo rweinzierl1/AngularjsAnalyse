@@ -88,6 +88,7 @@ type
     treenodeService: TTreenode;
     treenodeFactory: TTreenode;
     treenodeFilter: TTreenode;
+    treenodeHTML: TTreenode;
     treenodeAllFiles: TTreenode;
     treenodeDirectives: TTreenode;
     treenodeConfig: TTreenode;
@@ -511,6 +512,10 @@ begin
   treenodeConfig := TreeView1.Items.AddChild(nil, '.config');
   treenodeConfig.ImageIndex := constItemIndexConfig;
 
+  treenodeHTML := TreeView1.Items.AddChild(nil, 'HTML');
+  treenodeHTML.ImageIndex := constItemIndexHTML;
+
+
   treenodeDependencyInjectionWords :=
     TreeView1.Items.AddChild(nil, 'Dependency Injection Key Words');
   treenodeDependencyInjectionWords.ImageIndex := constItemIndexKey;
@@ -677,6 +682,21 @@ begin
       end;
 
 
+    if OneFileInfo.slngLines.Count > 0 then
+      begin
+        treenodeScope1 := TreeView1.Items.AddChild(treenode, 'ng   ' + ansireplacestr(OneFileInfo.slngWords.Text,#13#10,' | ') );
+        treenodeScope1.ImageIndex := constItemIndexAngular;
+
+        for n := 0 to OneFileInfo.slngLines.Count - 1 do
+        begin
+          treenodeScopeLokal :=
+            TreeView1.Items.AddChild(treenodeScope1, OneFileInfo.slngLines[n]);
+          treenodeScopeLokal.ImageIndex := constItemIndexAngular;
+        end;
+
+      end;
+
+
       if OneFileInfo.slScopeActions.Count > 0 then
       begin
         treenodeScope1 := TreeView1.Items.AddChild(treenode, 'scope.');
@@ -730,6 +750,14 @@ begin
     constItemIndexDirective);
   AddAngularJSFilesAsTreenode(treenodeFilter, frmMainController.slFilter,
     constItemIndexFilter);
+
+  sl := TStringList.create;
+  frmMainController.GetAllHtmlFiles(sl);
+  AddAngularJSFilesAsTreenode(treenodeHTML, sl, constItemIndexHTML);
+
+  sl.free;
+
+
 
   SynAnySyn1.Constants.Clear;
 

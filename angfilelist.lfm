@@ -66,6 +66,12 @@ object frmFileList: TfrmFileList
         AutoSize = True
         Caption = 'Path'
         Width = 465
+      end    
+      item
+        Caption = 'Lines'
+      end    
+      item
+        Caption = 'Type'
       end>
     GridLines = True
     ReadOnly = True

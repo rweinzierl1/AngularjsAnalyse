@@ -24,6 +24,8 @@ type
     slFileInhalt: TStringList;
     slDependencyInjektionNamen: TStringList;
     slScopeActions: TStringList;
+    slngLines: TStringList;
+    slngWords: TStringList;
 
     pTreenodeInView: TObject;
     constructor Create;
@@ -44,11 +46,13 @@ type
   private
     slDJKeyWords: TStringList;
     slAllScope: TStringList;
+    procedure LookForNgInString(sLine: string; oneFileInfo: TOneFileInfo);
     procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
     function SchluesselwortInZeileGefundenUndStringInKlammern(
       sZeile, sSchluesselwort: string; oneFileInfo: TOneFileInfo;
       iImageindex: integer): boolean;
     procedure AnalyzeFileContent(sDateiname: string; oneFileInfo: TOneFileInfo);
+    procedure SearchForNGInFile(oneFileInfo: TOneFileInfo);
   public
     sPfad: string;
     slAllFilesFound: TStringList;
@@ -86,6 +90,7 @@ type
     procedure SetTabsheetAktivForFile(sFile : string);
     function GetSynMemoForFile(sFile: string): TSynMemo;
     function CalculateIndexOfFileExtension(sMyFileName: string): integer;
+    procedure GetAllHtmlFiles(sl : TStringlist);
     constructor Create;
     destructor Destroy; override;
   end;
@@ -100,6 +105,10 @@ begin
   slFileInhalt := TStringList.Create;
   slDependencyInjektionNamen := TStringList.Create;
   slScopeActions             := TStringList.create;
+  slngLines                  := TStringList.create;
+  slngWords                  := TStringList.create;
+  slngWords.Sorted:= true;
+  slngWords.Duplicates:= dupIgnore;
 end;
 
 destructor TOneFileInfo.Destroy;
@@ -107,6 +116,8 @@ begin
   slFileInhalt.Free;
   slDependencyInjektionNamen.Free;
   slScopeActions.free;
+  slngLines.free;
+  slngWords.free;
   inherited Destroy;
 end;
 
@@ -238,7 +249,10 @@ begin
   sExt := uppercase(ExtractFileExt(sDateiname));
 
   if (sExt = '.HTML') or (sExt = '.HTM') or (sExt = '.CSS') then
-    oneFileInfo.slFileInhalt.loadfromfile(sDateiname)
+    begin
+    oneFileInfo.slFileInhalt.loadfromfile(sDateiname);
+    SearchForNGInFile(oneFileInfo);
+    end
   else
   if sExt = '.JS' then
   begin
@@ -332,7 +346,7 @@ begin
           end;
 
           LookForScopeInString(s, oneFileInfo );
-
+         // LookForNgInString(s, oneFileInfo );
 
     end;
 
@@ -340,6 +354,65 @@ begin
 
 end;
 
+procedure TFrmMainController.SearchForNGInFile(oneFileInfo: TOneFileInfo);
+  var i: integer;
+      s: string ;
+begin
+  for i := 0 to oneFileInfo.slFileInhalt.Count - 1 do
+    begin
+    s := oneFileInfo.slFileInhalt[i];
+    LookForNgInString(s, oneFileInfo );
+    end;
+end;
+
+procedure TFrmMainController.LookForNgInString(sLine : string ; oneFileInfo : TOneFileInfo) ;
+var i,i2,i3 : integer;
+    sWord : string;
+boolOK : boolean ;
+begin
+  repeat
+  i := pos('ng-',sLine) ;
+  if  i > 0 then
+    begin
+    boolOK := true;
+    i2 := pos('//',sLine) ;
+    if i2 > 0 then
+      if i2 < i then
+          boolOK := false; //Todo To simple
+
+    if copy(trim(sLine),1,1) = '*' then
+      boolOK := false; //Todo To simple
+
+    if i > 1 then
+      if (sline[i-1] in ['A'..'Z']) or (sline[i-1] in ['a'..'z']) then
+        if sline[i-1] <> ' ' then
+          boolOK := false;
+
+
+    if boolOK then
+      begin
+      oneFileInfo.slngLines.Add(trim(sLine) );
+
+      sWord := '';
+      for i3 := i to length(sLine) do
+        begin
+        if (sline[i3] in ['A'..'Z']) or (sline[i3] in ['a'..'z']) or (sline[i3] = '-') then
+          sWord := sWord + sline[i3]
+        else
+          break;
+        end;
+
+      oneFileInfo.slngWords.add(sWord);
+
+
+      end;
+
+
+    delete(sline,1,i);
+    end;
+
+  until i = 0;
+end;
 
 procedure TFrmMainController.LookForScopeInString(sLine : string ; oneFileInfo : TOneFileInfo) ;
 var i,i2 : integer;
@@ -801,6 +874,24 @@ begin
     Result := constItemIndexHTML;
   if sExt = '.CSS' then
     Result := constItemIndexCss;
+end;
+
+procedure TFrmMainController.GetAllHtmlFiles(sl: TStringlist);
+var
+  sExt: string;
+  i : integer;
+  oneFileInfo: TOneFileInfo;
+begin
+for i := 0 to slAllFilesFound.Count - 1 do
+  begin
+  sExt := uppercase(ExtractFileExt(slAllFilesFound[i]));
+  if pos('.HTM', sExt) > 0 then
+    begin
+    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]) ;
+    sl.AddObject(GetFilenameWithoutRootPath(slAllFilesFound[i]),oneFileInfo.pTreenodeInView  );
+    end;
+
+  end;
 end;
 
 end.

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Buttons, ComCtrls, StdCtrls, angDatamodul, angFrmMainController, angpkz;
+  Buttons, ComCtrls, StdCtrls, angDatamodul, angFrmMainController, angpkz,math;
 
 type
 
@@ -17,6 +17,7 @@ type
     iImageindex: integer;
     sFilename: string;
     sPath: string;
+    iLines : integer;
     Visible: boolean;
     constructor Create;
   end;
@@ -80,18 +81,25 @@ var
   i, i2: integer;
   FileListFileInfo: TFileListFileInfo;
   s: string;
+  oneFileInfo : TOneFileInfo ;
 begin
 
   for i := 0 to frmMainController.slAllFilesFound.Count - 1 do
   begin
     s := frmMainController.slAllFilesFound[i];
-    i2 := frmMainController.CalculateIndexOfFileExtension(s);
+    i2 := frmMainController.GetImageindexForFileIfItContainsOnlyTheSameType(s);
+    if i2 = -1 then
+      i2 := frmMainController.CalculateIndexOfFileExtension(s);
 
     if i2 <> constItemIndexUnknownFile then
     begin
+      oneFileInfo := TOneFileInfo(frmMainController.slAllFilesFound.Objects[i]);
+
       FileListFileInfo := TFileListFileInfo.create;
       FileListFileInfo.iImageindex:= i2;
       FileListFileInfo.sFilename:= extractfilename(s);
+      FileListFileInfo.iLines := oneFileInfo.slFileInhalt.Count  ;
+
       FileListFileInfo.sPath := frmMainController.GetFilenameWithoutRootPath(s);
       slFilesToView.AddObject(s,FileListFileInfo);
 
@@ -118,6 +126,11 @@ begin
         myItem := ListView1.Items.Add;
       myItem.Caption := extractfilename(FileListFileInfo.sFilename );
       myitem.SubItems.add(FileListFileInfo.sPath  );
+      myitem.SubItems.add(inttostr(FileListFileInfo.iLines ) );
+
+      myitem.SubItems.add(ExtractFileExt(FileListFileInfo.sFilename)  );
+
+
       myitem.ImageIndex := FileListFileInfo.iImageindex ;
       end;
 
@@ -221,7 +234,15 @@ begin
   else
   begin
     i := ColumnToSort -1;
-    Compare := CompareText(Item1.SubItems[i], Item2.SubItems[i]);
+    if i = 1 then
+      begin
+      Compare := CompareValue( strtointdef(Item1.SubItems[i],0), strtointdef(Item2.SubItems[i],0) );
+
+      end
+    else
+      Compare := CompareText(Item1.SubItems[i], Item2.SubItems[i]);
+
+
   end;
 end;
 
