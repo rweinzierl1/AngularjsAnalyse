@@ -5,18 +5,18 @@ unit angFrmMainController;
 interface
 
 uses
-  Classes, SysUtils, angPKZ, ComCtrls, SynMemo;
+  Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils;
 
 type
 
 
-    TOneBookMark = class(Tobject)
-    public
-    iBookmarkNr : integer;
-    iLineNr     : integer;
-    sLine       : string;
-    sFileName   : string;
-    boolAktiveTab : boolean;
+  TOneBookMark = class(TObject)
+  public
+    iBookmarkNr: integer;
+    iLineNr: integer;
+    sLine: string;
+    sFileName: string;
+    boolAktiveTab: boolean;
   end;
 
   TOneFileInfo = class
@@ -26,6 +26,7 @@ type
     slScopeActions: TStringList;
     slngLines: TStringList;
     slngWords: TStringList;
+    iImageindex: integer;
 
     pTreenodeInView: TObject;
     constructor Create;
@@ -46,6 +47,8 @@ type
   private
     slDJKeyWords: TStringList;
     slAllScope: TStringList;
+
+
     procedure LookForNgInString(sLine: string; oneFileInfo: TOneFileInfo);
     procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
     function SchluesselwortInZeileGefundenUndStringInKlammern(
@@ -68,10 +71,11 @@ type
     slOpendTabsheets: TStringList;
     sLastSearch: string;
 
+    function ChangeMinusToCamelCase(sSuchtext: string): string;
     function ChangeCamelCaseToMinusString(sSuchtext: string): string;
-    function GetFilenameWithoutRootPath(sDateiname : string): string;
+    function GetFilenameWithoutRootPath(sDateiname: string): string;
     function GetslDJKeyWords: TStringList;
-    function GetslAllScope : TStringlist;
+    function GetslAllScope: TStringList;
     procedure ClearAll;
     function findFileNameToDataPointer(p: TObject): string;
     procedure AddOneFileInSL(sPath: string; treenode: TObject);
@@ -85,13 +89,15 @@ type
       const Source: ansistring): integer;
     function GetImageindexForFileIfItContainsOnlyTheSameType(sFilename: string): integer;
     function GetFilenameToKeyword(sKeyWord: string): string;
+    function GetFileNameToPartFileName(sPart: string): string;
     function getContentToFilename(sFilename: string): string;
-    procedure GetAllBookmarks(slBookmarks : Tstringlist) ;
-    procedure SetTabsheetAktivForFile(sFile : string);
+    procedure GetAllBookmarks(slBookmarks: TStringList);
+    procedure SetTabsheetAktivForFile(sFile: string);
     function GetSynMemoForFile(sFile: string): TSynMemo;
     function CalculateIndexOfFileExtension(sMyFileName: string): integer;
-    procedure GetAllHtmlFiles(sl : TStringlist);
-    procedure GetAllUsedNgKeyWords(sl : TStringlist);
+    procedure GetAllHtmlFiles(sl: TStringList);
+    procedure GetAllUsedNgKeyWords(sl: TStringList);
+    function FindTreenodePointerToFilename(sFilename: string): TObject;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -105,20 +111,21 @@ constructor TOneFileInfo.Create;
 begin
   slFileInhalt := TStringList.Create;
   slDependencyInjektionNamen := TStringList.Create;
-  slScopeActions             := TStringList.create;
-  slngLines                  := TStringList.create;
-  slngWords                  := TStringList.create;
-  slngWords.Sorted:= true;
-  slngWords.Duplicates:= dupIgnore;
+  slScopeActions := TStringList.Create;
+  slngLines := TStringList.Create;
+  slngWords := TStringList.Create;
+  slngWords.Sorted := True;
+  slngWords.Duplicates := dupIgnore;
+  iImageindex := -1;
 end;
 
 destructor TOneFileInfo.Destroy;
 begin
   slFileInhalt.Free;
   slDependencyInjektionNamen.Free;
-  slScopeActions.free;
-  slngLines.free;
-  slngWords.free;
+  slScopeActions.Free;
+  slngLines.Free;
+  slngWords.Free;
   inherited Destroy;
 end;
 
@@ -156,7 +163,7 @@ begin
   slDirective.Free;
   slConfig.Free;
   slDJKeyWords.Free;
-  slAllScope.free;
+  slAllScope.Free;
 
   slOpendTabsheets.Free;
 
@@ -204,11 +211,11 @@ begin
             end;
           end;
 
-          if pos('+',s2) > 0 then
-            result := false ; //TODO make it better
+          if pos('+', s2) > 0 then
+            Result := False; //TODO make it better
 
-          if pos(':',s2) > 0 then
-            result := false ; //TODO make it better
+          if pos(':', s2) > 0 then
+            Result := False; //TODO make it better
 
           if Result then
             oneFileInfo.slDependencyInjektionNamen.AddObject(s2, TObject(iImageindex));
@@ -249,18 +256,20 @@ begin
 
   sExt := uppercase(ExtractFileExt(sDateiname));
 
+  oneFileInfo.iImageindex := CalculateIndexOfFileExtension(sDateiname);
+
   if (sExt = '.HTML') or (sExt = '.HTM') or (sExt = '.CSS') then
-    begin
+  begin
     oneFileInfo.slFileInhalt.loadfromfile(sDateiname);
     SearchForNGInFile(oneFileInfo);
-    end
+  end
   else
   if sExt = '.JS' then
   begin
-    sDateiNameOhneRootPfad:=GetFilenameWithoutRootPath(sDateiname );
+    sDateiNameOhneRootPfad := GetFilenameWithoutRootPath(sDateiname);
 
 
-    if pos('angular',ExtractFileName(sDateiname) ) = 0 then   //  ignore  Angular Files
+    if pos('angular', ExtractFileName(sDateiname)) = 0 then   //  ignore  Angular Files
       oneFileInfo.slFileInhalt.loadfromfile(sDateiname);
     for i := 0 to oneFileInfo.slFileInhalt.Count - 1 do
     begin
@@ -268,10 +277,10 @@ begin
       ZeileVerarbeitet := False;
 
       if i < 5 then  //  ignore  Angular Files
-        if pos('Google',s) > 0 then
-        if pos('Inc. http://angularjs.org', s) > 0 then
-          if pos('(c)', s) > 0 then
-            break;
+        if pos('Google', s) > 0 then
+          if pos('Inc. http://angularjs.org', s) > 0 then
+            if pos('(c)', s) > 0 then
+              break;
 
 
 
@@ -346,8 +355,8 @@ begin
             ZeileVerarbeitet := True;
           end;
 
-          LookForScopeInString(s, oneFileInfo );
-         // LookForNgInString(s, oneFileInfo );
+      LookForScopeInString(s, oneFileInfo);
+      // LookForNgInString(s, oneFileInfo );
 
     end;
 
@@ -356,86 +365,91 @@ begin
 end;
 
 procedure TFrmMainController.SearchForNGInFile(oneFileInfo: TOneFileInfo);
-  var i: integer;
-      s: string ;
+var
+  i: integer;
+  s: string;
 begin
   for i := 0 to oneFileInfo.slFileInhalt.Count - 1 do
-    begin
+  begin
     s := oneFileInfo.slFileInhalt[i];
-    LookForNgInString(s, oneFileInfo );
-    end;
+    LookForNgInString(s, oneFileInfo);
+  end;
 end;
 
-procedure TFrmMainController.LookForNgInString(sLine : string ; oneFileInfo : TOneFileInfo) ;
-var i,i2,i3 : integer;
-    sWord : string;
-boolOK : boolean ;
+procedure TFrmMainController.LookForNgInString(sLine: string;
+  oneFileInfo: TOneFileInfo);
+var
+  i, i2, i3: integer;
+  sWord: string;
+  boolOK: boolean;
 begin
   repeat
-  i := pos('ng-',sLine) ;
-  if  i > 0 then
+    i := pos('ng-', sLine);
+    if i > 0 then
     begin
-    boolOK := true;
-    i2 := pos('//',sLine) ;
-    if i2 > 0 then
-      if i2 < i then
-          boolOK := false; //Todo To simple
+      boolOK := True;
+      i2 := pos('//', sLine);
+      if i2 > 0 then
+        if i2 < i then
+          boolOK := False; //Todo To simple
 
-    if copy(trim(sLine),1,1) = '*' then
-      boolOK := false; //Todo To simple
+      if copy(trim(sLine), 1, 1) = '*' then
+        boolOK := False; //Todo To simple
 
-    if i > 1 then
-      if (sline[i-1] in ['A'..'Z']) or (sline[i-1] in ['a'..'z']) then
-        if sline[i-1] <> ' ' then
-          boolOK := false;
+      if i > 1 then
+        if (sline[i - 1] in ['A'..'Z']) or (sline[i - 1] in ['a'..'z']) then
+          if sline[i - 1] <> ' ' then
+            boolOK := False;
 
 
-    if boolOK then
+      if boolOK then
       begin
-      oneFileInfo.slngLines.Add(trim(sLine) );
+        oneFileInfo.slngLines.Add(trim(sLine));
 
-      sWord := '';
-      for i3 := i to length(sLine) do
+        sWord := '';
+        for i3 := i to length(sLine) do
         begin
-        if (sline[i3] in ['A'..'Z']) or (sline[i3] in ['a'..'z']) or (sline[i3] = '-') then
-          sWord := sWord + sline[i3]
-        else
-          break;
+          if (sline[i3] in ['A'..'Z']) or (sline[i3] in ['a'..'z']) or
+            (sline[i3] = '-') then
+            sWord := sWord + sline[i3]
+          else
+            break;
         end;
 
-      oneFileInfo.slngWords.add(sWord);
-
+        oneFileInfo.slngWords.add(sWord);
 
       end;
 
 
-    delete(sline,1,i);
+      Delete(sline, 1, i);
     end;
 
   until i = 0;
 end;
 
-procedure TFrmMainController.LookForScopeInString(sLine : string ; oneFileInfo : TOneFileInfo) ;
-var i,i2 : integer;
-boolOK : boolean ;
+procedure TFrmMainController.LookForScopeInString(sLine: string;
+  oneFileInfo: TOneFileInfo);
+var
+  i, i2: integer;
+  boolOK: boolean;
 begin
-  i := pos('scope.',sLine) ;
-  if  i > 0 then
-    begin
-    boolOK := true;
-    i2 := pos('//',sLine) ;
+  i := pos('scope.', sLine);
+  if i > 0 then
+  begin
+    boolOK := True;
+    i2 := pos('//', sLine);
     if i2 > 0 then
       if i2 < i then
-          boolOK := false; //Todo To simple
+        boolOK := False; //Todo To simple
 
-    if copy(trim(sLine),1,1) = '*' then
-      boolOK := false; //Todo To simple
+    if copy(trim(sLine), 1, 1) = '*' then
+      boolOK := False; //Todo To simple
 
 
     if boolOK then
-      oneFileInfo.slScopeActions.Add(trim(sLine) );
+      oneFileInfo.slScopeActions.Add(trim(sLine));
 
-    end;
+  end;
 end;
 
 procedure TFrmMainController.ClearAll;
@@ -462,6 +476,23 @@ begin
 
   AnalyzeFileContent(sPath, oneFileInfo);
 
+end;
+
+function TFrmMainController.FindTreenodePointerToFilename(sFilename: string): TObject;
+var
+  i: integer;
+  oneFileInfo: TOneFileInfo;
+begin
+  Result := nil;
+  for i := 0 to self.slAllFilesFound.Count - 1 do
+  begin
+    if self.slAllFilesFound[i] = sFilename then
+    begin
+      oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+      Result := oneFileInfo.pTreenodeInView;
+      break;
+    end;
+  end;
 end;
 
 function TFrmMainController.findFileNameToDataPointer(p: TObject): string;
@@ -517,7 +548,7 @@ begin
   Result := slAllScope;
 end;
 
-function TFrmMainController.GetFilenameToKeyword(sKeyWord : string) : string;
+function TFrmMainController.GetFilenameToKeyword(sKeyWord: string): string;
 var
   i, n: integer;
   oneFileInfo: TOneFileInfo;
@@ -528,15 +559,47 @@ begin
     oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
     for n := 0 to oneFileInfo.slDependencyInjektionNamen.Count - 1 do
       if oneFileInfo.slDependencyInjektionNamen[n] = sKeyWord then
-        result := slAllFilesFound[i];
+        Result := slAllFilesFound[i];
   end;
 
+end;
+
+function TFrmMainController.GetFileNameToPartFileName(sPart: string): string;
+var
+  i, n: integer;
+  oneFileInfo: TOneFileInfo;
+  sPart2, sFileUpper: string;
+begin
+  Result := '';
+  sPart2 := uppercase(sPart);
+
+
+ {$ifdef Unix}
+  {$else}
+  sPart2 := ansireplacestr(sPart2, '/', '\');
+
+ {$endif}
+
+  for i := 0 to slAllFilesFound.Count - 1 do
+  begin
+    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    if oneFileInfo.iImageindex <> constItemIndexUnknownFile then
+    begin
+      sFileUpper := uppercase(slAllFilesFound[i]);
+      if pos(sPart2, sFileUpper) > 0 then
+      begin
+        Result := slAllFilesFound[i];
+        break;
+      end;
+
+    end;
+  end;
 
 end;
 
 
 
-function TFrmMainController.getContentToFilename(sFilename : string): string;
+function TFrmMainController.getContentToFilename(sFilename: string): string;
 var
   i: integer;
   oneFileInfo: TOneFileInfo;
@@ -546,80 +609,80 @@ begin
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
     if slAllFilesFound[i] = sFilename then
-      begin
+    begin
       oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
-      result := oneFileInfo.slFileInhalt.Text;
-      end;
+      Result := oneFileInfo.slFileInhalt.Text;
+    end;
   end;
 end;
 
-procedure TFrmMainController.GetAllBookmarks(slBookmarks: Tstringlist);
-  var
-    i,n: integer;
-    OneTabsheet: TOneTabsheet;
-    X, Y: integer;
-    OneBookMark : TOneBookMark ;
+procedure TFrmMainController.GetAllBookmarks(slBookmarks: TStringList);
+var
+  i, n: integer;
+  OneTabsheet: TOneTabsheet;
+  X, Y: integer;
+  OneBookMark: TOneBookMark;
+begin
+
+  for i := 0 to slOpendTabsheets.Count - 1 do
   begin
+    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
 
-    for i := 0 to slOpendTabsheets.Count - 1 do
+    for n := 0 to 9 do
     begin
-      OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
-
-      for n := 0 to  9 do
-      begin
       x := 0;
       y := 0;
 
-      if OneTabsheet.SynMemo.GetBookMark(n,  X, Y) then
-        begin
-        OneBookMark := TOneBookMark.create ;
-        OneBookMark.iBookmarkNr:= n;
-        OneBookMark.iLineNr:=y-1;
-        OneBookMark.sLine:= OneTabsheet.SynMemo.lines[OneBookMark.iLineNr];
-        OneBookMark.sFileName:=slOpendTabsheets[i];
+      if OneTabsheet.SynMemo.GetBookMark(n, X, Y) then
+      begin
+        OneBookMark := TOneBookMark.Create;
+        OneBookMark.iBookmarkNr := n;
+        OneBookMark.iLineNr := y - 1;
+        OneBookMark.sLine := OneTabsheet.SynMemo.Lines[OneBookMark.iLineNr];
+        OneBookMark.sFileName := slOpendTabsheets[i];
 
         if OneTabsheet.SynMemo = self.myActiveSynMemo then
-          OneBookMark.boolAktiveTab := true
+          OneBookMark.boolAktiveTab := True
         else
-          OneBookMark.boolAktiveTab := false;
+          OneBookMark.boolAktiveTab := False;
 
 
-        slBookmarks.AddObject(OneBookMark.sLine,OneBookMark)
-        end;
+        slBookmarks.AddObject(OneBookMark.sLine, OneBookMark);
       end;
     end;
+  end;
 end;
 
 procedure TFrmMainController.SetTabsheetAktivForFile(sFile: string);
-  var
-    i: integer;
-    OneTabsheet: TOneTabsheet;
+var
+  i: integer;
+  OneTabsheet: TOneTabsheet;
+begin
+  for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    for i := 0 to slOpendTabsheets.Count - 1 do
+    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+    if slOpendTabsheets[i] = sFile then
     begin
-      OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
-      if slOpendTabsheets[i] = sFile then
-        begin
-        self.myActiveTabsheet := OneTabsheet.Tabsheet ;
-        self.myActiveSynMemo  := OneTabsheet.SynMemo;
-        end;
+      self.myActiveTabsheet := OneTabsheet.Tabsheet;
+      self.myActiveSynMemo := OneTabsheet.SynMemo;
     end;
+  end;
 
 end;
 
 
-function TFrmMainController.GetSynMemoForFile(sFile: string) : TSynMemo;
-  var
-    i: integer;
-    OneTabsheet: TOneTabsheet;
+function TFrmMainController.GetSynMemoForFile(sFile: string): TSynMemo;
+var
+  i: integer;
+  OneTabsheet: TOneTabsheet;
+begin
+  Result := nil;
+  for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    result := nil;
-    for i := 0 to slOpendTabsheets.Count - 1 do
-    begin
-      OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
-      if slOpendTabsheets[i] = sFile then
-        result := OneTabsheet.SynMemo;
-    end;
+    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+    if slOpendTabsheets[i] = sFile then
+      Result := OneTabsheet.SynMemo;
+  end;
 
 end;
 
@@ -644,6 +707,29 @@ begin
   Result := slDJKeyWords;
 end;
 
+
+
+function TFrmMainController.ChangeMinusToCamelCase(sSuchtext: string): string;
+var
+  i: integer;
+begin
+  repeat
+    i := pos('-', sSuchtext);
+    if i > 0 then
+    begin
+      Delete(sSuchtext, i, 1);
+      if length(sSuchtext) > i then
+        sSuchtext[i] := uppercase(sSuchtext[i])[1] ;
+    end;
+
+
+  until i = 0;
+
+  Result := sSuchtext;
+
+end;
+
+
 function TFrmMainController.ChangeCamelCaseToMinusString(sSuchtext: string): string;
 var
   i: integer;
@@ -665,13 +751,13 @@ begin
   end;
 end;
 
-function TFrmMainController.GetFilenameWithoutRootPath(sDateiname : string): string;
+function TFrmMainController.GetFilenameWithoutRootPath(sDateiname: string): string;
 var
   sDateiNameOhneRootPfad: string;
 begin
   sDateiNameOhneRootPfad := copy(sDateiname, length(self.sPfad) +
     1, length(sDateiname));
-  Result:=sDateiNameOhneRootPfad;
+  Result := sDateiNameOhneRootPfad;
 end;
 
 
@@ -684,9 +770,11 @@ var
   gefunden: boolean;
   sInhalt: string;
   sCamelCaseAufgeloest: string;
+  sMinusToCamelcase: string;
 begin
 
   sCamelCaseAufgeloest := ChangeCamelCaseToMinusString(sSuchtext);
+  sMinusToCamelcase := ChangeMinusToCamelCase(sSuchtext);
 
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
@@ -701,6 +789,11 @@ begin
       if sCamelCaseAufgeloest <> sSuchtext then
         if pos(sCamelCaseAufgeloest, sInhalt) > 0 then
           gefunden := True;
+
+      if not gefunden then
+        if sMinusToCamelcase <> sSuchtext then
+          if pos(sMinusToCamelcase, sInhalt) > 0 then
+            gefunden := True;
     end;
 
 
@@ -877,38 +970,38 @@ begin
     Result := constItemIndexCss;
 end;
 
-procedure TFrmMainController.GetAllHtmlFiles(sl: TStringlist);
+procedure TFrmMainController.GetAllHtmlFiles(sl: TStringList);
 var
   sExt: string;
-  i : integer;
+  i: integer;
   oneFileInfo: TOneFileInfo;
 begin
-for i := 0 to slAllFilesFound.Count - 1 do
+  for i := 0 to slAllFilesFound.Count - 1 do
   begin
-  sExt := uppercase(ExtractFileExt(slAllFilesFound[i]));
-  if pos('.HTM', sExt) > 0 then
+    sExt := uppercase(ExtractFileExt(slAllFilesFound[i]));
+    if pos('.HTM', sExt) > 0 then
     begin
-    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]) ;
-    sl.AddObject(GetFilenameWithoutRootPath(slAllFilesFound[i]),oneFileInfo.pTreenodeInView  );
+      oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+      sl.AddObject(GetFilenameWithoutRootPath(slAllFilesFound[i]),
+        oneFileInfo.pTreenodeInView);
     end;
 
   end;
 end;
 
-procedure TFrmMainController.GetAllUsedNgKeyWords(sl: TStringlist);
-var i,n : integer;
-  oneFileInfo : TOneFileInfo ;
+procedure TFrmMainController.GetAllUsedNgKeyWords(sl: TStringList);
+var
+  i, n: integer;
+  oneFileInfo: TOneFileInfo;
 begin
 
-for i := 0 to slAllFilesFound.Count - 1 do
-begin
+  for i := 0 to slAllFilesFound.Count - 1 do
+  begin
     oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
-    for n := 0 to oneFileInfo.slngWords.count -1 do
-      sl.add( oneFileInfo.slngWords[n] ) ;
+    for n := 0 to oneFileInfo.slngWords.Count - 1 do
+      sl.add(oneFileInfo.slngWords[n]);
 
-
-end;
-
+  end;
 
 end;
 

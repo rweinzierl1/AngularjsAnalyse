@@ -20,6 +20,8 @@ type
     FindDialog1: TFindDialog;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
+    mnuOpenMarkedFileName: TMenuItem;
+    mnuShowInTree: TMenuItem;
     mnuOpenAFile: TMenuItem;
     mnuGotoLine: TMenuItem;
     mnuBookmarks: TMenuItem;
@@ -65,6 +67,7 @@ type
     procedure mnuFindNextClick(Sender: TObject);
     procedure mnuGotoLineClick(Sender: TObject);
     procedure mnuOpenAFileClick(Sender: TObject);
+    procedure mnuOpenMarkedFileNameClick(Sender: TObject);
     procedure mnuSave1Click(Sender: TObject);
     procedure mnuSaveClick(Sender: TObject);
     procedure mnuSearchPathClick(Sender: TObject);
@@ -76,7 +79,9 @@ type
     procedure mnuPathToClipboardClick(Sender: TObject);
     procedure mnuPfadOeffnenClick(Sender: TObject);
     procedure mnuSaveallClick(Sender: TObject);
+    procedure mnuShowInTreeClick(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
+    procedure PopupMenuSyneditPopup(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
     procedure ToolButton3Click(Sender: TObject);
@@ -208,7 +213,6 @@ end;
 
 procedure TfrmMainView.mnuBookMark1Click(Sender: TObject);
 begin
-  // self.frmMainController.myActiveSynMemo.SetBookMark(1, 1, frmMainController.myActiveSynMemo.CaretY );
 end;
 
 procedure TfrmMainView.mnuBookmarksClick(Sender: TObject);
@@ -335,6 +339,16 @@ begin
   ShowFileInPagecontrolAsTabsheet(frmMainController.sPfad +  frmFileList.sFilename);
   end;
   frmFileList.Free;
+
+end;
+
+procedure TfrmMainView.mnuOpenMarkedFileNameClick(Sender: TObject);
+  var s,sFilename : string;
+begin
+  s := frmMainController.myActiveSynMemo.SelText;
+  sFilename :=  frmMainController.GetFileNameToPartFileName(s);
+    if sFilename <> '' then
+      ShowFileInPagecontrolAsTabsheet(sFilename);
 
 end;
 
@@ -653,6 +667,33 @@ begin
   frmMainController.SaveAll;
 end;
 
+procedure TfrmMainView.mnuShowInTreeClick(Sender: TObject);
+  var
+  i: integer;
+  myOneTabsheet: TOneTabsheet;
+  p : Tobject;
+begin
+  if pagecontrol1.PageCount = 0 then
+    exit;
+
+  Treeview1.FullCollapse;
+
+
+  for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
+  begin
+    myOneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[i]);
+    if Pagecontrol1.ActivePage = myOneTabsheet.Tabsheet then
+    begin
+    p :=   frmMainController.FindTreenodePointerToFilename(frmMainController.slOpendTabsheets[i]);
+
+    Treeview1.Selected := TTreenode(p);
+
+    end;
+  end;
+
+
+end;
+
 procedure TfrmMainView.PageControl1Change(Sender: TObject);
 begin
   if PageControl1.ActivePage = nil then
@@ -662,6 +703,20 @@ begin
   end
   else
     frmMainController.SetActiveTabsheet(PageControl1.ActivePage);
+end;
+
+procedure TfrmMainView.PopupMenuSyneditPopup(Sender: TObject);
+var s : string;
+begin
+  mnuOpenMarkedFileName.visible := false;
+  s := frmMainController.myActiveSynMemo.SelText;
+  if length(s) > 3 then
+    begin
+    if frmMainController.GetFileNameToPartFileName(s) <> '' then
+      mnuOpenMarkedFileName.visible := true;
+    end;
+
+
 end;
 
 
@@ -1014,11 +1069,21 @@ var
   s: string;
   m: TSynEditMark;
   sWord2: string;
+  sWord3: string;
+
   gefunden: boolean;
   point: TPoint;
+
+  boooWord2Different : boolean;
+  boooWord3Different : boolean;
 begin
   sWord2 := frmMainController.ChangeCamelCaseToMinusString(sWord);
+  sWord3 := frmMainController.ChangeMinusToCamelCase(sWord);
   gefunden := False;
+
+  boooWord2Different := (sWord <> sWord2);
+  boooWord3Different := (sWord <> sWord3);
+
 
   for i := frmMainController.myActiveSynMemo.Marks.Count - 1 downto 0 do
   begin
@@ -1031,8 +1096,12 @@ begin
   begin
     s := frmMainController.myActiveSynMemo.Lines[i];
     ipos := pos(sWord, s);
-    if ipos = 0 then
-      ipos := pos(sWord2, s);
+    if boooWord2Different then
+      if ipos = 0 then
+        ipos := pos(sWord2, s);
+    if boooWord3Different then
+      if ipos = 0 then
+        ipos := pos(sWord3, s);
 
     if ipos > 0 then
     begin

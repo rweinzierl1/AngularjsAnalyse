@@ -191,7 +191,6 @@ end;
 procedure TfrmFileList.eFilterKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
   var i : integer;
-  myItem : TListitem;
   FileListFileInfo: TFileListFileInfo;
 begin
 
