@@ -91,6 +91,7 @@ type
     function GetSynMemoForFile(sFile: string): TSynMemo;
     function CalculateIndexOfFileExtension(sMyFileName: string): integer;
     procedure GetAllHtmlFiles(sl : TStringlist);
+    procedure GetAllUsedNgKeyWords(sl : TStringlist);
     constructor Create;
     destructor Destroy; override;
   end;
@@ -892,6 +893,23 @@ for i := 0 to slAllFilesFound.Count - 1 do
     end;
 
   end;
+end;
+
+procedure TFrmMainController.GetAllUsedNgKeyWords(sl: TStringlist);
+var i,n : integer;
+  oneFileInfo : TOneFileInfo ;
+begin
+
+for i := 0 to slAllFilesFound.Count - 1 do
+begin
+    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    for n := 0 to oneFileInfo.slngWords.count -1 do
+      sl.add( oneFileInfo.slngWords[n] ) ;
+
+
+end;
+
+
 end;
 
 end.

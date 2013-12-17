@@ -523,7 +523,7 @@ begin
 
   treenodeAngularWords := TreeView1.Items.AddChild(nil, 'AngularJS Keywords');
   treenodeAngularWords.ImageIndex := constItemIndexAngular;
-  AddAngularJSKeyWordsInTreeview;
+
 
 
   treenodeScope := TreeView1.Items.AddChild(nil, 'scope.');
@@ -597,6 +597,18 @@ begin
 
   end;
 
+  sl.clear;
+  sl.Sorted := true;
+  sl.Duplicates:= dupIgnore;
+  frmMainController.GetAllUsedNgKeyWords(sl);
+
+  for i := 0 to sl.Count - 1 do
+  begin
+    treenodeAngularSchluessel :=
+      TreeView1.Items.AddChild(treenodeAngularWords, sl[i]);
+    treenodeAngularSchluessel.ImageIndex := constItemIndexAngular;
+
+  end;
 
 
   sl.Free;
@@ -802,7 +814,7 @@ begin
 
   end;
 
-
+   AddAngularJSKeyWordsInTreeview;
 
 
   TreeView1.EndUpdate;
