@@ -5,8 +5,10 @@ unit angFileList;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Buttons, ComCtrls, StdCtrls, angDatamodul, angFrmMainController, angpkz,math,strutils;
+  Classes, SysUtils, FileUtil, SynMemo, Forms, Controls, Graphics, Dialogs,
+  ExtCtrls, Buttons, ComCtrls, StdCtrls, Menus, angDatamodul,
+  angFrmMainController, angpkz, Math, strutils, SynHighlighterAny,
+  SynHighlighterCss, SynHighlighterHtml ,Clipbrd;
 
 type
 
@@ -17,10 +19,12 @@ type
     iImageindex: integer;
     sFilename: string;
     sPath: string;
-    iLines : integer;
+    iLines: integer;
     Visible: boolean;
-    ng : string;
-    DI : string;
+    ng: string;
+    DI: string;
+    Types : string;
+    oneFileInfo: TOneFileInfo;
     constructor Create;
   end;
 
@@ -32,29 +36,41 @@ type
     eFilter: TEdit;
     lblCount: TLabel;
     ListView1: TListView;
+    mnuCopyClipboard: TMenuItem;
     Panel1: TPanel;
+    pmAngFileList: TPopupMenu;
+    Splitter1: TSplitter;
+    SynMemo1: TSynMemo;
     procedure BitBtn1Click(Sender: TObject);
-    procedure eFilterKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
-      );
+    procedure eFilterKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure eFilterKeyPress(Sender: TObject; var Key: char);
-    procedure eFilterKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure eFilterKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure ListView1Click(Sender: TObject);
     procedure ListView1ColumnClick(Sender: TObject; Column: TListColumn);
     procedure ListView1Compare(Sender: TObject; Item1, Item2: TListItem;
-      Data: Integer; var Compare: Integer);
+      Data: integer; var Compare: integer);
     procedure ListView1DblClick(Sender: TObject);
     procedure ListView1Enter(Sender: TObject);
+    procedure ListView1SelectItem(Sender: TObject; Item: TListItem;
+      Selected: Boolean);
+    procedure mnuCopyClipboardClick(Sender: TObject);
   private
     { private declarations }
     slFilesToView: TStringList;
-    ColumnToSort: Integer;
+    ColumnToSort: integer;
+    frmMainController1: TFrmMainController;
     procedure DoSetSFilename;
 
     procedure ShowFiltered;
   public
     { public declarations }
-    sFilename : string;
+    sFilename: string;
+    SynAnySyn1: TSynAnySyn;
+    SynCssSyn1: TSynCssSyn;
+    SynHTMLSyn1: TSynHTMLSyn;
+
     procedure Initialize(frmMainController: TFrmMainController);
   end;
 
@@ -70,7 +86,7 @@ begin
   iImageindex := 0;
   sFilename := '';
   sPath := '';
-  Visible :=    True;
+  Visible := True;
 end;
 
 {$R *.lfm}
@@ -83,8 +99,10 @@ var
   i, i2: integer;
   FileListFileInfo: TFileListFileInfo;
   s: string;
-  oneFileInfo : TOneFileInfo ;
+  oneFileInfo: TOneFileInfo;
 begin
+  frmMainController1 := frmMainController;
+
 
   for i := 0 to frmMainController.slAllFilesFound.Count - 1 do
   begin
@@ -97,120 +115,126 @@ begin
     begin
       oneFileInfo := TOneFileInfo(frmMainController.slAllFilesFound.Objects[i]);
 
-      FileListFileInfo := TFileListFileInfo.create;
-      FileListFileInfo.iImageindex:= i2;
-      FileListFileInfo.sFilename:= extractfilename(s);
-      FileListFileInfo.iLines := oneFileInfo.slFileInhalt.Count  ;
+      FileListFileInfo := TFileListFileInfo.Create;
+      FileListFileInfo.iImageindex := i2;
+      FileListFileInfo.sFilename := extractfilename(s);
+      FileListFileInfo.iLines := oneFileInfo.slFileInhalt.Count;
 
-      FileListFileInfo.ng  :=  Ansireplacestr(oneFileInfo.slngWords.text ,#13#10,' | ')  ;
-      FileListFileInfo.DI  :=  Ansireplacestr(oneFileInfo.slDependencyInjektionNamen.text ,#13#10,' | ')  ;
+      FileListFileInfo.ng :=
+        Ansireplacestr(oneFileInfo.slngWords.Text, #13#10, ' | ');
+      FileListFileInfo.DI :=
+        Ansireplacestr(oneFileInfo.slDependencyInjektionNamen.Text, #13#10, ' | ');
 
       FileListFileInfo.sPath := frmMainController.GetFilenameWithoutRootPath(s);
-      slFilesToView.AddObject(s,FileListFileInfo);
+      FileListFileInfo.oneFileInfo := oneFileInfo;
+
+      FileListFileInfo.Types := frmMainController.GetAngularTypesForFile(FileListFileInfo.sPath);
+
+      slFilesToView.AddObject(s, FileListFileInfo);
 
     end;
   end;
 
-   ShowFiltered;
+  ShowFiltered;
 
 end;
 
 procedure TfrmFileList.ShowFiltered;
-var i : integer;
-  myItem : TListitem;
+var
+  i: integer;
+  myItem: TListitem;
   FileListFileInfo: TFileListFileInfo;
 begin
   ListView1.BeginUpdate;
-  ListView1.clear;
+  ListView1.Clear;
 
-  for i := 0 to slFilesToView.Count -1 do
-    begin
-    FileListFileInfo := TFileListFileInfo(slFilesToView.Objects[i] );
+  for i := 0 to slFilesToView.Count - 1 do
+  begin
+    FileListFileInfo := TFileListFileInfo(slFilesToView.Objects[i]);
     if FileListFileInfo.Visible then
-      begin
-        myItem := ListView1.Items.Add;
-      myItem.Caption := extractfilename(FileListFileInfo.sFilename );
-      myitem.SubItems.add(FileListFileInfo.sPath  );
-      myitem.SubItems.add(inttostr(FileListFileInfo.iLines ) );
+    begin
+      myItem := ListView1.Items.Add;
+      myItem.Caption := extractfilename(FileListFileInfo.sFilename);
+      myitem.SubItems.add(FileListFileInfo.sPath);
+      myitem.SubItems.add(IntToStr(FileListFileInfo.iLines));
 
-      myitem.SubItems.add(ExtractFileExt(FileListFileInfo.sFilename)  );
+      myitem.SubItems.add(ExtractFileExt(FileListFileInfo.sFilename));
 
-      myitem.SubItems.add(FileListFileInfo.ng );
-      myitem.SubItems.add(FileListFileInfo.DI );
+      myitem.SubItems.add(FileListFileInfo.ng);
+      myitem.SubItems.add(FileListFileInfo.DI);
+      myitem.SubItems.add(FileListFileInfo.Types);
+      myitem.Data := FileListFileInfo.oneFileInfo;
 
 
-      myitem.ImageIndex := FileListFileInfo.iImageindex ;
-      end;
-
+      myitem.ImageIndex := FileListFileInfo.iImageindex;
     end;
 
+  end;
 
-      ListView1.EndUpdate;
 
-   BitBtn1.enabled :=    ListView1.items.count > 0;
+  ListView1.EndUpdate;
 
-   lblCount.caption := inttostr(ListView1.items.count);
+  BitBtn1.Enabled := ListView1.items.Count > 0;
+
+  lblCount.Caption := IntToStr(ListView1.items.Count);
 
 end;
 
 
 procedure TfrmFileList.BitBtn1Click(Sender: TObject);
 begin
- DoSetSFilename;
+  DoSetSFilename;
 end;
 
-procedure TfrmFileList.eFilterKeyDown(Sender: TObject; var Key: Word;
+procedure TfrmFileList.eFilterKeyDown(Sender: TObject; var Key: word;
   Shift: TShiftState);
 begin
   if key = 40 then
-    Listview1.setfocus;
+    Listview1.SetFocus;
 end;
 
 procedure TfrmFileList.DoSetSFilename;
-var i : integer;
-   myItem : TListitem;
+var
+  i: integer;
+  myItem: TListitem;
 begin
-i := ListView1.ItemIndex;
+  i := ListView1.ItemIndex;
 
-if i = -1 then
+  if i = -1 then
   begin
-  i := 0;
-  if Listview1.Items.Count = 0 then
-    exit;
+    i := 0;
+    if Listview1.Items.Count = 0 then
+      exit;
 
   end;
 
-myItem := ListView1.Items[i];
+  myItem := ListView1.Items[i];
 
-sFilename := myItem.subitems[0];
+  sFilename := myItem.subitems[0];
 
-modalresult := mrOK;
+  modalresult := mrOk;
 end;
 
 procedure TfrmFileList.eFilterKeyPress(Sender: TObject; var Key: char);
 begin
 
-
-
-
-
 end;
 
-procedure TfrmFileList.eFilterKeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-  var i : integer;
+procedure TfrmFileList.eFilterKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
+var
+  i: integer;
   FileListFileInfo: TFileListFileInfo;
 begin
 
-  for i := 0 to slFilesToView.Count -1 do
-    begin
-    FileListFileInfo := TFileListFileInfo(slFilesToView.Objects[i] );
-    FileListFileInfo.Visible := true;
+  for i := 0 to slFilesToView.Count - 1 do
+  begin
+    FileListFileInfo := TFileListFileInfo(slFilesToView.Objects[i]);
+    FileListFileInfo.Visible := True;
     if eFilter.Text <> '' then
-      if pos(uppercase(eFilter.Text),uppercase(FileListFileInfo.sFilename)) = 0 then
-        FileListFileInfo.Visible := false;
-    end;
-  ShowFiltered ;
+      if pos(uppercase(eFilter.Text), uppercase(FileListFileInfo.sFilename)) = 0 then
+        FileListFileInfo.Visible := False;
+  end;
+  ShowFiltered;
 end;
 
 procedure TfrmFileList.FormCreate(Sender: TObject);
@@ -224,31 +248,37 @@ begin
   slFilesToView.Free;
 end;
 
-procedure TfrmFileList.ListView1ColumnClick(Sender: TObject; Column: TListColumn
-  );
+procedure TfrmFileList.ListView1Click(Sender: TObject);
+
+begin
+
+
+end;
+
+procedure TfrmFileList.ListView1ColumnClick(Sender: TObject; Column: TListColumn);
 begin
   ColumnToSort := Column.Index;
   Listview1.AlphaSort;
 end;
 
-procedure TfrmFileList.ListView1Compare(Sender: TObject; Item1,
-  Item2: TListItem; Data: Integer; var Compare: Integer);
-  var
-  i:integer;
+procedure TfrmFileList.ListView1Compare(Sender: TObject; Item1, Item2: TListItem;
+  Data: integer; var Compare: integer);
+var
+  i: integer;
 begin
   if ColumnToSort = 0 then
-  Compare := CompareText(Item1.Caption, Item2.Caption)
+    Compare := CompareText(Item1.Caption, Item2.Caption)
   else
   begin
-    i := ColumnToSort -1;
+    i := ColumnToSort - 1;
     if i = 1 then
-      begin
-      Compare := CompareValue( strtointdef(Item1.SubItems[i],0), strtointdef(Item2.SubItems[i],0) );
+    begin
+      Compare := CompareValue(strtointdef(Item1.SubItems[i], 0),
+        strtointdef(Item2.SubItems[i], 0));
 
-      end
+    end
     else
       Compare := CompareText(Item1.SubItems[i], Item2.SubItems[i]);
-
 
   end;
 end;
@@ -257,19 +287,57 @@ procedure TfrmFileList.ListView1DblClick(Sender: TObject);
 begin
   DoSetSFilename;
 
-
 end;
 
 procedure TfrmFileList.ListView1Enter(Sender: TObject);
 begin
-      if Listview1.Items.Count > 0 then
-      if Listview1.ItemIndex = -1 then
-        Listview1.ItemIndex := 0 ;
+  if Listview1.Items.Count > 0 then
+    if Listview1.ItemIndex = -1 then
+      Listview1.ItemIndex := 0;
+end;
+
+procedure TfrmFileList.ListView1SelectItem(Sender: TObject; Item: TListItem;
+  Selected: Boolean);
+  var {i : integer;
+item : TListitem; }
+oneFileInfo : ToneFileInfo;
+begin
+{i :=   Listview1.ItemIndex  ;
+if i = -1 then exit;
+item := Listview1.items[i];  }
+
+oneFileInfo := ToneFileInfo(item.Data);
+SynMemo1.Lines.text := oneFileinfo.slFileInhalt.Text  ;
+
+if oneFileinfo.iImageindex = constItemIndexCss then
+  SynMemo1.Highlighter := SynCssSyn1
+else
+if oneFileinfo.iImageindex = constItemIndexHTML then
+  SynMemo1.Highlighter := SynHtmlSyn1
+else
+  SynMemo1.Highlighter := SynAnySyn1;
+end;
+
+procedure TfrmFileList.mnuCopyClipboardClick(Sender: TObject);
+var i : integer;
+  s: string;
+  item : TListitem ;
+begin
+s := '';
+for i := 0 to ListView1.Items.Count - 1 do
+  begin
+    item := ListView1.Items[i];
+    s := s + item.Caption + #9 + ansireplacestr(item.SubItems.Text,#13#10,#9) + #13#10 ;
+  end;
+  Clipboard.AsText :=s;
 end;
 
 
 
 end.
+
+
+
 
 
 

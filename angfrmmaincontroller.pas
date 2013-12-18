@@ -98,6 +98,7 @@ type
     procedure GetAllHtmlFiles(sl: TStringList);
     procedure GetAllUsedNgKeyWords(sl: TStringList);
     function FindTreenodePointerToFilename(sFilename: string): TObject;
+    function GetAngularTypesForFile(sFile : string) : string;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -493,6 +494,23 @@ begin
       break;
     end;
   end;
+end;
+
+function TFrmMainController.GetAngularTypesForFile(sFile: string): string;
+var
+  i: integer;
+  oneFileInfo: TOneFileInfo;
+begin
+  Result := '';
+
+  if slModule.IndexOf(sFile) >= 0 then  Result := Result + 'Module |';
+  if slController.IndexOf(sFile) >= 0 then  Result := Result + 'Controller |';
+  if slService.IndexOf(sFile) >= 0 then  Result := Result + 'Service |';
+  if slFactory.IndexOf(sFile) >= 0 then  Result := Result + 'Factory |';
+  if slFilter.IndexOf(sFile) >= 0 then  Result := Result + 'Filter |';
+  if slDirective.IndexOf(sFile) >= 0 then  Result := Result + 'Directive |';
+  if slConfig.IndexOf(sFile) >= 0 then  Result := Result + 'Config |';
+
 end;
 
 function TFrmMainController.findFileNameToDataPointer(p: TObject): string;

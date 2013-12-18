@@ -338,6 +338,11 @@ end;
 procedure TfrmMainView.mnuOpenAFileClick(Sender: TObject);
 begin
   Application.CreateForm(TfrmFileList, frmFileList);
+
+  frmFileList.SynAnySyn1 := SynAnySyn1;
+  frmFileList.SynCssSyn1 := SynCssSyn1;
+  frmFileList.SynHTMLSyn1 := SynHTMLSyn1;
+
   frmFileList.Initialize(frmMainController);
   frmFileList.showmodal;
   if frmFileList.ModalResult = mrOk then
