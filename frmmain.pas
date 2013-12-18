@@ -9,7 +9,7 @@ uses
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
   SynEditMarks, strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
-  Clipbrd,
+  Clipbrd, shellapi,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList;
 
 type
@@ -20,6 +20,8 @@ type
     FindDialog1: TFindDialog;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
+    mnuOpenShell: TMenuItem;
+    mnuResync: TMenuItem;
     mnuOpenMarkedFileName: TMenuItem;
     mnuShowInTree: TMenuItem;
     mnuOpenAFile: TMenuItem;
@@ -44,6 +46,7 @@ type
     OpenDialog1: TOpenDialog;
     PageControl1: TPageControl;
     PopupMenu1: TPopupMenu;
+    PopupMenuTreeview: TPopupMenu;
     PopupMenuSynedit: TPopupMenu;
     Splitter1: TSplitter;
     StatusBar1: TStatusBar;
@@ -68,6 +71,8 @@ type
     procedure mnuGotoLineClick(Sender: TObject);
     procedure mnuOpenAFileClick(Sender: TObject);
     procedure mnuOpenMarkedFileNameClick(Sender: TObject);
+    procedure mnuOpenShellClick(Sender: TObject);
+    procedure mnuResyncClick(Sender: TObject);
     procedure mnuSave1Click(Sender: TObject);
     procedure mnuSaveClick(Sender: TObject);
     procedure mnuSearchPathClick(Sender: TObject);
@@ -109,6 +114,7 @@ type
     procedure AddAngularJSKeyWordsInTreeview;
     procedure AddEditMarkToLine(iImageindex, iLine: integer);
     procedure AddSearchInPathToTree(const s: string);
+    function CloseAllTabsheets: boolean;
     procedure DoCloseActivePagecontrolPage;
     procedure DoSaveActivePage;
     procedure MarkLineContainsThisWord(sWord: string);
@@ -336,20 +342,72 @@ begin
   frmFileList.showmodal;
   if frmFileList.ModalResult = mrOk then
   begin
-  ShowFileInPagecontrolAsTabsheet(frmMainController.sPfad +  frmFileList.sFilename);
+    ShowFileInPagecontrolAsTabsheet(frmMainController.sPfad + frmFileList.sFilename);
   end;
   frmFileList.Free;
 
 end;
 
 procedure TfrmMainView.mnuOpenMarkedFileNameClick(Sender: TObject);
-  var s,sFilename : string;
+var
+  s, sFilename: string;
 begin
   s := frmMainController.myActiveSynMemo.SelText;
-  sFilename :=  frmMainController.GetFileNameToPartFileName(s);
-    if sFilename <> '' then
-      ShowFileInPagecontrolAsTabsheet(sFilename);
+  sFilename := frmMainController.GetFileNameToPartFileName(s);
+  if sFilename <> '' then
+    ShowFileInPagecontrolAsTabsheet(sFilename);
 
+end;
+
+procedure TfrmMainView.mnuOpenShellClick(Sender: TObject);
+var
+  treenode: TTreenode;
+  sPfad: string;
+  //parentNode: TTreenode;
+  s: string;
+begin
+
+  treenode := TreeView1.Selected;
+  if treenode = nil then
+    exit;
+
+
+  if treenode = treenodeSearchInPath then
+    exit;
+
+  if treenode.Data = nil then
+    exit;
+
+  sPfad := frmMainController.findFileNameToDataPointer(TObject(treenode.Data));
+
+  sPfad := extractfilepath(sPfad);
+
+
+  ShellExecute(0, 'open', PCHAR(sPfad), NIL, NIL, 5);  //5 =  SW_SHOW
+
+end;
+
+procedure TfrmMainView.mnuResyncClick(Sender: TObject);
+var
+  sl: TStringList;
+  i : integer;
+begin
+
+  sl :=  TStringList.create;
+  sl.text := frmMainController.slOpendTabsheets.text;
+
+  if not CloseAllTabsheets then
+    exit;
+
+  StartPathAnalyse;
+
+
+
+  for i := 0 to sl.count -1 do
+    if fileexists(sl[i]) then
+      ShowFileInPagecontrolAsTabsheet(sl[i]);
+
+  sl.free;
 end;
 
 procedure TfrmMainView.mnuSave1Click(Sender: TObject);
@@ -611,9 +669,9 @@ begin
 
   end;
 
-  sl.clear;
-  sl.Sorted := true;
-  sl.Duplicates:= dupIgnore;
+  sl.Clear;
+  sl.Sorted := True;
+  sl.Duplicates := dupIgnore;
   frmMainController.GetAllUsedNgKeyWords(sl);
 
   for i := 0 to sl.Count - 1 do
@@ -632,26 +690,10 @@ end;
 procedure TfrmMainView.mnuPfadOeffnenClick(Sender: TObject);
 var
   chosenDirectory: string;
-  iAnswer: integer;
-  i: integer;
 begin
 
-  if frmMainController.SynMemoModifiedAvailable then
-  begin
-    iAnswer := MessageDlg('Save changes', mtConfirmation, [mbYes, mbNo, mbAbort], 0);
-    if iAnswer = mrAbort then
-      exit;
-    if iAnswer = mrYes then
-      frmMainController.SaveAll;
-  end;
-
-
-  for i := frmMainController.slOpendTabsheets.Count - 1 downto 0 do
-    frmMainController.slOpendTabsheets.Delete(i);
-
-
-  for i := Pagecontrol1.PageCount - 1 downto 0 do
-    Pagecontrol1.Pages[i].Free;
+  if not CloseAllTabsheets then
+    exit;
 
 
   if SelectDirectory('Select a directory', 'C:\', chosenDirectory) then
@@ -668,10 +710,10 @@ begin
 end;
 
 procedure TfrmMainView.mnuShowInTreeClick(Sender: TObject);
-  var
+var
   i: integer;
   myOneTabsheet: TOneTabsheet;
-  p : Tobject;
+  p: TObject;
 begin
   if pagecontrol1.PageCount = 0 then
     exit;
@@ -684,13 +726,13 @@ begin
     myOneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[i]);
     if Pagecontrol1.ActivePage = myOneTabsheet.Tabsheet then
     begin
-    p :=   frmMainController.FindTreenodePointerToFilename(frmMainController.slOpendTabsheets[i]);
+      p := frmMainController.FindTreenodePointerToFilename(
+        frmMainController.slOpendTabsheets[i]);
 
-    Treeview1.Selected := TTreenode(p);
+      Treeview1.Selected := TTreenode(p);
 
     end;
   end;
-
 
 end;
 
@@ -706,16 +748,16 @@ begin
 end;
 
 procedure TfrmMainView.PopupMenuSyneditPopup(Sender: TObject);
-var s : string;
+var
+  s: string;
 begin
-  mnuOpenMarkedFileName.visible := false;
+  mnuOpenMarkedFileName.Visible := False;
   s := frmMainController.myActiveSynMemo.SelText;
   if length(s) > 3 then
-    begin
+  begin
     if frmMainController.GetFileNameToPartFileName(s) <> '' then
-      mnuOpenMarkedFileName.visible := true;
-    end;
-
+      mnuOpenMarkedFileName.Visible := True;
+  end;
 
 end;
 
@@ -749,9 +791,10 @@ begin
       end;
 
 
-    if OneFileInfo.slngLines.Count > 0 then
+      if OneFileInfo.slngLines.Count > 0 then
       begin
-        treenodeScope1 := TreeView1.Items.AddChild(treenode, 'ng   ' + ansireplacestr(OneFileInfo.slngWords.Text,#13#10,' | ') );
+        treenodeScope1 := TreeView1.Items.AddChild(treenode, 'ng   ' +
+          ansireplacestr(OneFileInfo.slngWords.Text, #13#10, ' | '));
         treenodeScope1.ImageIndex := constItemIndexAngular;
 
         for n := 0 to OneFileInfo.slngLines.Count - 1 do
@@ -787,14 +830,13 @@ end;
 
 
 
-
 procedure TfrmMainView.StartPathAnalyse;
 var
   i, i1, i2, i3: integer;
   sl: TStringList;
   treenode: TTreenode;
 begin
-  mnuOpenAFile.enabled := true;
+  mnuOpenAFile.Enabled := True;
 
   AddRootTreenodesToTreeview;
   frmMainController.ClearAll;
@@ -818,11 +860,11 @@ begin
   AddAngularJSFilesAsTreenode(treenodeFilter, frmMainController.slFilter,
     constItemIndexFilter);
 
-  sl := TStringList.create;
+  sl := TStringList.Create;
   frmMainController.GetAllHtmlFiles(sl);
   AddAngularJSFilesAsTreenode(treenodeHTML, sl, constItemIndexHTML);
 
-  sl.free;
+  sl.Free;
 
 
 
@@ -869,7 +911,7 @@ begin
 
   end;
 
-   AddAngularJSKeyWordsInTreeview;
+  AddAngularJSKeyWordsInTreeview;
 
 
   TreeView1.EndUpdate;
@@ -949,6 +991,7 @@ begin
 
   mnuSave.Enabled := True;
   mnuSaveall.Enabled := True;
+  mnuResync.Enabled := True;
 
 end;
 
@@ -1074,8 +1117,8 @@ var
   gefunden: boolean;
   point: TPoint;
 
-  boooWord2Different : boolean;
-  boooWord3Different : boolean;
+  boooWord2Different: boolean;
+  boooWord3Different: boolean;
 begin
   sWord2 := frmMainController.ChangeCamelCaseToMinusString(sWord);
   sWord3 := frmMainController.ChangeMinusToCamelCase(sWord);
@@ -1156,6 +1199,35 @@ begin
 
   treenodeSearchInPath.Expand(False);
 
+end;
+
+function TfrmMainView.CloseAllTabsheets: boolean;
+var
+  i: integer;
+  iAnswer: integer;
+begin
+
+  if frmMainController.SynMemoModifiedAvailable then
+  begin
+    iAnswer := MessageDlg('Save changes', mtConfirmation,
+      [mbYes, mbNo, mbAbort], 0);
+    if iAnswer = mrAbort then
+    begin
+      Result := False;
+      exit;
+    end;
+    if iAnswer = mrYes then
+      frmMainController.SaveAll;
+  end;
+
+
+  for i := frmMainController.slOpendTabsheets.Count - 1 downto 0 do
+    frmMainController.slOpendTabsheets.Delete(i);
+
+
+  for i := Pagecontrol1.PageCount - 1 downto 0 do
+    Pagecontrol1.Pages[i].Free;
+  Result := True;
 end;
 
 

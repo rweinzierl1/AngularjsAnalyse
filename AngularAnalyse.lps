@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="28">
+    <Units Count="29">
       <Unit0>
         <Filename Value="AngularAnalyse.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -12,7 +12,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="53" Y="19"/>
-        <UsageCount Value="101"/>
+        <UsageCount Value="102"/>
       </Unit0>
       <Unit1>
         <Filename Value="frmmain.pas"/>
@@ -21,12 +21,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="frmMain"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1078"/>
-        <CursorPos X="1" Y="1104"/>
-        <UsageCount Value="101"/>
+        <TopLine Value="338"/>
+        <CursorPos X="48" Y="344"/>
+        <UsageCount Value="102"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -34,23 +33,22 @@
         <Filename Value="angpkz.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="angPKZ"/>
+        <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
         <TopLine Value="5"/>
-        <CursorPos X="26" Y="13"/>
-        <UsageCount Value="93"/>
+        <CursorPos X="43" Y="24"/>
+        <UsageCount Value="94"/>
+        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="angfrmmaincontroller.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="angFrmMainController"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="747"/>
-        <CursorPos X="55" Y="776"/>
-        <UsageCount Value="89"/>
-        <Bookmarks Count="1">
-          <Item0 X="40" Y="264" ID="1"/>
-        </Bookmarks>
+        <TopLine Value="244"/>
+        <CursorPos X="42" Y="252"/>
+        <UsageCount Value="90"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
@@ -63,7 +61,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="43" Y="15"/>
-        <UsageCount Value="55"/>
+        <UsageCount Value="56"/>
       </Unit4>
       <Unit5>
         <Filename Value="angdatamodul.pas"/>
@@ -72,10 +70,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
         <UnitName Value="angDatamodul"/>
+        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
-        <CursorPos X="56" Y="21"/>
-        <UsageCount Value="55"/>
+        <CursorPos X="44" Y="9"/>
+        <UsageCount Value="56"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="angfrmbookmarks.pas"/>
@@ -87,7 +88,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="3"/>
         <CursorPos X="38" Y="5"/>
-        <UsageCount Value="40"/>
+        <UsageCount Value="41"/>
       </Unit6>
       <Unit7>
         <Filename Value="angfilelist.pas"/>
@@ -96,10 +97,17 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="angFileList"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="25"/>
-        <CursorPos X="7" Y="43"/>
-        <UsageCount Value="35"/>
+        <TopLine Value="84"/>
+        <CursorPos X="90" Y="106"/>
+        <UsageCount Value="36"/>
+        <Bookmarks Count="1">
+          <Item0 X="90" Y="105" ID="1"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit7>
       <Unit8>
         <Filename Value="C:\lazarus\lcl\include\menuitem.inc"/>
@@ -231,11 +239,11 @@
       </Unit24>
       <Unit25>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\objpas\sysutils\sysstrh.inc"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
         <TopLine Value="59"/>
         <CursorPos X="10" Y="71"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit25>
       <Unit26>
@@ -253,6 +261,15 @@
         <CursorPos X="1" Y="470"/>
         <UsageCount Value="12"/>
       </Unit27>
+      <Unit28>
+        <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\win\wininc\defines.inc"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2647"/>
+        <CursorPos X="16" Y="2668"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit28>
     </Units>
     <General>
       <ActiveWindowIndexAtStart Value="0"/>
@@ -260,123 +277,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="frmmain.pas"/>
-        <Caret Line="1003" Column="28" TopLine="974"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
       </Position1>
       <Position2>
         <Filename Value="frmmain.pas"/>
-        <Caret Line="1133" Column="45" TopLine="1113"/>
+        <Caret Line="114" Column="31" TopLine="80"/>
       </Position2>
       <Position3>
         <Filename Value="frmmain.pas"/>
-        <Caret Line="969" Column="46" TopLine="950"/>
+        <Caret Line="646" Column="42" TopLine="625"/>
       </Position3>
       <Position4>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="747" Column="45" TopLine="737"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="1191" Column="18" TopLine="1149"/>
       </Position4>
       <Position5>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="88" Column="97" TopLine="78"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="365" Column="53" TopLine="348"/>
       </Position5>
       <Position6>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="711" Column="35" TopLine="708"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="342" Column="5" TopLine="335"/>
       </Position6>
       <Position7>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="721" Column="25" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="366" Column="83" TopLine="359"/>
       </Position7>
       <Position8>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="725" Column="17" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="365" Column="40" TopLine="355"/>
       </Position8>
       <Position9>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="721" Column="51" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="366" Column="40" TopLine="356"/>
       </Position9>
       <Position10>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="716" Column="1" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="373" Column="40" TopLine="358"/>
       </Position10>
       <Position11>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="717" Column="1" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="364" Column="3" TopLine="362"/>
       </Position11>
       <Position12>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="719" Column="1" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="1011" Column="3" TopLine="1004"/>
       </Position12>
       <Position13>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="720" Column="1" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="980" Column="3" TopLine="974"/>
       </Position13>
       <Position14>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="721" Column="1" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="1033" Column="51" TopLine="1004"/>
       </Position14>
       <Position15>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="725" Column="1" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="366" Column="5" TopLine="362"/>
       </Position15>
       <Position16>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="708" Column="51" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="12" Column="12" TopLine="1"/>
       </Position16>
       <Position17>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="711" Column="51" TopLine="703"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="386" Column="11" TopLine="366"/>
       </Position17>
       <Position18>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="2" Column="73" TopLine="1"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="12" Column="29" TopLine="1"/>
       </Position18>
       <Position19>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="51" Column="36" TopLine="22"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="7" Column="44" TopLine="3"/>
       </Position19>
       <Position20>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="711" Column="51" TopLine="682"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="385" Column="42" TopLine="351"/>
       </Position20>
       <Position21>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="3" Column="64" TopLine="1"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="5" Column="34" TopLine="1"/>
       </Position21>
       <Position22>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="75" Column="42" TopLine="46"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="401" Column="28" TopLine="390"/>
       </Position22>
       <Position23>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="733" Column="57" TopLine="719"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="344" Column="48" TopLine="338"/>
       </Position23>
       <Position24>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="2" Column="80" TopLine="1"/>
+        <Filename Value="angfilelist.pas"/>
+        <Caret Line="60" Column="3" TopLine="39"/>
       </Position24>
       <Position25>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="75" Column="42" TopLine="63"/>
+        <Filename Value="angfilelist.pas"/>
+        <Caret Line="20" Column="11" TopLine="1"/>
       </Position25>
       <Position26>
-        <Filename Value="angfrmmaincontroller.pas"/>
-        <Caret Line="733" Column="57" TopLine="704"/>
+        <Filename Value="angfilelist.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
       </Position26>
       <Position27>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="2" Column="78" TopLine="1"/>
+        <Filename Value="angfilelist.pas"/>
+        <Caret Line="20" Column="11" TopLine="1"/>
       </Position27>
       <Position28>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1102" Column="5" TopLine="1068"/>
+        <Filename Value="angfilelist.pas"/>
+        <Caret Line="103" Column="30" TopLine="74"/>
       </Position28>
       <Position29>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1080" Column="1" TopLine="1068"/>
+        <Filename Value="angfilelist.pas"/>
+        <Caret Line="9" Column="88" TopLine="1"/>
       </Position29>
       <Position30>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1085" Column="34" TopLine="1078"/>
+        <Filename Value="angfilelist.pas"/>
+        <Caret Line="103" Column="66" TopLine="85"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>

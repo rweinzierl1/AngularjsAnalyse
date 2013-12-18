@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Buttons, ComCtrls, StdCtrls, angDatamodul, angFrmMainController, angpkz,math;
+  Buttons, ComCtrls, StdCtrls, angDatamodul, angFrmMainController, angpkz,math,strutils;
 
 type
 
@@ -19,6 +19,8 @@ type
     sPath: string;
     iLines : integer;
     Visible: boolean;
+    ng : string;
+    DI : string;
     constructor Create;
   end;
 
@@ -100,6 +102,9 @@ begin
       FileListFileInfo.sFilename:= extractfilename(s);
       FileListFileInfo.iLines := oneFileInfo.slFileInhalt.Count  ;
 
+      FileListFileInfo.ng  :=  Ansireplacestr(oneFileInfo.slngWords.text ,#13#10,' | ')  ;
+      FileListFileInfo.DI  :=  Ansireplacestr(oneFileInfo.slDependencyInjektionNamen.text ,#13#10,' | ')  ;
+
       FileListFileInfo.sPath := frmMainController.GetFilenameWithoutRootPath(s);
       slFilesToView.AddObject(s,FileListFileInfo);
 
@@ -129,6 +134,9 @@ begin
       myitem.SubItems.add(inttostr(FileListFileInfo.iLines ) );
 
       myitem.SubItems.add(ExtractFileExt(FileListFileInfo.sFilename)  );
+
+      myitem.SubItems.add(FileListFileInfo.ng );
+      myitem.SubItems.add(FileListFileInfo.DI );
 
 
       myitem.ImageIndex := FileListFileInfo.iImageindex ;

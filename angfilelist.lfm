@@ -72,6 +72,12 @@ object frmFileList: TfrmFileList
       end    
       item
         Caption = 'Type'
+      end    
+      item
+        Caption = 'ng'
+      end    
+      item
+        Caption = 'DI'
       end>
     GridLines = True
     ReadOnly = True

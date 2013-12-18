@@ -39,6 +39,8 @@ constItemScope = 26;
 constItemAbwaertsuchen= 27;
 constItemAufwaertsuchen = 28;
 constItemTree = 29;
+constItemResync = 30;
+constItemOpenListview = 31;
 
 implementation
 
