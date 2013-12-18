@@ -34,10 +34,15 @@ type
     BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
     eFilter: TEdit;
+    eFilterAng: TEdit;
+    eFilterTypes: TEdit;
+    eFilterPath: TEdit;
+    eFilterNg: TEdit;
     lblCount: TLabel;
     ListView1: TListView;
     mnuCopyClipboard: TMenuItem;
     Panel1: TPanel;
+    Panel2: TPanel;
     pmAngFileList: TPopupMenu;
     Splitter1: TSplitter;
     SynMemo1: TSynMemo;
@@ -52,7 +57,11 @@ type
     procedure ListView1Compare(Sender: TObject; Item1, Item2: TListItem;
       Data: integer; var Compare: integer);
     procedure ListView1DblClick(Sender: TObject);
+    procedure ListView1EndDrag(Sender, Target: TObject; X, Y: Integer);
     procedure ListView1Enter(Sender: TObject);
+    procedure ListView1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure ListView1Resize(Sender: TObject);
     procedure ListView1SelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure mnuCopyClipboardClick(Sender: TObject);
@@ -61,6 +70,7 @@ type
     slFilesToView: TStringList;
     ColumnToSort: integer;
     frmMainController1: TFrmMainController;
+    procedure doFilterKeyUp;
     procedure DoSetSFilename;
 
     procedure ShowFiltered;
@@ -221,6 +231,11 @@ begin
 end;
 
 procedure TfrmFileList.eFilterKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
+begin
+doFilterKeyUp ;
+end;
+
+procedure TfrmFileList.doFilterKeyUp;
 var
   i: integer;
   FileListFileInfo: TFileListFileInfo;
@@ -233,6 +248,24 @@ begin
     if eFilter.Text <> '' then
       if pos(uppercase(eFilter.Text), uppercase(FileListFileInfo.sFilename)) = 0 then
         FileListFileInfo.Visible := False;
+
+    if eFilterPath.Text <> '' then
+      if pos(uppercase(eFilterPath.Text), uppercase(FileListFileInfo.sPath )) = 0 then
+        FileListFileInfo.Visible := False;
+
+    if eFilterNg.Text <> '' then
+      if pos(uppercase(eFilterNg.Text), uppercase(FileListFileInfo.ng )) = 0 then
+        FileListFileInfo.Visible := False;
+
+
+    if eFilterAng.Text <> '' then
+      if pos(uppercase(eFilterAng.Text), uppercase(FileListFileInfo.DI )) = 0 then
+        FileListFileInfo.Visible := False;
+
+    if eFilterTypes.Text <> '' then
+      if pos(uppercase(eFilterTypes.Text), uppercase(FileListFileInfo.Types )) = 0 then
+        FileListFileInfo.Visible := False;
+
   end;
   ShowFiltered;
 end;
@@ -289,11 +322,27 @@ begin
 
 end;
 
+procedure TfrmFileList.ListView1EndDrag(Sender, Target: TObject; X, Y: Integer);
+begin
+     eFilter.Width:=listview1.Columns[0].Width ;
+end;
+
 procedure TfrmFileList.ListView1Enter(Sender: TObject);
 begin
   if Listview1.Items.Count > 0 then
     if Listview1.ItemIndex = -1 then
       Listview1.ItemIndex := 0;
+end;
+
+procedure TfrmFileList.ListView1MouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+
+end;
+
+procedure TfrmFileList.ListView1Resize(Sender: TObject);
+begin
+
 end;
 
 procedure TfrmFileList.ListView1SelectItem(Sender: TObject; Item: TListItem;
