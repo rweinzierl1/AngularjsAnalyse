@@ -20,6 +20,11 @@ type
     FindDialog1: TFindDialog;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
+    mnuSmaller: TMenuItem;
+    mnuLarger: TMenuItem;
+    mnuFont: TMenuItem;
+    mnuColorScheme: TMenuItem;
+    mnuPreferences: TMenuItem;
     mnuOpenShell: TMenuItem;
     mnuResync: TMenuItem;
     mnuOpenMarkedFileName: TMenuItem;
@@ -64,11 +69,13 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure mnuBookMark1Click(Sender: TObject);
     procedure mnuBookmarksClick(Sender: TObject);
+    procedure mnuColorSchemeClick(Sender: TObject);
     procedure mnuDJKeywordsClick(Sender: TObject);
     procedure mnuFindClick(Sender: TObject);
     procedure mnuCloseActivepageClick(Sender: TObject);
     procedure mnuFindNextClick(Sender: TObject);
     procedure mnuGotoLineClick(Sender: TObject);
+    procedure mnuLargerClick(Sender: TObject);
     procedure mnuOpenAFileClick(Sender: TObject);
     procedure mnuOpenMarkedFileNameClick(Sender: TObject);
     procedure mnuOpenShellClick(Sender: TObject);
@@ -85,11 +92,13 @@ type
     procedure mnuPfadOeffnenClick(Sender: TObject);
     procedure mnuSaveallClick(Sender: TObject);
     procedure mnuShowInTreeClick(Sender: TObject);
+    procedure mnuSmallerClick(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
     procedure PopupMenuSyneditPopup(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
     procedure ToolButton3Click(Sender: TObject);
+    procedure ToolButton4Click(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1DblClick(Sender: TObject);
   private
@@ -114,6 +123,7 @@ type
     procedure AddAngularJSKeyWordsInTreeview;
     procedure AddEditMarkToLine(iImageindex, iLine: integer);
     procedure AddSearchInPathToTree(const s: string);
+    procedure ChangeSchema(Sender: TObject);
     function CloseAllTabsheets: boolean;
     procedure DoCloseActivePagecontrolPage;
     procedure DoSaveActivePage;
@@ -155,12 +165,43 @@ begin
   Clipboard.AsText := frmMainController.GetActiveFilePath;
 end;
 
+procedure TfrmMainView.ChangeSchema(Sender: TObject);
+var mi : TMenuItem;
+  i : integer;
+  OneColorScheme : TOneColorScheme;
+begin
+  mi := TMenuItem(Sender);
+
+
+  for i := 0 to frmMainController.slColorScheme.Count -1 do
+    begin
+    if mi.Caption =  frmMainController.slColorScheme[i] then
+      begin
+      OneColorScheme := TOneColorScheme(frmMainController.slColorScheme.Objects[i]  ) ;
+      frmMainController.slColorScheme.activeColorScheme := OneColorScheme;
+      end;
+    end;
+end;
+
 procedure TfrmMainView.FormCreate(Sender: TObject);
+var i : integer;
+  mi : TMenuItem;
 begin
   frmMainController := TFrmMainController.Create;
 
   if not fileexists(extractfilepath(ParamStr(0)) + 'test.txt') then
     ToolBar1.Visible := False;
+
+
+  for i := 0 to  frmMainController.slColorScheme.Count -1 do
+    begin
+    mi := TMenuItem.Create(mnuColorScheme);
+    mnuColorScheme.Add(mi);
+    mi.Caption:=frmMainController.slColorScheme[i];
+    mi.OnClick:=@ChangeSchema;
+
+    end;
+
 
 end;
 
@@ -180,6 +221,8 @@ begin
     MarkLineContainsThisWord(frmMainController.sLastSearch);
     FindDialog1.CloseDialog;
   end;
+
+
 
 
   {srOptions := [];
@@ -267,6 +310,11 @@ begin
   frmBookmarks.Free;
 end;
 
+procedure TfrmMainView.mnuColorSchemeClick(Sender: TObject);
+begin
+
+end;
+
 procedure TfrmMainView.mnuDJKeywordsClick(Sender: TObject);
 begin
   Application.CreateForm(TfrmSelectKeywords, frmSelectKeywordsObj);
@@ -333,6 +381,11 @@ begin
 
   end;
 
+end;
+
+procedure TfrmMainView.mnuLargerClick(Sender: TObject);
+begin
+  frmMainController.myActiveSynMemo.Font.Height := frmMainController.myActiveSynMemo.Font.Height +1 ;
 end;
 
 procedure TfrmMainView.mnuOpenAFileClick(Sender: TObject);
@@ -741,6 +794,11 @@ begin
 
 end;
 
+procedure TfrmMainView.mnuSmallerClick(Sender: TObject);
+begin
+ frmMainController.myActiveSynMemo.Font.Height := frmMainController.myActiveSynMemo.Font.Height -1 ;
+end;
+
 procedure TfrmMainView.PageControl1Change(Sender: TObject);
 begin
   if PageControl1.ActivePage = nil then
@@ -944,9 +1002,14 @@ begin
   StartPathAnalyse;
 end;
 
+procedure TfrmMainView.ToolButton4Click(Sender: TObject);
+begin
+
+end;
+
 function TfrmMainView.SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
 var
-  i, i2: integer;
+  i, i2,i3: integer;
   myOneTabsheet: TOneTabsheet;
 begin
   Result := False;
@@ -978,6 +1041,15 @@ begin
   myOneTabsheet.SynMemo.BookMarkOptions.BookmarkImages := DataModule1.imgBookMarks;
 
 
+  if frmMainController.slColorScheme.activeColorScheme <> nil then
+    begin
+    i3 :=frmMainController.slColorScheme.activeColorScheme.Color ;
+    myOneTabsheet.SynMemo.Color := i3 ; //  ;
+    i3 := frmMainController.slColorScheme.activeColorScheme.Font.Color ;
+    myOneTabsheet.SynMemo.Font.Color  := i3 ;
+    end;
+
+  myOneTabsheet.SynMemo.Font.Quality :=  fqProof;
 
   myOneTabsheet.Tabsheet := frmMainController.myActiveTabsheet;
 
@@ -1075,17 +1147,9 @@ var
   sr: TSearchRec;
   i: integer;
   myItem: TTreenode;
-  sSeparator: string;
 begin
 
-  {$ifdef Unix}
-  sSeparator := '/';
-  {$else}
-  sSeparator := '\';
-{$endif}
-
-
-  i := FindFirst(sPfad + sSeparator + '*', faAnyFile, sr);
+  i := FindFirst(sPfad + sAngSeparator + '*', faAnyFile, sr);
   while (i = 0) do
   begin
     if (sr.attr and faDirectory = faDirectory) then
@@ -1094,7 +1158,7 @@ begin
       begin
         myItem := TreeView1.Items.AddChild(myItemRoot, sr.Name);
         myItem.ImageIndex := constItemIndexFolder;
-        ReadPathToTreeview(myItem, sPfad + sSeparator + sr.Name);
+        ReadPathToTreeview(myItem, sPfad + sAngSeparator + sr.Name);
       end;
     end
     else
@@ -1102,7 +1166,7 @@ begin
       myItem := TreeView1.Items.AddChild(myItemRoot, sr.Name);
       myItem.ImageIndex := frmMainController.CalculateIndexOfFileExtension(sr.Name);
       myItem.Data := myItem;
-      frmMainController.AddOneFileInSL(sPfad + sSeparator + sr.Name, myItem);
+      frmMainController.AddOneFileInSL(sPfad + sAngSeparator + sr.Name, myItem);
 
     end;
     i := Findnext(sr);

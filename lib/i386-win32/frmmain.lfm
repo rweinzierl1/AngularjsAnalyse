@@ -82,6 +82,7 @@ object frmMainView: TfrmMainView
       Left = 47
       Top = 2
       Caption = 'ToolButton4'
+      OnClick = ToolButton4Click
     end
   end
   object PageControl1: TPageControl
@@ -165,6 +166,26 @@ object frmMainView: TfrmMainView
         Caption = 'Info'
         ImageIndex = 23
         OnClick = mnuInfoClick
+      end
+    end
+    object mnuPreferences: TMenuItem
+      Caption = 'Preferences'
+      object mnuFont: TMenuItem
+        Caption = 'Font'
+        object mnuLarger: TMenuItem
+          Caption = 'Larger'
+          ShortCut = 16491
+          OnClick = mnuLargerClick
+        end
+        object mnuSmaller: TMenuItem
+          Caption = 'Smaller'
+          ShortCut = 16493
+          OnClick = mnuSmallerClick
+        end
+      end
+      object mnuColorScheme: TMenuItem
+        Caption = 'ColorScheme'
+        OnClick = mnuColorSchemeClick
       end
     end
     object mnuCloseActivepage: TMenuItem

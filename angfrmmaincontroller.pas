@@ -5,7 +5,7 @@ unit angFrmMainController;
 interface
 
 uses
-  Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils;
+  Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils,Graphics,inifiles;
 
 type
 
@@ -40,6 +40,29 @@ type
     SynMemo: TsynMemo;
   end;
 
+  { TOneColorScheme }
+
+  TOneColorScheme = class
+  public
+  sName : String;
+  Color : Tcolor;
+  Font  : TFont;
+  constructor create;
+  destructor destroy;
+  end;
+
+
+  { TColorSchemeList }
+
+  TColorSchemeList = class(TStringlist)
+
+  public
+  activeColorScheme : TOneColorScheme;
+  constructor create;
+
+  end;
+
+
 
   { TFrmMainController }
 
@@ -70,6 +93,8 @@ type
     myActiveSynMemo: TsynMemo;
     slOpendTabsheets: TStringList;
     sLastSearch: string;
+
+    slColorScheme : TColorSchemeList;
 
     function ChangeMinusToCamelCase(sSuchtext: string): string;
     function ChangeCamelCaseToMinusString(sSuchtext: string): string;
@@ -106,6 +131,54 @@ type
 
 implementation
 
+{ TOneColorScheme }
+
+constructor TOneColorScheme.create;
+begin
+  Font := TFont.create;
+end;
+
+destructor TOneColorScheme.destroy;
+begin
+  Font.free;
+end;
+
+{ TColorSchemeList }
+
+constructor TColorSchemeList.create;
+var
+  sr: TSearchRec;
+  i: integer;
+  sPath : string;
+  OneScheme : TOneColorScheme ;
+  myIni : TIniFile;
+  sName : string;
+begin
+   self.OwnsObjects := True;
+
+   sPath := Extractfilepath(paramstr(0)) + 'ColorScheme';
+
+     i := FindFirst(sPath + sAngSeparator + '*.ini', faAnyFile, sr);
+     while (i = 0) do
+     begin
+         OneScheme := TOneColorScheme.create ;
+
+         sName := ansireplacestr(sr.Name,'.ini','');
+         self.AddObject(sName,OneScheme );
+         myIni := TIniFile.create(sPath + sAngSeparator + sr.Name) ;
+         OneScheme.Color :=  myIni.Readinteger('Font','Color',clWhite );
+         OneScheme.sName := sName;
+         OneScheme.Font.Color := myIni.Readinteger('Font.Color','Color',clBlack );  ;
+         myIni.free;
+
+       i := Findnext(sr);
+     end;
+     FindClose(sr);
+
+     activeColorScheme := nil;
+
+end;
+
 { TOneFileInfo }
 
 constructor TOneFileInfo.Create;
@@ -118,6 +191,9 @@ begin
   slngWords.Sorted := True;
   slngWords.Duplicates := dupIgnore;
   iImageindex := -1;
+
+
+
 end;
 
 destructor TOneFileInfo.Destroy;
@@ -150,6 +226,9 @@ begin
 
   slOpendTabsheets := TStringList.Create;
   slOpendTabsheets.OwnsObjects := True;
+
+  slColorScheme := TColorSchemeList.Create;
+
 end;
 
 destructor TFrmMainController.Destroy;
@@ -167,6 +246,8 @@ begin
   slAllScope.Free;
 
   slOpendTabsheets.Free;
+
+  slColorScheme.free;
 
 
   inherited Destroy;

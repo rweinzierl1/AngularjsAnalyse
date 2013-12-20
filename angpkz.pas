@@ -9,6 +9,13 @@ uses
 
 const
 
+{$ifdef Unix}
+sAngSeparator = '/';
+{$else}
+sAngSeparator = '\';
+{$endif}
+
+
 constItemIndexFolder = 0 ;
 constItemIndexUnknownFile = 1;
 constItemIndexFolder2  = 2 ;
