@@ -34,11 +34,19 @@ type
   end;
 
 
+  { TOneTabsheet }
+
   TOneTabsheet = class
+  private
+
   public
     Tabsheet: TTabSheet;
     SynMemo: TsynMemo;
     SynMemoPreview: TsynMemo;
+    procedure  setPreviewText;
+    procedure setCarentFromPreviewToEdit;
+    procedure setCarentFromEditToPreview;
+    procedure SchemeFromEditToPreview;
   end;
 
   { TOneColorScheme }
@@ -91,8 +99,8 @@ type
     slFilter: TStringList;
     slDirective: TStringList;
     slConfig: TStringList;
-    myActiveTabsheet: TTabSheet;
-    myActiveSynMemo: TsynMemo;
+    myActiveOneTabsheet : TOneTabsheet;
+
     slOpendTabsheets: TStringList;
     sLastSearch: string;
 
@@ -135,6 +143,44 @@ type
 
 
 implementation
+
+{ TOneTabsheet }
+
+procedure TOneTabsheet.setPreviewText;
+begin
+
+    SynMemoPreview.Highlighter := SynMemo.Highlighter;
+    SynMemoPreview.Lines.Assign(SynMemo.lines) ;
+
+    SynMemoPreview.CaretY := SynMemo.CaretY;
+
+end;
+
+procedure TOneTabsheet.setCarentFromPreviewToEdit;
+begin
+
+
+  SynMemo.CaretY := SynMemoPreview.CaretY ;
+  SynMemo.CaretX := SynMemoPreview.CaretX ;
+  SynMemoPreview.Repaint;
+
+end;
+
+procedure TOneTabsheet.setCarentFromEditToPreview;
+begin
+SynMemoPreview.CaretY  :=  SynMemo.CaretY  ;
+//SynMemoPreview.CaretX :=  SynMemo.CaretX  ;
+SynMemoPreview.Repaint;
+end;
+
+procedure TOneTabsheet.SchemeFromEditToPreview;
+begin
+  SynMemoPreview.Color:=SynMemo.Color ;
+  SynMemoPreview.Font.Color:= SynMemo.Font.Color;
+
+SynMemoPreview.Repaint;
+end;
+
 
 { TOneColorScheme }
 
@@ -747,7 +793,7 @@ begin
         OneBookMark.sLine := OneTabsheet.SynMemo.Lines[OneBookMark.iLineNr];
         OneBookMark.sFileName := slOpendTabsheets[i];
 
-        if OneTabsheet.SynMemo = self.myActiveSynMemo then
+        if OneTabsheet.SynMemo = self.myActiveOneTabsheet.SynMemo then
           OneBookMark.boolAktiveTab := True
         else
           OneBookMark.boolAktiveTab := False;
@@ -767,11 +813,8 @@ begin
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
     OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
-    if slOpendTabsheets[i] = sFile then
-    begin
-      self.myActiveTabsheet := OneTabsheet.Tabsheet;
-      self.myActiveSynMemo := OneTabsheet.SynMemo;
-    end;
+    self.myActiveOneTabsheet := OneTabsheet;
+
   end;
 
 end;
@@ -960,10 +1003,10 @@ begin
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
     OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+
     if OneTabsheet.Tabsheet = ActivePage then
     begin
-      myActiveTabsheet := OneTabsheet.Tabsheet;
-      myActiveSynMemo := OneTabsheet.SynMemo;
+      self.myActiveOneTabsheet := OneTabsheet;
       break;
     end;
   end;
@@ -980,7 +1023,7 @@ begin
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
     myOneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
-    if myOneTabsheet.Tabsheet = myActiveTabsheet then
+    if myOneTabsheet.Tabsheet = self.myActiveOneTabsheet.Tabsheet then
     begin
       Result := slOpendTabsheets[i];
     end;

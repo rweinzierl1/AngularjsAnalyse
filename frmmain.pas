@@ -9,7 +9,7 @@ uses
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
   SynEditMarks, strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
-  Clipbrd, shellapi,
+  Clipbrd, shellapi, SynEditMiscClasses, SynEditMarkupSpecialLine,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types;
 
 type
@@ -63,12 +63,13 @@ type
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
     TreeView1: TTreeView;
+    procedure Button1Click(Sender: TObject);
     procedure FindDialog1Find(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
-      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+      WheelDelta: integer; MousePos: TPoint; var Handled: boolean);
     procedure mnuBookMark1Click(Sender: TObject);
     procedure mnuBookmarksClick(Sender: TObject);
     procedure mnuColorSchemeClick(Sender: TObject);
@@ -137,6 +138,13 @@ type
     procedure AddRootTreenodesToTreeview;
     procedure ShowFileInPagecontrolAsTabsheet(const sPfad: string);
     procedure StartPathAnalyse;
+    procedure SynEditPreviewDblClick(Sender: TObject);
+    procedure SynEditPreviewSpecialLineMarkup(Sender: TObject;
+      Line: integer; var Special: boolean; Markup: TSynSelectedColor);
+    procedure synmemoChange(Sender: TObject);
+    procedure synmemoClick(Sender: TObject);
+
+
   public
   end;
 
@@ -168,30 +176,32 @@ begin
 end;
 
 procedure TfrmMainView.ChangeSchema(Sender: TObject);
-var mi : TMenuItem;
-  i : integer;
-  OneColorScheme : TOneColorScheme;
+var
+  mi: TMenuItem;
+  i: integer;
+  OneColorScheme: TOneColorScheme;
 begin
   mi := TMenuItem(Sender);
 
-  for i := 0 to mi.Parent.Count -1 do
-    mi.Parent.Items[i].checked := false ;
+  for i := 0 to mi.Parent.Count - 1 do
+    mi.Parent.Items[i].Checked := False;
 
 
-  for i := 0 to frmMainController.slColorScheme.Count -1 do
+  for i := 0 to frmMainController.slColorScheme.Count - 1 do
+  begin
+    if mi.Caption = frmMainController.slColorScheme[i] then
     begin
-    if mi.Caption =  frmMainController.slColorScheme[i] then
-      begin
-      OneColorScheme := TOneColorScheme(frmMainController.slColorScheme.Objects[i]  ) ;
+      OneColorScheme := TOneColorScheme(frmMainController.slColorScheme.Objects[i]);
       frmMainController.slColorScheme.activeColorScheme := OneColorScheme;
-      mi.checked := true;
-      end;
+      mi.Checked := True;
     end;
+  end;
 end;
 
 procedure TfrmMainView.FormCreate(Sender: TObject);
-var i : integer;
-  mi : TMenuItem;
+var
+  i: integer;
+  mi: TMenuItem;
 begin
   frmMainController := TFrmMainController.Create;
 
@@ -199,15 +209,14 @@ begin
     ToolBar1.Visible := False;
 
 
-  for i := 0 to  frmMainController.slColorScheme.Count -1 do
-    begin
+  for i := 0 to frmMainController.slColorScheme.Count - 1 do
+  begin
     mi := TMenuItem.Create(mnuColorScheme);
     mnuColorScheme.Add(mi);
-    mi.Caption:=frmMainController.slColorScheme[i];
-    mi.OnClick:=@ChangeSchema;
+    mi.Caption := frmMainController.slColorScheme[i];
+    mi.OnClick := @ChangeSchema;
 
-    end;
-
+  end;
 
 end;
 
@@ -216,14 +225,18 @@ procedure TfrmMainView.FindDialog1Find(Sender: TObject);
   srOptions: TSynSearchOptions;  }
 
 begin
-  if frmMainController.myActiveSynMemo = nil then
+  if frmMainController.myActiveOneTabsheet = nil then
+    exit;
+
+  if frmMainController.myActiveOneTabsheet.SynMemo = nil then
     exit;
 
 
-  if pos(FindDialog1.FindText, frmMainController.myActiveSynMemo.Lines.Text) > 0 then
+  if pos(FindDialog1.FindText,
+    frmMainController.myActiveOneTabsheet.SynMemo.Lines.Text) > 0 then
   begin
     frmMainController.sLastSearch := FindDialog1.FindText;
-    frmMainController.myActiveSynMemo.SetFocus;
+    frmMainController.myActiveOneTabsheet.SynMemo.SetFocus;
     MarkLineContainsThisWord(frmMainController.sLastSearch);
     FindDialog1.CloseDialog;
   end;
@@ -243,6 +256,11 @@ begin
   SHowMessage('Yes');
 end else
   SHowMessage('No');      }
+end;
+
+procedure TfrmMainView.Button1Click(Sender: TObject);
+begin
+
 end;
 
 procedure TfrmMainView.FormCloseQuery(Sender: TObject; var CanClose: boolean);
@@ -267,10 +285,8 @@ begin
 end;
 
 procedure TfrmMainView.FormMouseWheel(Sender: TObject; Shift: TShiftState;
-  WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+  WheelDelta: integer; MousePos: TPoint; var Handled: boolean);
 begin
-
-
 
 end;
 
@@ -295,15 +311,15 @@ begin
   begin
 
     if frmBookmarks.iKeyPressed >= 0 then
-      frmMainController.myActiveSynMemo.SetBookMark(
-        frmBookmarks.iKeyPressed, frmMainController.myActiveSynMemo.CaretX,
-        frmMainController.myActiveSynMemo.CaretY)
+      frmMainController.myActiveOneTabsheet.SynMemo.SetBookMark(
+        frmBookmarks.iKeyPressed, frmMainController.myActiveOneTabsheet.SynMemo.CaretX,
+        frmMainController.myActiveOneTabsheet.SynMemo.CaretY)
     else
     if frmBookmarks.obmMarked <> nil then
     begin
       frmMainController.SetTabsheetAktivForFile(frmBookmarks.obmMarked.sFileName);
-      self.PageControl1.ActivePage := frmMainController.myActiveTabsheet;
-      frmMainController.myActiveSynMemo.GotoBookMark(
+      self.PageControl1.ActivePage := frmMainController.myActiveOneTabsheet.Tabsheet;
+      frmMainController.myActiveOneTabsheet.SynMemo.GotoBookMark(
         frmBookmarks.obmMarked.iBookmarkNr);
     end;
 
@@ -336,7 +352,7 @@ begin
   frmSelectKeywordsObj.showmodal;
   if frmSelectKeywordsObj.ModalResult = mrOk then
   begin
-    frmMainController.myActiveSynMemo.InsertTextAtCaret(
+    frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(
       frmSelectKeywordsObj.GetSelectedKeyWords);
   end;
   frmSelectKeywordsObj.Free;
@@ -344,7 +360,7 @@ end;
 
 procedure TfrmMainView.mnuFindClick(Sender: TObject);
 begin
-  if frmMainController.myActiveSynMemo = nil then
+  if frmMainController.myActiveOneTabsheet.SynMemo = nil then
     exit;
 
   if FindDialog1.Execute then
@@ -365,7 +381,7 @@ var
   i, iPos: integer;
   point: TPoint;
 begin
-  mySyn := frmMainController.myActiveSynMemo;
+  mySyn := frmMainController.myActiveOneTabsheet.SynMemo;
 
 
   for i := mySyn.CaretY to mySyn.Lines.Count - 1 do
@@ -391,7 +407,7 @@ begin
   begin
     i := strtointdef(s, -1);
     if i <> -1 then
-      self.frmMainController.myActiveSynMemo.CaretY := i;
+      self.frmMainController.myActiveOneTabsheet.SynMemo.CaretY := i;
 
   end;
 
@@ -400,7 +416,7 @@ end;
 procedure TfrmMainView.mnuLargerClick(Sender: TObject);
 begin
 
-  frmMainController.iFontSize1  := frmMainController.iFontSize1 + 1;
+  frmMainController.iFontSize1 := frmMainController.iFontSize1 + 1;
   frmMainController.SetHeightToAllSynedit;
 
 end;
@@ -427,7 +443,7 @@ procedure TfrmMainView.mnuOpenMarkedFileNameClick(Sender: TObject);
 var
   s, sFilename: string;
 begin
-  s := frmMainController.myActiveSynMemo.SelText;
+  s := frmMainController.myActiveOneTabsheet.SynMemo.SelText;
   sFilename := frmMainController.GetFileNameToPartFileName(s);
   if sFilename <> '' then
     ShowFileInPagecontrolAsTabsheet(sFilename);
@@ -458,18 +474,18 @@ begin
   sPfad := extractfilepath(sPfad);
 
 
-  ShellExecute(0, 'open', PCHAR(sPfad), NIL, NIL, 5);  //5 =  SW_SHOW
+  ShellExecute(0, 'open', PChar(sPfad), nil, nil, 5);  //5 =  SW_SHOW
 
 end;
 
 procedure TfrmMainView.mnuResyncClick(Sender: TObject);
 var
   sl: TStringList;
-  i : integer;
+  i: integer;
 begin
 
-  sl :=  TStringList.create;
-  sl.text := frmMainController.slOpendTabsheets.text;
+  sl := TStringList.Create;
+  sl.Text := frmMainController.slOpendTabsheets.Text;
 
   if not CloseAllTabsheets then
     exit;
@@ -478,11 +494,11 @@ begin
 
 
 
-  for i := 0 to sl.count -1 do
+  for i := 0 to sl.Count - 1 do
     if fileexists(sl[i]) then
       ShowFileInPagecontrolAsTabsheet(sl[i]);
 
-  sl.free;
+  sl.Free;
 end;
 
 procedure TfrmMainView.mnuSave1Click(Sender: TObject);
@@ -525,7 +541,7 @@ var
   s: string;
   point: TPoint;
 begin
-  mySyn := frmMainController.myActiveSynMemo;
+  mySyn := frmMainController.myActiveOneTabsheet.SynMemo;
   s := mySyn.SelText;
 
   if s = '' then
@@ -548,7 +564,7 @@ var
   point: TPoint;
   i, iPos: integer;
 begin
-  mySyn := frmMainController.myActiveSynMemo;
+  mySyn := frmMainController.myActiveOneTabsheet.SynMemo;
   point := mySyn.LogicalCaretXY;
   s := trim(mySyn.GetWordAtRowCol(point));
 
@@ -574,7 +590,7 @@ var
   point: TPoint;
   i, iPos: integer;
 begin
-  mySyn := frmMainController.myActiveSynMemo;
+  mySyn := frmMainController.myActiveOneTabsheet.SynMemo;
   point := mySyn.LogicalCaretXY;
   s := trim(mySyn.GetWordAtRowCol(point));
 
@@ -700,24 +716,26 @@ begin
   if SearchTabsheetOrCreateNew(sPfad) then
   begin
     if pos('.HTM', uppercase(sPfad)) > 0 then
-      frmMainController.myActiveSynMemo.Highlighter := SynHTMLSyn1
+      frmMainController.myActiveOneTabsheet.SynMemo.Highlighter := SynHTMLSyn1
     else
     if pos('.CSS', uppercase(sPfad)) > 0 then
-      frmMainController.myActiveSynMemo.Highlighter := SynCssSyn1
+      frmMainController.myActiveOneTabsheet.SynMemo.Highlighter := SynCssSyn1
     else
     begin
-      frmMainController.myActiveSynMemo.Highlighter := SynAnySyn1;
+      frmMainController.myActiveOneTabsheet.SynMemo.Highlighter := SynAnySyn1;
       if pos('.JS', uppercase(sPfad)) > 0 then
       begin
         {
         SynAnySyn1.KeyWords.Clear;
         SynAnySyn1.KeyWords.add('ANGULAR');          }
-        frmMainController.myActiveSynMemo.Refresh;
+        frmMainController.myActiveOneTabsheet.SynMemo.Refresh;
       end;
     end;
 
-    frmMainController.myActiveTabsheet.Caption := extractfilename(sPfad);
-    frmMainController.myActiveSynMemo.Lines.LoadFromFile(sPfad);
+    frmMainController.myActiveOneTabsheet.Tabsheet.Caption := extractfilename(sPfad);
+    frmMainController.myActiveOneTabsheet.SynMemo.Lines.LoadFromFile(sPfad);
+
+    frmMainController.myActiveOneTabsheet.setPreviewText;
   end;
 end;
 
@@ -813,10 +831,10 @@ end;
 
 procedure TfrmMainView.mnuSmallerClick(Sender: TObject);
 begin
-if frmMainController.iFontSize1 > 1 then
+  if frmMainController.iFontSize1 > 1 then
   begin
-  frmMainController.iFontSize1  := frmMainController.iFontSize1 - 1;
-  frmMainController.SetHeightToAllSynedit;
+    frmMainController.iFontSize1 := frmMainController.iFontSize1 - 1;
+    frmMainController.SetHeightToAllSynedit;
   end;
 end;
 
@@ -824,8 +842,8 @@ procedure TfrmMainView.PageControl1Change(Sender: TObject);
 begin
   if PageControl1.ActivePage = nil then
   begin
-    frmMainController.myActiveTabsheet := nil;
-    frmMainController.myActiveSynMemo := nil;
+    frmMainController.myActiveOneTabsheet.Tabsheet := nil;
+    frmMainController.myActiveOneTabsheet.SynMemo := nil;
   end
   else
     frmMainController.SetActiveTabsheet(PageControl1.ActivePage);
@@ -836,7 +854,7 @@ var
   s: string;
 begin
   mnuOpenMarkedFileName.Visible := False;
-  s := frmMainController.myActiveSynMemo.SelText;
+  s := frmMainController.myActiveOneTabsheet.SynMemo.SelText;
   if length(s) > 3 then
   begin
     if frmMainController.GetFileNameToPartFileName(s) <> '' then
@@ -1007,7 +1025,6 @@ end;
 
 
 
-
 procedure TfrmMainView.ToolButton1Click(Sender: TObject);
 begin
   frmMainController.sPfad := 'C:\temp\KonfigWeb';
@@ -1023,6 +1040,7 @@ procedure TfrmMainView.ToolButton3Click(Sender: TObject);
 begin
   frmMainController.sPfad := 'D:\BesuchHerrRammer\Konfigurator\Src';
   StartPathAnalyse;
+
 end;
 
 procedure TfrmMainView.ToolButton4Click(Sender: TObject);
@@ -1030,9 +1048,38 @@ begin
 
 end;
 
+procedure TfrmMainView.SynEditPreviewSpecialLineMarkup(Sender: TObject;
+  Line: integer; var Special: boolean; Markup: TSynSelectedColor);
+begin
+
+  if frmMainController.myActiveOneTabsheet.SynMemo.CaretY = line then
+  begin
+    Markup.Background := clred;
+    Special := True;
+  end;
+
+end;
+
+
+
+procedure TfrmMainView.synmemoChange(Sender: TObject);
+begin
+  frmMainController.myActiveOneTabsheet.setPreviewText;
+end;
+
+procedure TfrmMainView.synmemoClick(Sender: TObject);
+begin
+  frmMainController.myActiveOneTabsheet.setCarentFromEditToPreview  ;
+end;
+
+procedure TfrmMainView.SynEditPreviewDblClick(Sender: TObject);
+begin
+  frmMainController.myActiveOneTabsheet.setCarentFromPreviewToEdit;
+end;
+
 function TfrmMainView.SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
 var
-  i, i2,i3: integer;
+  i, i2, i3: integer;
   myOneTabsheet: TOneTabsheet;
 begin
   Result := False;
@@ -1048,68 +1095,68 @@ begin
   end;
 
 
-  frmMainController.myActiveTabsheet := Pagecontrol1.AddTabSheet;
-
-
-
-
-
-
-  frmMainController.myActiveSynMemo :=
-    TsynMemo.Create(frmMainController.myActiveTabsheet);
-
   myOneTabsheet := TOneTabsheet.Create;
-  myOneTabsheet.SynMemo := frmMainController.myActiveSynMemo;
-
-
+  frmMainController.myActiveOneTabsheet := myOneTabsheet;
+  myOneTabsheet.Tabsheet := Pagecontrol1.AddTabSheet;
+  myOneTabsheet.SynMemo :=
+    TsynMemo.Create(frmMainController.myActiveOneTabsheet.Tabsheet);
   myOneTabsheet.SynMemoPreview :=
-    TsynMemo.Create(frmMainController.myActiveTabsheet);
+    TsynMemo.Create(frmMainController.myActiveOneTabsheet.Tabsheet);
   myOneTabsheet.SynMemoPreview.Align := alRight;
   myOneTabsheet.SynMemoPreview.Visible := True;
-  myOneTabsheet.SynMemoPreview.Parent := frmMainController.myActiveTabsheet;
-  myOneTabsheet.SynMemoPreview.Width:= 70;
-  myOneTabsheet.SynMemoPreview.Font.Quality :=  fqProof;
-  myOneTabsheet.SynMemoPreview.Font.Size  :=  1;
-  myOneTabsheet.SynMemoPreview.Font.Name:=  'Consolas';
+  myOneTabsheet.SynMemoPreview.Parent := frmMainController.myActiveOneTabsheet.Tabsheet;
+  myOneTabsheet.SynMemoPreview.Width := 70;
+  myOneTabsheet.SynMemoPreview.Font.Quality := fqProof;
+  myOneTabsheet.SynMemoPreview.Font.Size := 1;
+  myOneTabsheet.SynMemoPreview.Font.Name := 'Consolas';
   myOneTabsheet.SynMemoPreview.ScrollBars := ssNone;
-  myOneTabsheet.SynMemoPreview.Gutter.visible := false;
-  myOneTabsheet.SynMemoPreview.readonly := true;
+  myOneTabsheet.SynMemoPreview.Gutter.Visible := False;
+  myOneTabsheet.SynMemoPreview.ReadOnly := True;
+  myOneTabsheet.SynMemoPreview.OnSpecialLineMarkup := @SynEditPreviewSpecialLineMarkup;
+  myOneTabsheet.SynMemoPreview.OnDblClick := @SynEditPreviewDblClick;
 
 
-  frmMainController.myActiveSynMemo.Align := alClient;
-  frmMainController.myActiveSynMemo.Visible := True;
-  frmMainController.myActiveSynMemo.Parent := frmMainController.myActiveTabsheet;
+  frmMainController.myActiveOneTabsheet.SynMemo.Align := alClient;
+  frmMainController.myActiveOneTabsheet.SynMemo.Visible := True;
+  frmMainController.myActiveOneTabsheet.SynMemo.Parent :=
+    frmMainController.myActiveOneTabsheet.Tabsheet;
 
-  frmMainController.myActiveSynMemo.PopupMenu := PopupMenuSynedit;
+  frmMainController.myActiveOneTabsheet.SynMemo.PopupMenu := PopupMenuSynedit;
 
   myOneTabsheet.SynMemo.BookMarkOptions.BookmarkImages := DataModule1.imgBookMarks;
 
+  myOneTabsheet.SynMemo.OnChange := @synmemoChange;
+  myOneTabsheet.SynMemo.OnClick := @synmemoClick;
+
 
   if frmMainController.slColorScheme.activeColorScheme <> nil then
-    begin
-    i3 :=frmMainController.slColorScheme.activeColorScheme.Color ;
-    myOneTabsheet.SynMemo.Color := i3 ; //  ;
-    i3 := frmMainController.slColorScheme.activeColorScheme.Font.Color ;
-    myOneTabsheet.SynMemo.Font.Color  := i3 ;
-    end;
+  begin
+    i3 := frmMainController.slColorScheme.activeColorScheme.Color;
+    myOneTabsheet.SynMemo.Color := i3; //  ;
+    i3 := frmMainController.slColorScheme.activeColorScheme.Font.Color;
+    myOneTabsheet.SynMemo.Font.Color := i3;
 
-  myOneTabsheet.SynMemo.Font.Quality :=  fqProof;
-  myOneTabsheet.SynMemo.Font.Size  :=  frmMainController.iFontSize1;
-  myOneTabsheet.SynMemo.Font.Name:=  'Consolas';
+    myOneTabsheet.SchemeFromEditToPreview;
+  end;
 
-  myOneTabsheet.Tabsheet := frmMainController.myActiveTabsheet;
+  myOneTabsheet.SynMemo.Font.Quality := fqProof;
+  myOneTabsheet.SynMemo.Font.Size := frmMainController.iFontSize1;
+  myOneTabsheet.SynMemo.Font.Name := 'Consolas';
 
-  frmMainController.myActiveTabsheet.ImageIndex :=
+
+  myOneTabsheet.Tabsheet := frmMainController.myActiveOneTabsheet.Tabsheet;
+
+  frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex :=
     frmMainController.CalculateIndexOfFileExtension(sMyFileName);
 
   i2 := frmMainController.GetImageindexForFileIfItContainsOnlyTheSameType(sMyFileName);
 
   if i2 >= 0 then
-    frmMainController.myActiveTabsheet.ImageIndex := i2;
+    frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex := i2;
 
   frmMainController.slOpendTabsheets.AddObject(sMyFileName, myOneTabsheet);
 
-  self.PageControl1.ActivePage := frmMainController.myActiveTabsheet;
+  self.PageControl1.ActivePage := frmMainController.myActiveOneTabsheet.Tabsheet;
   Result := True;
 
   mnuSave.Enabled := True;
@@ -1243,16 +1290,16 @@ begin
   boooWord3Different := (sWord <> sWord3);
 
 
-  for i := frmMainController.myActiveSynMemo.Marks.Count - 1 downto 0 do
+  for i := frmMainController.myActiveOneTabsheet.SynMemo.Marks.Count - 1 downto 0 do
   begin
-    m := frmMainController.myActiveSynMemo.Marks[i];
+    m := frmMainController.myActiveOneTabsheet.SynMemo.Marks[i];
     if m.ImageIndex = constItemIndexMarkFound then
-      frmMainController.myActiveSynMemo.Marks.Delete(i);
+      frmMainController.myActiveOneTabsheet.SynMemo.Marks.Delete(i);
   end;
 
-  for i := 0 to frmMainController.myActiveSynMemo.Lines.Count - 1 do
+  for i := 0 to frmMainController.myActiveOneTabsheet.SynMemo.Lines.Count - 1 do
   begin
-    s := frmMainController.myActiveSynMemo.Lines[i];
+    s := frmMainController.myActiveOneTabsheet.SynMemo.Lines[i];
     ipos := pos(sWord, s);
     if boooWord2Different then
       if ipos = 0 then
@@ -1277,10 +1324,10 @@ begin
 
         point.x := ipos;
 
-        frmMainController.myActiveSynMemo.LogicalCaretXY := point;
+        frmMainController.myActiveOneTabsheet.SynMemo.LogicalCaretXY := point;
 
-        frmMainController.myActiveSynMemo.SetFocus;
-        frmMainController.myActiveSynMemo.SelectWord;
+        frmMainController.myActiveOneTabsheet.SynMemo.SetFocus;
+        frmMainController.myActiveOneTabsheet.SynMemo.SelectWord;
         gefunden := True;
       end;
 
@@ -1294,12 +1341,12 @@ procedure TfrmMainView.AddEditMarkToLine(iImageindex, iLine: integer);
 var
   m: TSynEditMark;
 begin
-  m := TSynEditMark.Create(frmMainController.myActiveSynMemo);
+  m := TSynEditMark.Create(frmMainController.myActiveOneTabsheet.SynMemo);
   m.Line := iLine;
   m.ImageList := DataModule1.ImageList1;
   m.ImageIndex := iImageindex;
   m.Visible := True;
-  frmMainController.myActiveSynMemo.Marks.Add(m);
+  frmMainController.myActiveOneTabsheet.SynMemo.Marks.Add(m);
 end;
 
 procedure TfrmMainView.AddSearchInPathToTree(const s: string);
