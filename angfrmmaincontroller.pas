@@ -38,6 +38,7 @@ type
   public
     Tabsheet: TTabSheet;
     SynMemo: TsynMemo;
+    SynMemoPreview: TsynMemo;
   end;
 
   { TOneColorScheme }
@@ -79,6 +80,7 @@ type
       iImageindex: integer): boolean;
     procedure AnalyzeFileContent(sDateiname: string; oneFileInfo: TOneFileInfo);
     procedure SearchForNGInFile(oneFileInfo: TOneFileInfo);
+
   public
     sPfad: string;
     slAllFilesFound: TStringList;
@@ -95,6 +97,8 @@ type
     sLastSearch: string;
 
     slColorScheme : TColorSchemeList;
+    iFontSize1   : integer;
+
 
     function ChangeMinusToCamelCase(sSuchtext: string): string;
     function ChangeCamelCaseToMinusString(sSuchtext: string): string;
@@ -124,6 +128,7 @@ type
     procedure GetAllUsedNgKeyWords(sl: TStringList);
     function FindTreenodePointerToFilename(sFilename: string): TObject;
     function GetAngularTypesForFile(sFile : string) : string;
+        procedure SetHeightToAllSynedit;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -228,6 +233,8 @@ begin
   slOpendTabsheets.OwnsObjects := True;
 
   slColorScheme := TColorSchemeList.Create;
+
+  iFontSize1 := 10 ;
 
 end;
 
@@ -1100,6 +1107,20 @@ begin
     for n := 0 to oneFileInfo.slngWords.Count - 1 do
       sl.add(oneFileInfo.slngWords[n]);
 
+  end;
+
+end;
+
+procedure TFrmMainController.SetHeightToAllSynedit;
+var
+  i: integer;
+  myOneTabsheet: TOneTabsheet;
+begin
+
+  for i := 0 to self.slOpendTabsheets.Count - 1 do
+  begin
+      myOneTabsheet := TOneTabsheet(self.slOpendTabsheets.Objects[i]);
+      myOneTabsheet.SynMemo.Font.Size := self.iFontSize1 ;
   end;
 
 end;

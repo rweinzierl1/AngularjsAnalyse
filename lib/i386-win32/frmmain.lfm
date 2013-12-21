@@ -10,6 +10,7 @@ object frmMainView: TfrmMainView
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnMouseWheel = FormMouseWheel
   LCLVersion = '1.0.14.0'
   object TreeView1: TTreeView
     Left = 0
@@ -174,12 +175,12 @@ object frmMainView: TfrmMainView
         Caption = 'Font'
         object mnuLarger: TMenuItem
           Caption = 'Larger'
-          ShortCut = 16491
+          ShortCut = 16464
           OnClick = mnuLargerClick
         end
         object mnuSmaller: TMenuItem
           Caption = 'Smaller'
-          ShortCut = 16493
+          ShortCut = 16460
           OnClick = mnuSmallerClick
         end
       end

@@ -10,7 +10,7 @@ uses
   SynEditMarks, strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
   Clipbrd, shellapi,
-  angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList;
+  angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types;
 
 type
 
@@ -67,6 +67,8 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
+      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure mnuBookMark1Click(Sender: TObject);
     procedure mnuBookmarksClick(Sender: TObject);
     procedure mnuColorSchemeClick(Sender: TObject);
@@ -172,6 +174,9 @@ var mi : TMenuItem;
 begin
   mi := TMenuItem(Sender);
 
+  for i := 0 to mi.Parent.Count -1 do
+    mi.Parent.Items[i].checked := false ;
+
 
   for i := 0 to frmMainController.slColorScheme.Count -1 do
     begin
@@ -179,6 +184,7 @@ begin
       begin
       OneColorScheme := TOneColorScheme(frmMainController.slColorScheme.Objects[i]  ) ;
       frmMainController.slColorScheme.activeColorScheme := OneColorScheme;
+      mi.checked := true;
       end;
     end;
 end;
@@ -258,6 +264,14 @@ end;
 procedure TfrmMainView.FormDestroy(Sender: TObject);
 begin
   frmMainController.Free;
+end;
+
+procedure TfrmMainView.FormMouseWheel(Sender: TObject; Shift: TShiftState;
+  WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+begin
+
+
+
 end;
 
 procedure TfrmMainView.mnuBookMark1Click(Sender: TObject);
@@ -385,7 +399,10 @@ end;
 
 procedure TfrmMainView.mnuLargerClick(Sender: TObject);
 begin
-  frmMainController.myActiveSynMemo.Font.Height := frmMainController.myActiveSynMemo.Font.Height +1 ;
+
+  frmMainController.iFontSize1  := frmMainController.iFontSize1 + 1;
+  frmMainController.SetHeightToAllSynedit;
+
 end;
 
 procedure TfrmMainView.mnuOpenAFileClick(Sender: TObject);
@@ -796,7 +813,11 @@ end;
 
 procedure TfrmMainView.mnuSmallerClick(Sender: TObject);
 begin
- frmMainController.myActiveSynMemo.Font.Height := frmMainController.myActiveSynMemo.Font.Height -1 ;
+if frmMainController.iFontSize1 > 1 then
+  begin
+  frmMainController.iFontSize1  := frmMainController.iFontSize1 - 1;
+  frmMainController.SetHeightToAllSynedit;
+  end;
 end;
 
 procedure TfrmMainView.PageControl1Change(Sender: TObject);
@@ -985,6 +1006,8 @@ end;
 
 
 
+
+
 procedure TfrmMainView.ToolButton1Click(Sender: TObject);
 begin
   frmMainController.sPfad := 'C:\temp\KonfigWeb';
@@ -1026,17 +1049,38 @@ begin
 
 
   frmMainController.myActiveTabsheet := Pagecontrol1.AddTabSheet;
+
+
+
+
+
+
   frmMainController.myActiveSynMemo :=
     TsynMemo.Create(frmMainController.myActiveTabsheet);
+
+  myOneTabsheet := TOneTabsheet.Create;
+  myOneTabsheet.SynMemo := frmMainController.myActiveSynMemo;
+
+
+  myOneTabsheet.SynMemoPreview :=
+    TsynMemo.Create(frmMainController.myActiveTabsheet);
+  myOneTabsheet.SynMemoPreview.Align := alRight;
+  myOneTabsheet.SynMemoPreview.Visible := True;
+  myOneTabsheet.SynMemoPreview.Parent := frmMainController.myActiveTabsheet;
+  myOneTabsheet.SynMemoPreview.Width:= 70;
+  myOneTabsheet.SynMemoPreview.Font.Quality :=  fqProof;
+  myOneTabsheet.SynMemoPreview.Font.Size  :=  1;
+  myOneTabsheet.SynMemoPreview.Font.Name:=  'Consolas';
+  myOneTabsheet.SynMemoPreview.ScrollBars := ssNone;
+  myOneTabsheet.SynMemoPreview.Gutter.visible := false;
+  myOneTabsheet.SynMemoPreview.readonly := true;
+
+
   frmMainController.myActiveSynMemo.Align := alClient;
   frmMainController.myActiveSynMemo.Visible := True;
   frmMainController.myActiveSynMemo.Parent := frmMainController.myActiveTabsheet;
 
   frmMainController.myActiveSynMemo.PopupMenu := PopupMenuSynedit;
-
-
-  myOneTabsheet := TOneTabsheet.Create;
-  myOneTabsheet.SynMemo := frmMainController.myActiveSynMemo;
 
   myOneTabsheet.SynMemo.BookMarkOptions.BookmarkImages := DataModule1.imgBookMarks;
 
@@ -1050,6 +1094,8 @@ begin
     end;
 
   myOneTabsheet.SynMemo.Font.Quality :=  fqProof;
+  myOneTabsheet.SynMemo.Font.Size  :=  frmMainController.iFontSize1;
+  myOneTabsheet.SynMemo.Font.Name:=  'Consolas';
 
   myOneTabsheet.Tabsheet := frmMainController.myActiveTabsheet;
 
