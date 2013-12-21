@@ -38,7 +38,11 @@ type
     eFilterTypes: TEdit;
     eFilterPath: TEdit;
     eFilterNg: TEdit;
+    lblDI: TLabel;
+    lblTypes: TLabel;
+    lblPath: TLabel;
     lblCount: TLabel;
+    lblNg: TLabel;
     ListView1: TListView;
     mnuCopyClipboard: TMenuItem;
     Panel1: TPanel;

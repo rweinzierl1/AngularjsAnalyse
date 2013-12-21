@@ -9,7 +9,7 @@ uses
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
   SynEditMarks, strutils,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
-  Clipbrd, shellapi, SynEditMiscClasses, SynEditMarkupSpecialLine,
+  Clipbrd, ActnList, shellapi, SynEditMiscClasses, SynEditMarkupSpecialLine,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types;
 
 type
@@ -17,9 +17,14 @@ type
   { TfrmMainView }
 
   TfrmMainView = class(TForm)
+    acSelectDir: TAction;
+    acOpenAFile: TAction;
+    ActionList1: TActionList;
     FindDialog1: TFindDialog;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    MenuItem3: TMenuItem;
     mnuSmaller: TMenuItem;
     mnuLarger: TMenuItem;
     mnuFont: TMenuItem;
@@ -51,6 +56,7 @@ type
     OpenDialog1: TOpenDialog;
     PageControl1: TPageControl;
     PopupMenu1: TPopupMenu;
+    PopupMenuRecentFiles: TPopupMenu;
     PopupMenuTreeview: TPopupMenu;
     PopupMenuSynedit: TPopupMenu;
     Splitter1: TSplitter;
@@ -60,9 +66,12 @@ type
     SynHTMLSyn1: TSynHTMLSyn;
     ToolBar1: TToolBar;
     ToolButton1: TToolButton;
+    ToolButton2: TToolButton;
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
     TreeView1: TTreeView;
+    procedure acOpenAFileExecute(Sender: TObject);
+    procedure acSelectDirExecute(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure FindDialog1Find(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
@@ -70,6 +79,8 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: integer; MousePos: TPoint; var Handled: boolean);
+    procedure MenuItem2Click(Sender: TObject);
+    procedure MenuItem3Click(Sender: TObject);
     procedure mnuBookMark1Click(Sender: TObject);
     procedure mnuBookmarksClick(Sender: TObject);
     procedure mnuColorSchemeClick(Sender: TObject);
@@ -143,6 +154,7 @@ type
       Line: integer; var Special: boolean; Markup: TSynSelectedColor);
     procedure synmemoChange(Sender: TObject);
     procedure synmemoClick(Sender: TObject);
+    procedure synmemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 
 
   public
@@ -178,8 +190,9 @@ end;
 procedure TfrmMainView.ChangeSchema(Sender: TObject);
 var
   mi: TMenuItem;
-  i: integer;
+  i,n: integer;
   OneColorScheme: TOneColorScheme;
+  OneTabsheet: TOneTabsheet;
 begin
   mi := TMenuItem(Sender);
 
@@ -194,6 +207,14 @@ begin
       OneColorScheme := TOneColorScheme(frmMainController.slColorScheme.Objects[i]);
       frmMainController.slColorScheme.activeColorScheme := OneColorScheme;
       mi.Checked := True;
+
+      for n := 0 to  frmMainController.slOpendTabsheets.Count -1 do
+        begin
+        OneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[n]);
+        OneTabsheet.setActiveColorScheme(OneColorScheme);
+
+
+        end;
     end;
   end;
 end;
@@ -263,6 +284,39 @@ begin
 
 end;
 
+procedure TfrmMainView.acSelectDirExecute(Sender: TObject);
+  var
+  chosenDirectory: string;
+begin
+
+  if not CloseAllTabsheets then
+    exit;
+
+
+  if SelectDirectory('Select a directory', 'C:\', chosenDirectory) then
+  begin
+    frmMainController.sPfad := chosenDirectory;
+    StartPathAnalyse;
+  end;
+end;
+
+procedure TfrmMainView.acOpenAFileExecute(Sender: TObject);
+begin
+Application.CreateForm(TfrmFileList, frmFileList);
+
+  frmFileList.SynAnySyn1 := SynAnySyn1;
+  frmFileList.SynCssSyn1 := SynCssSyn1;
+  frmFileList.SynHTMLSyn1 := SynHTMLSyn1;
+
+  frmFileList.Initialize(frmMainController);
+  frmFileList.showmodal;
+  if frmFileList.ModalResult = mrOk then
+  begin
+    ShowFileInPagecontrolAsTabsheet(frmMainController.sPfad + frmFileList.sFilename);
+  end;
+  frmFileList.Free;
+end;
+
 procedure TfrmMainView.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 var
   iAnswer: integer;
@@ -288,6 +342,18 @@ procedure TfrmMainView.FormMouseWheel(Sender: TObject; Shift: TShiftState;
   WheelDelta: integer; MousePos: TPoint; var Handled: boolean);
 begin
 
+end;
+
+procedure TfrmMainView.MenuItem2Click(Sender: TObject);
+begin
+    frmMainController.sPfad := 'C:\temp\KonfigWeb';
+  StartPathAnalyse;
+end;
+
+procedure TfrmMainView.MenuItem3Click(Sender: TObject);
+begin
+    frmMainController.sPfad := 'D:\BesuchHerrRammer\Konfigurator\Src';
+  StartPathAnalyse;
 end;
 
 procedure TfrmMainView.mnuBookMark1Click(Sender: TObject);
@@ -423,19 +489,7 @@ end;
 
 procedure TfrmMainView.mnuOpenAFileClick(Sender: TObject);
 begin
-  Application.CreateForm(TfrmFileList, frmFileList);
 
-  frmFileList.SynAnySyn1 := SynAnySyn1;
-  frmFileList.SynCssSyn1 := SynCssSyn1;
-  frmFileList.SynHTMLSyn1 := SynHTMLSyn1;
-
-  frmFileList.Initialize(frmMainController);
-  frmFileList.showmodal;
-  if frmFileList.ModalResult = mrOk then
-  begin
-    ShowFileInPagecontrolAsTabsheet(frmMainController.sPfad + frmFileList.sFilename);
-  end;
-  frmFileList.Free;
 
 end;
 
@@ -781,19 +835,7 @@ end;
 
 
 procedure TfrmMainView.mnuPfadOeffnenClick(Sender: TObject);
-var
-  chosenDirectory: string;
 begin
-
-  if not CloseAllTabsheets then
-    exit;
-
-
-  if SelectDirectory('Select a directory', 'C:\', chosenDirectory) then
-  begin
-    frmMainController.sPfad := chosenDirectory;
-    StartPathAnalyse;
-  end;
 
 end;
 
@@ -938,7 +980,9 @@ var
   sl: TStringList;
   treenode: TTreenode;
 begin
-  mnuOpenAFile.Enabled := True;
+  //mnuOpenAFile.Enabled := True;
+  acOpenAFile.Enabled := true;
+
 
   AddRootTreenodesToTreeview;
   frmMainController.ClearAll;
@@ -1027,8 +1071,7 @@ end;
 
 procedure TfrmMainView.ToolButton1Click(Sender: TObject);
 begin
-  frmMainController.sPfad := 'C:\temp\KonfigWeb';
-  StartPathAnalyse;
+
 end;
 
 procedure TfrmMainView.ToolButton2Click(Sender: TObject);
@@ -1038,8 +1081,7 @@ end;
 
 procedure TfrmMainView.ToolButton3Click(Sender: TObject);
 begin
-  frmMainController.sPfad := 'D:\BesuchHerrRammer\Konfigurator\Src';
-  StartPathAnalyse;
+
 
 end;
 
@@ -1072,9 +1114,20 @@ begin
   frmMainController.myActiveOneTabsheet.setCarentFromEditToPreview  ;
 end;
 
+procedure TfrmMainView.synmemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  frmMainController.myActiveOneTabsheet.setCarentFromEditToPreview  ;
+end;
+
 procedure TfrmMainView.SynEditPreviewDblClick(Sender: TObject);
+var i : integer;
 begin
   frmMainController.myActiveOneTabsheet.setCarentFromPreviewToEdit;
+
+  frmMainController.DeleteAllMarksWithIndexIndexMarkFound;
+
+  i := TSynmemo(Sender).CaretY;
+  AddEditMarkToLine(constItemIndexMarkFound, i );
 end;
 
 function TfrmMainView.SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
@@ -1127,16 +1180,16 @@ begin
 
   myOneTabsheet.SynMemo.OnChange := @synmemoChange;
   myOneTabsheet.SynMemo.OnClick := @synmemoClick;
+  myOneTabsheet.SynMemo.OnKeyUp := @synmemoKeyUp;
+
 
 
   if frmMainController.slColorScheme.activeColorScheme <> nil then
   begin
-    i3 := frmMainController.slColorScheme.activeColorScheme.Color;
-    myOneTabsheet.SynMemo.Color := i3; //  ;
-    i3 := frmMainController.slColorScheme.activeColorScheme.Font.Color;
-    myOneTabsheet.SynMemo.Font.Color := i3;
+    myOneTabsheet.setActiveColorScheme(frmMainController.slColorScheme.activeColorScheme);
 
-    myOneTabsheet.SchemeFromEditToPreview;
+
+
   end;
 
   myOneTabsheet.SynMemo.Font.Quality := fqProof;
@@ -1269,10 +1322,10 @@ end;
 
 procedure TfrmMainView.MarkLineContainsThisWord(sWord: string);
 var
-  i: integer;
+  i : integer ;
   ipos: integer;
   s: string;
-  m: TSynEditMark;
+
   sWord2: string;
   sWord3: string;
 
@@ -1289,13 +1342,9 @@ begin
   boooWord2Different := (sWord <> sWord2);
   boooWord3Different := (sWord <> sWord3);
 
+  frmMainController.DeleteAllMarksWithIndexIndexMarkFound;
 
-  for i := frmMainController.myActiveOneTabsheet.SynMemo.Marks.Count - 1 downto 0 do
-  begin
-    m := frmMainController.myActiveOneTabsheet.SynMemo.Marks[i];
-    if m.ImageIndex = constItemIndexMarkFound then
-      frmMainController.myActiveOneTabsheet.SynMemo.Marks.Delete(i);
-  end;
+
 
   for i := 0 to frmMainController.myActiveOneTabsheet.SynMemo.Lines.Count - 1 do
   begin
@@ -1337,17 +1386,7 @@ begin
 
 end;
 
-procedure TfrmMainView.AddEditMarkToLine(iImageindex, iLine: integer);
-var
-  m: TSynEditMark;
-begin
-  m := TSynEditMark.Create(frmMainController.myActiveOneTabsheet.SynMemo);
-  m.Line := iLine;
-  m.ImageList := DataModule1.ImageList1;
-  m.ImageIndex := iImageindex;
-  m.Visible := True;
-  frmMainController.myActiveOneTabsheet.SynMemo.Marks.Add(m);
-end;
+
 
 procedure TfrmMainView.AddSearchInPathToTree(const s: string);
 var
@@ -1392,5 +1431,16 @@ begin
   Result := True;
 end;
 
+procedure TfrmMainView.AddEditMarkToLine(iImageindex, iLine: integer);
+var
+  m: TSynEditMark;
+begin
+  m := TSynEditMark.Create(frmMainController.myActiveOneTabsheet.SynMemo);
+  m.Line := iLine;
+  m.ImageList := DataModule1.ImageList1;
+  m.ImageIndex := iImageindex;
+  m.Visible := True;
+ frmMainController.myActiveOneTabsheet.SynMemo.Marks.Add(m);
+end;
 
 end.

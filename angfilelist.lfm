@@ -1,5 +1,5 @@
 object frmFileList: TfrmFileList
-  Left = 448
+  Left = 553
   Height = 338
   Top = 349
   Width = 769
@@ -612,7 +612,7 @@ object frmFileList: TfrmFileList
       TabOrder = 0
     end
     object eFilterPath: TEdit
-      Left = 130
+      Left = 158
       Height = 22
       Hint = 'path'
       Top = 1
@@ -624,7 +624,7 @@ object frmFileList: TfrmFileList
       TabOrder = 1
     end
     object eFilterNg: TEdit
-      Left = 267
+      Left = 313
       Height = 22
       Hint = 'ng'
       Top = 1
@@ -636,7 +636,7 @@ object frmFileList: TfrmFileList
       TabOrder = 2
     end
     object eFilterAng: TEdit
-      Left = 404
+      Left = 465
       Height = 22
       Hint = 'Angular'
       Top = 1
@@ -648,7 +648,7 @@ object frmFileList: TfrmFileList
       TabOrder = 3
     end
     object eFilterTypes: TEdit
-      Left = 541
+      Left = 637
       Height = 22
       Hint = 'Types'
       Top = 1
@@ -658,6 +658,42 @@ object frmFileList: TfrmFileList
       ParentShowHint = False
       ShowHint = True
       TabOrder = 4
+    end
+    object lblPath: TLabel
+      Left = 130
+      Height = 22
+      Top = 1
+      Width = 28
+      Align = alLeft
+      Caption = 'Path:'
+      ParentColor = False
+    end
+    object lblNg: TLabel
+      Left = 295
+      Height = 22
+      Top = 1
+      Width = 18
+      Align = alLeft
+      Caption = 'ng:'
+      ParentColor = False
+    end
+    object lblDI: TLabel
+      Left = 450
+      Height = 22
+      Top = 1
+      Width = 15
+      Align = alLeft
+      Caption = 'DI:'
+      ParentColor = False
+    end
+    object lblTypes: TLabel
+      Left = 602
+      Height = 22
+      Top = 1
+      Width = 35
+      Align = alLeft
+      Caption = 'Types:'
+      ParentColor = False
     end
   end
   object pmAngFileList: TPopupMenu

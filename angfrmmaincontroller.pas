@@ -5,7 +5,7 @@ unit angFrmMainController;
 interface
 
 uses
-  Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils,Graphics,inifiles;
+  Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils, Graphics, inifiles,SynEditMarks;
 
 type
 
@@ -33,6 +33,27 @@ type
     destructor Destroy; override;
   end;
 
+  { TOneColorScheme }
+
+  TOneColorScheme = class
+  public
+    sName: string;
+    Color: Tcolor;
+    Font: TFont;
+    constructor Create;
+    destructor Destroy;
+  end;
+
+
+  { TColorSchemeList }
+
+  TColorSchemeList = class(TStringList)
+
+  public
+    activeColorScheme: TOneColorScheme;
+    constructor Create;
+
+  end;
 
   { TOneTabsheet }
 
@@ -43,33 +64,13 @@ type
     Tabsheet: TTabSheet;
     SynMemo: TsynMemo;
     SynMemoPreview: TsynMemo;
-    procedure  setPreviewText;
+    procedure setPreviewText;
     procedure setCarentFromPreviewToEdit;
     procedure setCarentFromEditToPreview;
     procedure SchemeFromEditToPreview;
+    procedure setActiveColorScheme(OneColorScheme: TOneColorScheme);
   end;
 
-  { TOneColorScheme }
-
-  TOneColorScheme = class
-  public
-  sName : String;
-  Color : Tcolor;
-  Font  : TFont;
-  constructor create;
-  destructor destroy;
-  end;
-
-
-  { TColorSchemeList }
-
-  TColorSchemeList = class(TStringlist)
-
-  public
-  activeColorScheme : TOneColorScheme;
-  constructor create;
-
-  end;
 
 
 
@@ -79,7 +80,6 @@ type
   private
     slDJKeyWords: TStringList;
     slAllScope: TStringList;
-
 
     procedure LookForNgInString(sLine: string; oneFileInfo: TOneFileInfo);
     procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
@@ -99,13 +99,13 @@ type
     slFilter: TStringList;
     slDirective: TStringList;
     slConfig: TStringList;
-    myActiveOneTabsheet : TOneTabsheet;
+    myActiveOneTabsheet: TOneTabsheet;
 
     slOpendTabsheets: TStringList;
     sLastSearch: string;
 
-    slColorScheme : TColorSchemeList;
-    iFontSize1   : integer;
+    slColorScheme: TColorSchemeList;
+    iFontSize1: integer;
 
 
     function ChangeMinusToCamelCase(sSuchtext: string): string;
@@ -135,8 +135,9 @@ type
     procedure GetAllHtmlFiles(sl: TStringList);
     procedure GetAllUsedNgKeyWords(sl: TStringList);
     function FindTreenodePointerToFilename(sFilename: string): TObject;
-    function GetAngularTypesForFile(sFile : string) : string;
-        procedure SetHeightToAllSynedit;
+    function GetAngularTypesForFile(sFile: string): string;
+    procedure SetHeightToAllSynedit;
+    procedure DeleteAllMarksWithIndexIndexMarkFound;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -149,84 +150,93 @@ implementation
 procedure TOneTabsheet.setPreviewText;
 begin
 
-    SynMemoPreview.Highlighter := SynMemo.Highlighter;
-    SynMemoPreview.Lines.Assign(SynMemo.lines) ;
+  SynMemoPreview.Highlighter := SynMemo.Highlighter;
+  SynMemoPreview.Lines.Assign(SynMemo.Lines);
 
-    SynMemoPreview.CaretY := SynMemo.CaretY;
+  SynMemoPreview.CaretY := SynMemo.CaretY;
 
 end;
 
 procedure TOneTabsheet.setCarentFromPreviewToEdit;
 begin
 
-
-  SynMemo.CaretY := SynMemoPreview.CaretY ;
-  SynMemo.CaretX := SynMemoPreview.CaretX ;
+  SynMemo.CaretY := SynMemoPreview.CaretY;
+  SynMemo.CaretX := SynMemoPreview.CaretX;
   SynMemoPreview.Repaint;
 
 end;
 
 procedure TOneTabsheet.setCarentFromEditToPreview;
 begin
-SynMemoPreview.CaretY  :=  SynMemo.CaretY  ;
-//SynMemoPreview.CaretX :=  SynMemo.CaretX  ;
-SynMemoPreview.Repaint;
+  SynMemoPreview.CaretY := SynMemo.CaretY;
+  //SynMemoPreview.CaretX :=  SynMemo.CaretX  ;
+  SynMemoPreview.Repaint;
 end;
 
 procedure TOneTabsheet.SchemeFromEditToPreview;
 begin
-  SynMemoPreview.Color:=SynMemo.Color ;
-  SynMemoPreview.Font.Color:= SynMemo.Font.Color;
+  SynMemoPreview.Color := SynMemo.Color;
+  SynMemoPreview.Font.Color := SynMemo.Font.Color;
 
-SynMemoPreview.Repaint;
+  SynMemoPreview.Repaint;
+end;
+
+procedure TOneTabsheet.setActiveColorScheme(OneColorScheme: TOneColorScheme);
+begin
+  SynMemo.Color := OneColorScheme.Color;
+  SynMemo.Font.Color := OneColorScheme.Font.Color;
+
+  SynMemo.Refresh;
+  SchemeFromEditToPreview;
 end;
 
 
 { TOneColorScheme }
 
-constructor TOneColorScheme.create;
+constructor TOneColorScheme.Create;
 begin
-  Font := TFont.create;
+  Font := TFont.Create;
 end;
 
-destructor TOneColorScheme.destroy;
+destructor TOneColorScheme.Destroy;
 begin
-  Font.free;
+  Font.Free;
 end;
 
 { TColorSchemeList }
 
-constructor TColorSchemeList.create;
+constructor TColorSchemeList.Create;
 var
   sr: TSearchRec;
   i: integer;
-  sPath : string;
-  OneScheme : TOneColorScheme ;
-  myIni : TIniFile;
-  sName : string;
+  sPath: string;
+  OneScheme: TOneColorScheme;
+  myIni: TIniFile;
+  sName: string;
 begin
-   self.OwnsObjects := True;
+  self.OwnsObjects := True;
 
-   sPath := Extractfilepath(paramstr(0)) + 'ColorScheme';
+  sPath := Extractfilepath(ParamStr(0)) + 'ColorScheme';
 
-     i := FindFirst(sPath + sAngSeparator + '*.ini', faAnyFile, sr);
-     while (i = 0) do
-     begin
-         OneScheme := TOneColorScheme.create ;
+  i := FindFirst(sPath + sAngSeparator + '*.ini', faAnyFile, sr);
+  while (i = 0) do
+  begin
+    OneScheme := TOneColorScheme.Create;
 
-         sName := ansireplacestr(sr.Name,'.ini','');
-         self.AddObject(sName,OneScheme );
-         myIni := TIniFile.create(sPath + sAngSeparator + sr.Name) ;
-         OneScheme.Color :=  myIni.Readinteger('Font','Color',clWhite );
-         OneScheme.sName := sName;
-         OneScheme.Font.Color := myIni.Readinteger('Font.Color','Color',clBlack );  ;
-         myIni.free;
+    sName := ansireplacestr(sr.Name, '.ini', '');
+    self.AddObject(sName, OneScheme);
+    myIni := TIniFile.Create(sPath + sAngSeparator + sr.Name);
+    OneScheme.Color := myIni.Readinteger('Font', 'Color', clWhite);
+    OneScheme.sName := sName;
+    OneScheme.Font.Color := myIni.Readinteger('Font.Color', 'Color', clBlack);
+    ;
+    myIni.Free;
 
-       i := Findnext(sr);
-     end;
-     FindClose(sr);
+    i := Findnext(sr);
+  end;
+  FindClose(sr);
 
-     activeColorScheme := nil;
+  activeColorScheme := nil;
 
 end;
 
@@ -242,8 +252,6 @@ begin
   slngWords.Sorted := True;
   slngWords.Duplicates := dupIgnore;
   iImageindex := -1;
-
-
 
 end;
 
@@ -280,7 +288,7 @@ begin
 
   slColorScheme := TColorSchemeList.Create;
 
-  iFontSize1 := 10 ;
+  iFontSize1 := 10;
 
 end;
 
@@ -300,7 +308,7 @@ begin
 
   slOpendTabsheets.Free;
 
-  slColorScheme.free;
+  slColorScheme.Free;
 
 
   inherited Destroy;
@@ -637,13 +645,20 @@ var
 begin
   Result := '';
 
-  if slModule.IndexOf(sFile) >= 0 then  Result := Result + 'Module |';
-  if slController.IndexOf(sFile) >= 0 then  Result := Result + 'Controller |';
-  if slService.IndexOf(sFile) >= 0 then  Result := Result + 'Service |';
-  if slFactory.IndexOf(sFile) >= 0 then  Result := Result + 'Factory |';
-  if slFilter.IndexOf(sFile) >= 0 then  Result := Result + 'Filter |';
-  if slDirective.IndexOf(sFile) >= 0 then  Result := Result + 'Directive |';
-  if slConfig.IndexOf(sFile) >= 0 then  Result := Result + 'Config |';
+  if slModule.IndexOf(sFile) >= 0 then
+    Result := Result + 'Module |';
+  if slController.IndexOf(sFile) >= 0 then
+    Result := Result + 'Controller |';
+  if slService.IndexOf(sFile) >= 0 then
+    Result := Result + 'Service |';
+  if slFactory.IndexOf(sFile) >= 0 then
+    Result := Result + 'Factory |';
+  if slFilter.IndexOf(sFile) >= 0 then
+    Result := Result + 'Filter |';
+  if slDirective.IndexOf(sFile) >= 0 then
+    Result := Result + 'Directive |';
+  if slConfig.IndexOf(sFile) >= 0 then
+    Result := Result + 'Config |';
 
 end;
 
@@ -868,7 +883,7 @@ begin
     begin
       Delete(sSuchtext, i, 1);
       if length(sSuchtext) > i then
-        sSuchtext[i] := uppercase(sSuchtext[i])[1] ;
+        sSuchtext[i] := uppercase(sSuchtext[i])[1];
     end;
 
 
@@ -1162,10 +1177,26 @@ begin
 
   for i := 0 to self.slOpendTabsheets.Count - 1 do
   begin
-      myOneTabsheet := TOneTabsheet(self.slOpendTabsheets.Objects[i]);
-      myOneTabsheet.SynMemo.Font.Size := self.iFontSize1 ;
+    myOneTabsheet := TOneTabsheet(self.slOpendTabsheets.Objects[i]);
+    myOneTabsheet.SynMemo.Font.Size := self.iFontSize1;
   end;
 
 end;
+
+
+procedure TFrmMainController.DeleteAllMarksWithIndexIndexMarkFound ;
+var i: integer;
+m: TSynEditMark;
+begin
+    for i := self.myActiveOneTabsheet.SynMemo.Marks.Count - 1 downto 0 do
+  begin
+    m := self.myActiveOneTabsheet.SynMemo.Marks[i];
+    if m.ImageIndex = constItemIndexMarkFound then
+      self.myActiveOneTabsheet.SynMemo.Marks.Delete(i);
+  end;
+end;
+
+
+
 
 end.

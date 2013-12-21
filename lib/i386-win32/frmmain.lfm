@@ -65,25 +65,28 @@ object frmMainView: TfrmMainView
     Caption = 'ToolBar1'
     Images = DataModule1.ImageList1
     TabOrder = 3
-    object ToolButton1: TToolButton
+    object ToolButton4: TToolButton
       Left = 1
       Top = 2
-      Caption = 'ToolButton1'
-      ImageIndex = 5
-      OnClick = ToolButton1Click
+      Action = acSelectDir
+      DropdownMenu = PopupMenuRecentFiles
+      PopupMenu = PopupMenuRecentFiles
     end
-    object ToolButton3: TToolButton
+    object ToolButton1: TToolButton
       Left = 24
       Top = 2
-      Caption = 'ToolButton3'
-      ImageIndex = 17
-      OnClick = ToolButton3Click
+      Action = acOpenAFile
     end
-    object ToolButton4: TToolButton
+    object ToolButton2: TToolButton
       Left = 47
       Top = 2
-      Caption = 'ToolButton4'
-      OnClick = ToolButton4Click
+      Caption = 'ToolButton2'
+    end
+    object ToolButton3: TToolButton
+      Left = 70
+      Top = 2
+      Caption = 'ToolButton3'
+      Style = tbsCheck
     end
   end
   object PageControl1: TPageControl
@@ -121,16 +124,10 @@ object frmMainView: TfrmMainView
       Caption = 'File'
       OnClick = mnuDateiClick
       object mnuPfadOeffnen: TMenuItem
-        Caption = 'Select directory'
-        ImageIndex = 2
-        OnClick = mnuPfadOeffnenClick
+        Action = acSelectDir
       end
       object mnuOpenAFile: TMenuItem
-        Caption = 'Open a file'
-        Enabled = False
-        ImageIndex = 31
-        ShortCut = 16463
-        OnClick = mnuOpenAFileClick
+        Action = acOpenAFile
       end
       object mnuSave: TMenuItem
         Caption = 'Save'
@@ -612,6 +609,37 @@ object frmMainView: TfrmMainView
     object mnuOpenShell: TMenuItem
       Caption = 'Open Path in Shell'
       OnClick = mnuOpenShellClick
+    end
+  end
+  object PopupMenuRecentFiles: TPopupMenu
+    left = 260
+    top = 70
+    object MenuItem2: TMenuItem
+      Caption = 'C:\temp\KonfigWeb'
+      OnClick = MenuItem2Click
+    end
+    object MenuItem3: TMenuItem
+      Caption = 'D:\BesuchHerrRammer\Konfigurator\Src'
+      OnClick = MenuItem3Click
+    end
+  end
+  object ActionList1: TActionList
+    Images = DataModule1.ImageList1
+    left = 270
+    top = 235
+    object acSelectDir: TAction
+      Caption = 'Select Directory'
+      Hint = 'Select Directory'
+      ImageIndex = 2
+      OnExecute = acSelectDirExecute
+    end
+    object acOpenAFile: TAction
+      Caption = 'Open A File'
+      Enabled = False
+      Hint = 'Open a File from List'
+      ImageIndex = 31
+      OnExecute = acOpenAFileExecute
+      ShortCut = 16463
     end
   end
 end
