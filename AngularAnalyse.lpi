@@ -18,6 +18,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
+      <BuildNr Value="1"/>
       <StringTable InternalName="AngularJS Anlyze tool" ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">

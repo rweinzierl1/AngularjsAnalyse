@@ -69,24 +69,31 @@ object frmMainView: TfrmMainView
       Left = 1
       Top = 2
       Action = acSelectDir
-      DropdownMenu = PopupMenuRecentFiles
-      PopupMenu = PopupMenuRecentFiles
+      DropdownMenu = PopupMenuRecentPath
+      ParentShowHint = False
+      ShowHint = True
+      Style = tbsDropDown
     end
     object ToolButton1: TToolButton
-      Left = 24
+      Left = 36
       Top = 2
       Action = acOpenAFile
+      ParentShowHint = False
+      ShowHint = True
     end
     object ToolButton2: TToolButton
-      Left = 47
+      Left = 59
       Top = 2
-      Caption = 'ToolButton2'
+      Action = acSaveAll
+      ParentShowHint = False
+      ShowHint = True
     end
     object ToolButton3: TToolButton
-      Left = 70
+      Left = 82
       Top = 2
-      Caption = 'ToolButton3'
-      Style = tbsCheck
+      Action = acSynchronize
+      ParentShowHint = False
+      ShowHint = True
     end
   end
   object PageControl1: TPageControl
@@ -136,16 +143,10 @@ object frmMainView: TfrmMainView
         OnClick = mnuSaveClick
       end
       object mnuSaveall: TMenuItem
-        Caption = 'SaveAll'
-        Enabled = False
-        ImageIndex = 22
-        OnClick = mnuSaveallClick
+        Action = acSaveAll
       end
       object mnuResync: TMenuItem
-        Caption = 'Synchronize'
-        Enabled = False
-        ImageIndex = 30
-        OnClick = mnuResyncClick
+        Action = acSynchronize
       end
     end
     object MenuItem1: TMenuItem
@@ -172,12 +173,12 @@ object frmMainView: TfrmMainView
         Caption = 'Font'
         object mnuLarger: TMenuItem
           Caption = 'Larger'
-          ShortCut = 16464
+          ShortCut = 49232
           OnClick = mnuLargerClick
         end
         object mnuSmaller: TMenuItem
           Caption = 'Smaller'
-          ShortCut = 16460
+          ShortCut = 49229
           OnClick = mnuSmallerClick
         end
       end
@@ -193,6 +194,8 @@ object frmMainView: TfrmMainView
     end
   end
   object OpenDialog1: TOpenDialog
+    FileName = 'C:\Freigabe\Lazarus\AngularAnalysegit\angfrmmaincontroller.pas'
+    InitialDir = 'C:\Freigabe\Lazarus\AngularAnalysegit\'
     left = 328
     top = 177
   end
@@ -611,18 +614,6 @@ object frmMainView: TfrmMainView
       OnClick = mnuOpenShellClick
     end
   end
-  object PopupMenuRecentFiles: TPopupMenu
-    left = 260
-    top = 70
-    object MenuItem2: TMenuItem
-      Caption = 'C:\temp\KonfigWeb'
-      OnClick = MenuItem2Click
-    end
-    object MenuItem3: TMenuItem
-      Caption = 'D:\BesuchHerrRammer\Konfigurator\Src'
-      OnClick = MenuItem3Click
-    end
-  end
   object ActionList1: TActionList
     Images = DataModule1.ImageList1
     left = 270
@@ -640,6 +631,30 @@ object frmMainView: TfrmMainView
       ImageIndex = 31
       OnExecute = acOpenAFileExecute
       ShortCut = 16463
+    end
+    object acSaveAll: TAction
+      Caption = 'Save All'
+      Enabled = False
+      Hint = 'Save all'
+      ImageIndex = 22
+      OnExecute = acSaveAllExecute
+      ShortCut = 16467
+    end
+    object acSynchronize: TAction
+      Category = 'Synchronize'
+      Caption = 'Synchronize'
+      Enabled = False
+      Hint = 'Synchronize directory'
+      ImageIndex = 30
+      OnExecute = acSynchronizeExecute
+    end
+  end
+  object PopupMenuRecentPath: TPopupMenu
+    left = 240
+    top = 64
+    object MenuItem2: TMenuItem
+      Caption = 'New Item1'
+      OnClick = MenuItem2Click
     end
   end
 end

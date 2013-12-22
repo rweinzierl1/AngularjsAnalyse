@@ -43,6 +43,7 @@ type
     lblPath: TLabel;
     lblCount: TLabel;
     lblNg: TLabel;
+    lblFiles: TLabel;
     ListView1: TListView;
     mnuCopyClipboard: TMenuItem;
     Panel1: TPanel;
@@ -56,6 +57,7 @@ type
     procedure eFilterKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure ListView1Click(Sender: TObject);
     procedure ListView1ColumnClick(Sender: TObject; Column: TListColumn);
     procedure ListView1Compare(Sender: TObject; Item1, Item2: TListItem;
@@ -283,6 +285,11 @@ end;
 procedure TfrmFileList.FormDestroy(Sender: TObject);
 begin
   slFilesToView.Free;
+end;
+
+procedure TfrmFileList.FormShow(Sender: TObject);
+begin
+  eFilter.setfocus;
 end;
 
 procedure TfrmFileList.ListView1Click(Sender: TObject);

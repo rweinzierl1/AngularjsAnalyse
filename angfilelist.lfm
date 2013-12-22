@@ -1,23 +1,24 @@
 object frmFileList: TfrmFileList
-  Left = 553
+  Left = 521
   Height = 338
-  Top = 349
-  Width = 769
+  Top = 302
+  Width = 806
   Caption = 'File List'
   ClientHeight = 338
-  ClientWidth = 769
+  ClientWidth = 806
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '1.0.14.0'
   object Panel1: TPanel
     Left = 0
     Height = 34
     Top = 304
-    Width = 769
+    Width = 806
     Align = alBottom
     ClientHeight = 34
-    ClientWidth = 769
+    ClientWidth = 806
     TabOrder = 1
     object BitBtn1: TBitBtn
       Left = 160
@@ -55,7 +56,7 @@ object frmFileList: TfrmFileList
     Left = 0
     Height = 176
     Top = 24
-    Width = 769
+    Width = 806
     Align = alClient
     Columns = <    
       item
@@ -103,7 +104,7 @@ object frmFileList: TfrmFileList
     Left = 0
     Height = 99
     Top = 205
-    Width = 769
+    Width = 806
     Align = alBottom
     Font.Height = -13
     Font.Name = 'Courier New'
@@ -584,7 +585,7 @@ object frmFileList: TfrmFileList
     Left = 0
     Height = 5
     Top = 200
-    Width = 769
+    Width = 806
     Align = alBottom
     ResizeAnchor = akBottom
   end
@@ -592,13 +593,13 @@ object frmFileList: TfrmFileList
     Left = 0
     Height = 24
     Top = 0
-    Width = 769
+    Width = 806
     Align = alTop
     ClientHeight = 24
-    ClientWidth = 769
+    ClientWidth = 806
     TabOrder = 4
     object eFilter: TEdit
-      Left = 1
+      Left = 28
       Height = 22
       Hint = 'File'
       Top = 1
@@ -612,7 +613,7 @@ object frmFileList: TfrmFileList
       TabOrder = 0
     end
     object eFilterPath: TEdit
-      Left = 158
+      Left = 185
       Height = 22
       Hint = 'path'
       Top = 1
@@ -624,11 +625,11 @@ object frmFileList: TfrmFileList
       TabOrder = 1
     end
     object eFilterNg: TEdit
-      Left = 313
+      Left = 340
       Height = 22
       Hint = 'ng'
       Top = 1
-      Width = 137
+      Width = 84
       Align = alLeft
       OnKeyUp = eFilterKeyUp
       ParentShowHint = False
@@ -636,11 +637,11 @@ object frmFileList: TfrmFileList
       TabOrder = 2
     end
     object eFilterAng: TEdit
-      Left = 465
+      Left = 439
       Height = 22
       Hint = 'Angular'
       Top = 1
-      Width = 137
+      Width = 73
       Align = alLeft
       OnKeyUp = eFilterKeyUp
       ParentShowHint = False
@@ -648,11 +649,11 @@ object frmFileList: TfrmFileList
       TabOrder = 3
     end
     object eFilterTypes: TEdit
-      Left = 637
+      Left = 547
       Height = 22
       Hint = 'Types'
       Top = 1
-      Width = 137
+      Width = 97
       Align = alLeft
       OnKeyUp = eFilterKeyUp
       ParentShowHint = False
@@ -660,7 +661,7 @@ object frmFileList: TfrmFileList
       TabOrder = 4
     end
     object lblPath: TLabel
-      Left = 130
+      Left = 157
       Height = 22
       Top = 1
       Width = 28
@@ -669,7 +670,7 @@ object frmFileList: TfrmFileList
       ParentColor = False
     end
     object lblNg: TLabel
-      Left = 295
+      Left = 322
       Height = 22
       Top = 1
       Width = 18
@@ -678,7 +679,7 @@ object frmFileList: TfrmFileList
       ParentColor = False
     end
     object lblDI: TLabel
-      Left = 450
+      Left = 424
       Height = 22
       Top = 1
       Width = 15
@@ -687,12 +688,21 @@ object frmFileList: TfrmFileList
       ParentColor = False
     end
     object lblTypes: TLabel
-      Left = 602
+      Left = 512
       Height = 22
       Top = 1
       Width = 35
       Align = alLeft
       Caption = 'Types:'
+      ParentColor = False
+    end
+    object lblFiles: TLabel
+      Left = 1
+      Height = 22
+      Top = 1
+      Width = 27
+      Align = alLeft
+      Caption = 'Files:'
       ParentColor = False
     end
   end

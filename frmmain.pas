@@ -19,12 +19,13 @@ type
   TfrmMainView = class(TForm)
     acSelectDir: TAction;
     acOpenAFile: TAction;
+    acSaveAll: TAction;
+    acSynchronize: TAction;
     ActionList1: TActionList;
     FindDialog1: TFindDialog;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
-    MenuItem3: TMenuItem;
     mnuSmaller: TMenuItem;
     mnuLarger: TMenuItem;
     mnuFont: TMenuItem;
@@ -56,7 +57,7 @@ type
     OpenDialog1: TOpenDialog;
     PageControl1: TPageControl;
     PopupMenu1: TPopupMenu;
-    PopupMenuRecentFiles: TPopupMenu;
+    PopupMenuRecentPath: TPopupMenu;
     PopupMenuTreeview: TPopupMenu;
     PopupMenuSynedit: TPopupMenu;
     Splitter1: TSplitter;
@@ -71,7 +72,9 @@ type
     ToolButton4: TToolButton;
     TreeView1: TTreeView;
     procedure acOpenAFileExecute(Sender: TObject);
+    procedure acSaveAllExecute(Sender: TObject);
     procedure acSelectDirExecute(Sender: TObject);
+    procedure acSynchronizeExecute(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure FindDialog1Find(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
@@ -113,6 +116,7 @@ type
     procedure ToolButton2Click(Sender: TObject);
     procedure ToolButton3Click(Sender: TObject);
     procedure ToolButton4Click(Sender: TObject);
+    procedure ToolButton5Click(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1DblClick(Sender: TObject);
   private
@@ -134,12 +138,14 @@ type
     treenodeScopeGleichFunction: TTreenode;
 
     frmMainController: TFrmMainController;
+    procedure AddAllRecentPathtoPopupmenu;
     procedure AddAngularJSKeyWordsInTreeview;
     procedure AddEditMarkToLine(iImageindex, iLine: integer);
     procedure AddSearchInPathToTree(const s: string);
     procedure ChangeSchema(Sender: TObject);
     function CloseAllTabsheets: boolean;
     procedure DoCloseActivePagecontrolPage;
+    procedure DoRecentPathPM(Sender: TObject);
     procedure DoSaveActivePage;
     procedure MarkLineContainsThisWord(sWord: string);
     function SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
@@ -196,6 +202,9 @@ var
 begin
   mi := TMenuItem(Sender);
 
+
+  frmMainController.UserPropertys.sSchema := mi.caption;
+
   for i := 0 to mi.Parent.Count - 1 do
     mi.Parent.Items[i].Checked := False;
 
@@ -219,6 +228,15 @@ begin
   end;
 end;
 
+
+procedure TfrmMainView.DoRecentPathPM(Sender: TObject);
+var mi: TMenuItem;
+begin
+   mi := TMenuItem(Sender) ;
+  frmMainController.sPfad :=mi.caption ;
+  StartPathAnalyse;
+end;
+
 procedure TfrmMainView.FormCreate(Sender: TObject);
 var
   i: integer;
@@ -226,8 +244,6 @@ var
 begin
   frmMainController := TFrmMainController.Create;
 
-  if not fileexists(extractfilepath(ParamStr(0)) + 'test.txt') then
-    ToolBar1.Visible := False;
 
 
   for i := 0 to frmMainController.slColorScheme.Count - 1 do
@@ -236,8 +252,12 @@ begin
     mnuColorScheme.Add(mi);
     mi.Caption := frmMainController.slColorScheme[i];
     mi.OnClick := @ChangeSchema;
+    if mi.Caption = frmMainController.UserPropertys.sSchema then
+      ChangeSchema(mi);
 
   end;
+
+  AddAllRecentPathtoPopupmenu;
 
 end;
 
@@ -297,7 +317,31 @@ begin
   begin
     frmMainController.sPfad := chosenDirectory;
     StartPathAnalyse;
+    AddAllRecentPathtoPopupmenu;
   end;
+end;
+
+procedure TfrmMainView.acSynchronizeExecute(Sender: TObject);
+  var
+  sl: TStringList;
+  i: integer;
+begin
+
+  sl := TStringList.Create;
+  sl.Text := frmMainController.slOpendTabsheets.Text;
+
+  if not CloseAllTabsheets then
+    exit;
+
+  StartPathAnalyse;
+
+
+
+  for i := 0 to sl.Count - 1 do
+    if fileexists(sl[i]) then
+      ShowFileInPagecontrolAsTabsheet(sl[i]);
+
+  sl.Free;
 end;
 
 procedure TfrmMainView.acOpenAFileExecute(Sender: TObject);
@@ -315,6 +359,11 @@ Application.CreateForm(TfrmFileList, frmFileList);
     ShowFileInPagecontrolAsTabsheet(frmMainController.sPfad + frmFileList.sFilename);
   end;
   frmFileList.Free;
+end;
+
+procedure TfrmMainView.acSaveAllExecute(Sender: TObject);
+begin
+   frmMainController.SaveAll;
 end;
 
 procedure TfrmMainView.FormCloseQuery(Sender: TObject; var CanClose: boolean);
@@ -346,14 +395,12 @@ end;
 
 procedure TfrmMainView.MenuItem2Click(Sender: TObject);
 begin
-    frmMainController.sPfad := 'C:\temp\KonfigWeb';
-  StartPathAnalyse;
+  showmessage('este');
 end;
 
 procedure TfrmMainView.MenuItem3Click(Sender: TObject);
 begin
-    frmMainController.sPfad := 'D:\BesuchHerrRammer\Konfigurator\Src';
-  StartPathAnalyse;
+
 end;
 
 procedure TfrmMainView.mnuBookMark1Click(Sender: TObject);
@@ -482,7 +529,7 @@ end;
 procedure TfrmMainView.mnuLargerClick(Sender: TObject);
 begin
 
-  frmMainController.iFontSize1 := frmMainController.iFontSize1 + 1;
+  frmMainController.UserPropertys.iFontsize:= frmMainController.UserPropertys.iFontsize + 1;
   frmMainController.SetHeightToAllSynedit;
 
 end;
@@ -533,26 +580,7 @@ begin
 end;
 
 procedure TfrmMainView.mnuResyncClick(Sender: TObject);
-var
-  sl: TStringList;
-  i: integer;
 begin
-
-  sl := TStringList.Create;
-  sl.Text := frmMainController.slOpendTabsheets.Text;
-
-  if not CloseAllTabsheets then
-    exit;
-
-  StartPathAnalyse;
-
-
-
-  for i := 0 to sl.Count - 1 do
-    if fileexists(sl[i]) then
-      ShowFileInPagecontrolAsTabsheet(sl[i]);
-
-  sl.Free;
 end;
 
 procedure TfrmMainView.mnuSave1Click(Sender: TObject);
@@ -672,6 +700,7 @@ procedure TfrmMainView.DoCloseActivePagecontrolPage;
 var
   i, iAnswer: integer;
   myOneTabsheet: TOneTabsheet;
+  myTabsheet : TTabsheet;
 begin
   if pagecontrol1.PageCount = 0 then
     exit;
@@ -701,9 +730,14 @@ begin
       break;
     end;
   end;
+  myTabsheet :=  Pagecontrol1.ActivePage;
 
+  if Pagecontrol1.ActivePage.TabIndex > 0 then    //avoid white blinking
+    begin
+    Pagecontrol1.ActivePageIndex:= Pagecontrol1.ActivePage.TabIndex -1 ;
+    end;
 
-  Pagecontrol1.ActivePage.Free;
+  myTabsheet.Free;
 end;
 
 
@@ -833,6 +867,23 @@ begin
   sl.Free;
 end;
 
+procedure TfrmMainView.AddAllRecentPathtoPopupmenu;
+var mi: TMenuItem;
+   i: integer;
+begin
+  PopupMenuRecentPath.Items.Clear;
+  for i := 0 to frmMainController.UserPropertys.slRecentPath.Count -1 do
+    begin
+    mi := TMenuItem.Create(PopupMenuRecentPath);
+    PopupMenuRecentPath.Items.Add(mi);
+    mi.Caption:= frmMainController.UserPropertys.slRecentPath[i] ;
+    mi.OnClick := @DoRecentPathPM;
+    end;
+
+
+  TreeView1.PopupMenu :=PopupMenuRecentPath ;
+end;
+
 
 procedure TfrmMainView.mnuPfadOeffnenClick(Sender: TObject);
 begin
@@ -841,7 +892,7 @@ end;
 
 procedure TfrmMainView.mnuSaveallClick(Sender: TObject);
 begin
-  frmMainController.SaveAll;
+
 end;
 
 procedure TfrmMainView.mnuShowInTreeClick(Sender: TObject);
@@ -873,9 +924,9 @@ end;
 
 procedure TfrmMainView.mnuSmallerClick(Sender: TObject);
 begin
-  if frmMainController.iFontSize1 > 1 then
+  if frmMainController.UserPropertys.iFontsize > 1 then
   begin
-    frmMainController.iFontSize1 := frmMainController.iFontSize1 - 1;
+    frmMainController.UserPropertys.iFontsize := frmMainController.UserPropertys.iFontsize - 1;
     frmMainController.SetHeightToAllSynedit;
   end;
 end;
@@ -982,6 +1033,8 @@ var
 begin
   //mnuOpenAFile.Enabled := True;
   acOpenAFile.Enabled := true;
+  self.acSaveAll.enabled := true;
+  self.acSynchronize.Enabled:=true;
 
 
   AddRootTreenodesToTreeview;
@@ -1090,6 +1143,10 @@ begin
 
 end;
 
+procedure TfrmMainView.ToolButton5Click(Sender: TObject);
+begin
+end;
+
 procedure TfrmMainView.SynEditPreviewSpecialLineMarkup(Sender: TObject;
   Line: integer; var Special: boolean; Markup: TSynSelectedColor);
 begin
@@ -1193,7 +1250,7 @@ begin
   end;
 
   myOneTabsheet.SynMemo.Font.Quality := fqProof;
-  myOneTabsheet.SynMemo.Font.Size := frmMainController.iFontSize1;
+  myOneTabsheet.SynMemo.Font.Size := frmMainController.UserPropertys.iFontsize;
   myOneTabsheet.SynMemo.Font.Name := 'Consolas';
 
 

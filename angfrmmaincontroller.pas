@@ -71,6 +71,21 @@ type
     procedure setActiveColorScheme(OneColorScheme: TOneColorScheme);
   end;
 
+  { TUserPropertys }
+
+  TUserPropertys = class
+   private
+     sConfigFileName : string;
+   public
+   iFontsize : integer;
+   sSchema   : string;
+   boolAutoSave : boolean;
+   slRecentPath : TStringlist;
+   procedure LoadFromConfigFile;
+   procedure SaveConfigFile;
+   constructor create;
+   destructor destroy; override;
+  end;
 
 
 
@@ -78,6 +93,7 @@ type
 
   TFrmMainController = class
   private
+    FsPfad: string;
     slDJKeyWords: TStringList;
     slAllScope: TStringList;
 
@@ -88,9 +104,10 @@ type
       iImageindex: integer): boolean;
     procedure AnalyzeFileContent(sDateiname: string; oneFileInfo: TOneFileInfo);
     procedure SearchForNGInFile(oneFileInfo: TOneFileInfo);
+    procedure SetsPfad(AValue: string);
 
   public
-    sPfad: string;
+
     slAllFilesFound: TStringList;
     slController: TStringList;
     slModule: TStringList;
@@ -100,13 +117,10 @@ type
     slDirective: TStringList;
     slConfig: TStringList;
     myActiveOneTabsheet: TOneTabsheet;
-
     slOpendTabsheets: TStringList;
     sLastSearch: string;
-
     slColorScheme: TColorSchemeList;
-    iFontSize1: integer;
-
+    UserPropertys  : TUserPropertys;
 
     function ChangeMinusToCamelCase(sSuchtext: string): string;
     function ChangeCamelCaseToMinusString(sSuchtext: string): string;
@@ -138,12 +152,78 @@ type
     function GetAngularTypesForFile(sFile: string): string;
     procedure SetHeightToAllSynedit;
     procedure DeleteAllMarksWithIndexIndexMarkFound;
+    property sPfad: string read FsPfad write SetsPfad;
     constructor Create;
     destructor Destroy; override;
   end;
 
 
 implementation
+
+{ TUserPropertys }
+
+procedure TUserPropertys.LoadFromConfigFile;
+var myIni : TIniFile;
+i : integer;
+s: string;
+begin
+  if fileexists(sConfigFileName) then
+    begin
+    myIni := TIniFile.create(sConfigFileName);
+    self.iFontsize:= myIni.ReadInteger('init','Fontsize',iFontsize);
+    self.sSchema:= myIni.ReadString ('init','Schema',sSchema);
+    slRecentPath.clear;
+    for i := 0 to 9 do
+      begin
+      s := myIni.ReadString ('init','Recentpath'+inttostr(i),'');
+      if s <> '' then
+        if DirectoryExists(s) then
+          slRecentPath.add(s);
+      end;
+    myIni.free;
+    end;
+end;
+
+procedure TUserPropertys.SaveConfigFile;
+var myIni : TIniFile;
+var i : integer;
+begin
+    forcedirectories(extractfilepath(sConfigFileName));
+
+    myIni := TIniFile.create(sConfigFileName);
+    myIni.WriteInteger('init','Fontsize',iFontsize);
+    myIni.WriteString ('init','Schema',sSchema);
+
+    for i := 0 to 9 do
+      begin
+      if i < slRecentPath.Count   then
+        myIni.WriteString ('init','Recentpath'+inttostr(i),slRecentPath[i])
+      else
+        myIni.WriteString ('init','Recentpath'+inttostr(i),'');
+      end;
+
+    myIni.free;
+
+end;
+
+constructor TUserPropertys.create;
+begin
+  slRecentPath := TStringlist.create;
+
+  iFontsize := 10;
+  sSchema   := 'dark';
+  boolAutoSave := false  ;
+  sConfigFileName := GetAppConfigFile(false);
+  LoadFromConfigFile;
+
+end;
+
+destructor TUserPropertys.destroy;
+begin
+  SaveConfigFile;
+  slRecentPath.free;
+  inherited destroy;
+end;
 
 { TOneTabsheet }
 
@@ -288,7 +368,7 @@ begin
 
   slColorScheme := TColorSchemeList.Create;
 
-  iFontSize1 := 10;
+  UserPropertys := TUserPropertys.create ;
 
 end;
 
@@ -309,7 +389,7 @@ begin
   slOpendTabsheets.Free;
 
   slColorScheme.Free;
-
+  UserPropertys.free;
 
   inherited Destroy;
 end;
@@ -517,6 +597,20 @@ begin
     s := oneFileInfo.slFileInhalt[i];
     LookForNgInString(s, oneFileInfo);
   end;
+end;
+
+procedure TFrmMainController.SetsPfad(AValue: string);
+var iOld : integer;
+begin
+  if FsPfad=AValue then Exit;
+  FsPfad:=AValue;
+
+  iOld := UserPropertys.slRecentPath.IndexOf(AValue);
+
+  if iOld >= 0 then
+    self.UserPropertys.slRecentPath.Exchange(iOld ,0)
+  else
+    self.UserPropertys.slRecentPath.Insert(0,AValue);
 end;
 
 procedure TFrmMainController.LookForNgInString(sLine: string;
@@ -1178,7 +1272,7 @@ begin
   for i := 0 to self.slOpendTabsheets.Count - 1 do
   begin
     myOneTabsheet := TOneTabsheet(self.slOpendTabsheets.Objects[i]);
-    myOneTabsheet.SynMemo.Font.Size := self.iFontSize1;
+    myOneTabsheet.SynMemo.Font.Size := self.UserPropertys.iFontsize;
   end;
 
 end;
