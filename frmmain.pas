@@ -21,11 +21,13 @@ type
     acOpenAFile: TAction;
     acSaveAll: TAction;
     acSynchronize: TAction;
+    acAutosave: TAction;
     ActionList1: TActionList;
     FindDialog1: TFindDialog;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    mnuAutosave: TMenuItem;
     mnuSmaller: TMenuItem;
     mnuLarger: TMenuItem;
     mnuFont: TMenuItem;
@@ -70,7 +72,10 @@ type
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
+    ToolButton5: TToolButton;
+    ToolButton6: TToolButton;
     TreeView1: TTreeView;
+    procedure acAutosaveExecute(Sender: TObject);
     procedure acOpenAFileExecute(Sender: TObject);
     procedure acSaveAllExecute(Sender: TObject);
     procedure acSelectDirExecute(Sender: TObject);
@@ -79,11 +84,13 @@ type
     procedure FindDialog1Find(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
+    procedure FormDeactivate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: integer; MousePos: TPoint; var Handled: boolean);
     procedure MenuItem2Click(Sender: TObject);
     procedure MenuItem3Click(Sender: TObject);
+    procedure mnuAutosaveClick(Sender: TObject);
     procedure mnuBookMark1Click(Sender: TObject);
     procedure mnuBookmarksClick(Sender: TObject);
     procedure mnuColorSchemeClick(Sender: TObject);
@@ -153,6 +160,7 @@ type
       sl: TStringList; iImageindex: integer);
     procedure ReadPathToTreeview(myItemRoot: TTreenode; sPfad: string);
     procedure AddRootTreenodesToTreeview;
+    procedure setAcAutosaveToUserProperty;
     procedure ShowFileInPagecontrolAsTabsheet(const sPfad: string);
     procedure StartPathAnalyse;
     procedure SynEditPreviewDblClick(Sender: TObject);
@@ -237,6 +245,13 @@ begin
   StartPathAnalyse;
 end;
 
+
+procedure OnDeactivate1(Sender: TObject);
+begin
+
+  showmessage('ddd');
+end;
+
 procedure TfrmMainView.FormCreate(Sender: TObject);
 var
   i: integer;
@@ -258,6 +273,18 @@ begin
   end;
 
   AddAllRecentPathtoPopupmenu;
+  setAcAutosaveToUserProperty;
+
+
+  application.OnDeactivate:= @FormDeactivate;
+
+
+end;
+
+procedure TfrmMainView.FormDeactivate(Sender: TObject);
+begin
+  if self.frmMainController.UserPropertys.boolAutoSave then
+    frmMainController.SaveAll;
 
 end;
 
@@ -361,6 +388,13 @@ Application.CreateForm(TfrmFileList, frmFileList);
   frmFileList.Free;
 end;
 
+procedure TfrmMainView.acAutosaveExecute(Sender: TObject);
+begin
+   self.frmMainController.UserPropertys.boolAutoSave:= not self.frmMainController.UserPropertys.boolAutoSave;
+
+   setAcAutosaveToUserProperty;
+end;
+
 procedure TfrmMainView.acSaveAllExecute(Sender: TObject);
 begin
    frmMainController.SaveAll;
@@ -370,6 +404,12 @@ procedure TfrmMainView.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 var
   iAnswer: integer;
 begin
+  if frmMainController.UserPropertys.boolAutoSave then
+    begin
+    frmMainController.SaveAll;
+    exit;
+    end;
+
 
   if frmMainController.SynMemoModifiedAvailable then
   begin
@@ -399,6 +439,11 @@ begin
 end;
 
 procedure TfrmMainView.MenuItem3Click(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmMainView.mnuAutosaveClick(Sender: TObject);
 begin
 
 end;
@@ -705,6 +750,9 @@ begin
   if pagecontrol1.PageCount = 0 then
     exit;
 
+    if self.frmMainController.UserPropertys.boolAutoSave then
+    frmMainController.SaveAll;
+
 
   for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
   begin
@@ -799,6 +847,16 @@ begin
 
 end;
 
+procedure TfrmMainView.setAcAutosaveToUserProperty;
+begin
+  acAutosave.Checked:= self.frmMainController.UserPropertys.boolAutoSave;
+  if acAutosave.Checked then
+    acAutosave.Caption := 'Autosave is on'
+  else
+    acAutosave.Caption := 'Autosave is off';
+  acAutosave.Hint:= acAutosave.Caption;
+end;
+
 procedure TfrmMainView.ShowFileInPagecontrolAsTabsheet(const sPfad: string);
 begin
   if SearchTabsheetOrCreateNew(sPfad) then
@@ -881,7 +939,6 @@ begin
     end;
 
 
-  TreeView1.PopupMenu :=PopupMenuRecentPath ;
 end;
 
 

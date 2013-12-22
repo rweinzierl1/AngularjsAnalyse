@@ -9,6 +9,7 @@ object frmMainView: TfrmMainView
   Menu = MainMenu1
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  OnDeactivate = FormDeactivate
   OnDestroy = FormDestroy
   OnMouseWheel = FormMouseWheel
   LCLVersion = '1.0.14.0'
@@ -94,6 +95,21 @@ object frmMainView: TfrmMainView
       Action = acSynchronize
       ParentShowHint = False
       ShowHint = True
+    end
+    object ToolButton6: TToolButton
+      Left = 105
+      Top = 2
+      Width = 5
+      Caption = 'ToolButton6'
+      Style = tbsDivider
+    end
+    object ToolButton5: TToolButton
+      Left = 110
+      Top = 2
+      Action = acAutosave
+      ParentShowHint = False
+      ShowHint = True
+      Style = tbsCheck
     end
   end
   object PageControl1: TPageControl
@@ -185,6 +201,9 @@ object frmMainView: TfrmMainView
       object mnuColorScheme: TMenuItem
         Caption = 'ColorScheme'
         OnClick = mnuColorSchemeClick
+      end
+      object mnuAutosave: TMenuItem
+        Action = acAutosave
       end
     end
     object mnuCloseActivepage: TMenuItem
@@ -647,6 +666,11 @@ object frmMainView: TfrmMainView
       Hint = 'Synchronize directory'
       ImageIndex = 30
       OnExecute = acSynchronizeExecute
+    end
+    object acAutosave: TAction
+      Caption = 'Autosave'
+      ImageIndex = 32
+      OnExecute = acAutosaveExecute
     end
   end
   object PopupMenuRecentPath: TPopupMenu

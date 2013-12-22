@@ -172,6 +172,7 @@ begin
     myIni := TIniFile.create(sConfigFileName);
     self.iFontsize:= myIni.ReadInteger('init','Fontsize',iFontsize);
     self.sSchema:= myIni.ReadString ('init','Schema',sSchema);
+    self.boolAutoSave := myIni.ReadBool ('init','Autosave',boolAutoSave);
     slRecentPath.clear;
     for i := 0 to 9 do
       begin
@@ -193,6 +194,7 @@ begin
     myIni := TIniFile.create(sConfigFileName);
     myIni.WriteInteger('init','Fontsize',iFontsize);
     myIni.WriteString ('init','Schema',sSchema);
+    myIni.WriteBool ('init','Autosave',boolAutoSave);
 
     for i := 0 to 9 do
       begin
