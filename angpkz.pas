@@ -49,6 +49,8 @@ constItemTree = 29;
 constItemResync = 30;
 constItemOpenListview = 31;
 constItemAutosave = 32;
+constItemFontBig = 33;
+constItemFontSmall = 34;
 
 
 implementation

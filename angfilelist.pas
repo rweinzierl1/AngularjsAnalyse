@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, FileUtil, SynMemo, Forms, Controls, Graphics, Dialogs,
   ExtCtrls, Buttons, ComCtrls, StdCtrls, Menus, angDatamodul,
   angFrmMainController, angpkz, Math, strutils, SynHighlighterAny,
-  SynHighlighterCss, SynHighlighterHtml ,Clipbrd;
+  SynHighlighterCss, SynHighlighterHtml ,Clipbrd, SynEdit ,SynEditTypes;
 
 type
 
@@ -71,6 +71,7 @@ type
     procedure ListView1SelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure mnuCopyClipboardClick(Sender: TObject);
+    procedure SynMemo1StatusChange(Sender: TObject; Changes: TSynStatusChanges);
   private
     { private declarations }
     slFilesToView: TStringList;
@@ -390,6 +391,13 @@ for i := 0 to ListView1.Items.Count - 1 do
     s := s + item.Caption + #9 + ansireplacestr(item.SubItems.Text,#13#10,#9) + #13#10 ;
   end;
   Clipboard.AsText :=s;
+end;
+
+procedure TfrmFileList.SynMemo1StatusChange(Sender: TObject;
+  Changes: TSynStatusChanges);
+begin
+
+
 end;
 
 

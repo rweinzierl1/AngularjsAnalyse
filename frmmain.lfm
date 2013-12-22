@@ -64,7 +64,9 @@ object frmMainView: TfrmMainView
     Top = 0
     Width = 884
     Caption = 'ToolBar1'
+    Color = 15790320
     Images = DataModule1.ImageList1
+    ParentColor = False
     TabOrder = 3
     object ToolButton4: TToolButton
       Left = 1
@@ -111,6 +113,20 @@ object frmMainView: TfrmMainView
       ShowHint = True
       Style = tbsCheck
     end
+    object ToolButton7: TToolButton
+      Left = 133
+      Top = 2
+      Action = acFontLarger
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object ToolButton8: TToolButton
+      Left = 156
+      Top = 2
+      Action = acFontSmaller
+      ParentShowHint = False
+      ShowHint = True
+    end
   end
   object PageControl1: TPageControl
     Left = 206
@@ -122,13 +138,16 @@ object frmMainView: TfrmMainView
     PopupMenu = PopupMenu1
     TabOrder = 4
     OnChange = PageControl1Change
+    OnChanging = PageControl1Changing
   end
   object SynHTMLSyn1: TSynHTMLSyn
     DefaultFilter = 'HTML-Dokumente (*.htm,*.html)|*.htm;*.html'
     Enabled = False
     AndAttri.FrameEdges = sfeAround
     ASPAttri.FrameEdges = sfeAround
+    CommentAttri.Foreground = clBlue
     CommentAttri.FrameEdges = sfeAround
+    CommentAttri.Style = [fsBold]
     IdentifierAttri.FrameEdges = sfeAround
     KeyAttri.FrameEdges = sfeAround
     SpaceAttri.FrameEdges = sfeAround
@@ -188,13 +207,11 @@ object frmMainView: TfrmMainView
       object mnuFont: TMenuItem
         Caption = 'Font'
         object mnuLarger: TMenuItem
-          Caption = 'Larger'
-          ShortCut = 49232
+          Action = acFontLarger
           OnClick = mnuLargerClick
         end
         object mnuSmaller: TMenuItem
-          Caption = 'Smaller'
-          ShortCut = 49229
+          Action = acFontSmaller
           OnClick = mnuSmallerClick
         end
       end
@@ -284,12 +301,19 @@ object frmMainView: TfrmMainView
   object SynCssSyn1: TSynCssSyn
     DefaultFilter = 'Cascading Stylesheets (*.css)|*.css'
     Enabled = False
+    CommentAttri.Foreground = clBlue
     CommentAttri.FrameEdges = sfeAround
+    CommentAttri.StyleMask = [fsBold]
+    IdentifierAttri.Foreground = clPurple
     IdentifierAttri.FrameEdges = sfeAround
+    KeyAttri.Foreground = 33023
     KeyAttri.FrameEdges = sfeAround
+    NumberAttri.Foreground = clLime
     NumberAttri.FrameEdges = sfeAround
     SpaceAttri.FrameEdges = sfeAround
+    StringAttri.Foreground = clAqua
     StringAttri.FrameEdges = sfeAround
+    SymbolAttri.Foreground = 33023
     SymbolAttri.FrameEdges = sfeAround
     left = 632
     top = 104
@@ -671,6 +695,19 @@ object frmMainView: TfrmMainView
       Caption = 'Autosave'
       ImageIndex = 32
       OnExecute = acAutosaveExecute
+    end
+    object acFontLarger: TAction
+      Caption = 'larger'
+      Hint = 'Font larger'
+      ImageIndex = 33
+      OnExecute = acFontLargerExecute
+      ShortCut = 49232
+    end
+    object acFontSmaller: TAction
+      Caption = 'smaller'
+      Hint = 'Font smaller'
+      ImageIndex = 34
+      OnExecute = acFontSmallerExecute
     end
   end
   object PopupMenuRecentPath: TPopupMenu

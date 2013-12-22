@@ -5,7 +5,8 @@ unit angFrmMainController;
 interface
 
 uses
-  Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils, Graphics, inifiles,SynEditMarks;
+  Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils, Graphics,
+  inifiles, SynEditMarks;
 
 type
 
@@ -69,22 +70,24 @@ type
     procedure setCarentFromEditToPreview;
     procedure SchemeFromEditToPreview;
     procedure setActiveColorScheme(OneColorScheme: TOneColorScheme);
+    procedure InfoToPreviewForToplineChanged;
+    procedure InfoToPreviewSelectionChanged;
   end;
 
   { TUserPropertys }
 
   TUserPropertys = class
-   private
-     sConfigFileName : string;
-   public
-   iFontsize : integer;
-   sSchema   : string;
-   boolAutoSave : boolean;
-   slRecentPath : TStringlist;
-   procedure LoadFromConfigFile;
-   procedure SaveConfigFile;
-   constructor create;
-   destructor destroy; override;
+  private
+    sConfigFileName: string;
+  public
+    iFontsize: integer;
+    sSchema: string;
+    boolAutoSave: boolean;
+    slRecentPath: TStringList;
+    procedure LoadFromConfigFile;
+    procedure SaveConfigFile;
+    constructor Create;
+    destructor Destroy; override;
   end;
 
 
@@ -120,7 +123,7 @@ type
     slOpendTabsheets: TStringList;
     sLastSearch: string;
     slColorScheme: TColorSchemeList;
-    UserPropertys  : TUserPropertys;
+    UserPropertys: TUserPropertys;
 
     function ChangeMinusToCamelCase(sSuchtext: string): string;
     function ChangeCamelCaseToMinusString(sSuchtext: string): string;
@@ -163,68 +166,71 @@ implementation
 { TUserPropertys }
 
 procedure TUserPropertys.LoadFromConfigFile;
-var myIni : TIniFile;
-i : integer;
-s: string;
+var
+  myIni: TIniFile;
+  i: integer;
+  s: string;
 begin
   if fileexists(sConfigFileName) then
-    begin
-    myIni := TIniFile.create(sConfigFileName);
-    self.iFontsize:= myIni.ReadInteger('init','Fontsize',iFontsize);
-    self.sSchema:= myIni.ReadString ('init','Schema',sSchema);
-    self.boolAutoSave := myIni.ReadBool ('init','Autosave',boolAutoSave);
-    slRecentPath.clear;
+  begin
+    myIni := TIniFile.Create(sConfigFileName);
+    self.iFontsize := myIni.ReadInteger('init', 'Fontsize', iFontsize);
+    self.sSchema := myIni.ReadString('init', 'Schema', sSchema);
+    self.boolAutoSave := myIni.ReadBool('init', 'Autosave', boolAutoSave);
+    slRecentPath.Clear;
     for i := 0 to 9 do
-      begin
-      s := myIni.ReadString ('init','Recentpath'+inttostr(i),'');
+    begin
+      s := myIni.ReadString('init', 'Recentpath' + IntToStr(i), '');
       if s <> '' then
         if DirectoryExists(s) then
           slRecentPath.add(s);
-      end;
-    myIni.free;
     end;
+    myIni.Free;
+  end;
 end;
 
 procedure TUserPropertys.SaveConfigFile;
-var myIni : TIniFile;
-var i : integer;
+var
+  myIni: TIniFile;
+var
+  i: integer;
 begin
-    forcedirectories(extractfilepath(sConfigFileName));
+  forcedirectories(extractfilepath(sConfigFileName));
 
-    myIni := TIniFile.create(sConfigFileName);
-    myIni.WriteInteger('init','Fontsize',iFontsize);
-    myIni.WriteString ('init','Schema',sSchema);
-    myIni.WriteBool ('init','Autosave',boolAutoSave);
+  myIni := TIniFile.Create(sConfigFileName);
+  myIni.WriteInteger('init', 'Fontsize', iFontsize);
+  myIni.WriteString('init', 'Schema', sSchema);
+  myIni.WriteBool('init', 'Autosave', boolAutoSave);
 
-    for i := 0 to 9 do
-      begin
-      if i < slRecentPath.Count   then
-        myIni.WriteString ('init','Recentpath'+inttostr(i),slRecentPath[i])
-      else
-        myIni.WriteString ('init','Recentpath'+inttostr(i),'');
-      end;
+  for i := 0 to 9 do
+  begin
+    if i < slRecentPath.Count then
+      myIni.WriteString('init', 'Recentpath' + IntToStr(i), slRecentPath[i])
+    else
+      myIni.WriteString('init', 'Recentpath' + IntToStr(i), '');
+  end;
 
-    myIni.free;
+  myIni.Free;
 
 end;
 
-constructor TUserPropertys.create;
+constructor TUserPropertys.Create;
 begin
-  slRecentPath := TStringlist.create;
+  slRecentPath := TStringList.Create;
 
   iFontsize := 10;
-  sSchema   := 'dark';
-  boolAutoSave := false  ;
-  sConfigFileName := GetAppConfigFile(false);
+  sSchema := 'dark';
+  boolAutoSave := False;
+  sConfigFileName := GetAppConfigFile(False);
   LoadFromConfigFile;
 
 end;
 
-destructor TUserPropertys.destroy;
+destructor TUserPropertys.Destroy;
 begin
   SaveConfigFile;
-  slRecentPath.free;
-  inherited destroy;
+  slRecentPath.Free;
+  inherited Destroy;
 end;
 
 { TOneTabsheet }
@@ -270,6 +276,45 @@ begin
 
   SynMemo.Refresh;
   SchemeFromEditToPreview;
+end;
+
+procedure TOneTabsheet.InfoToPreviewForToplineChanged;
+var
+  i, i2: integer;
+begin
+
+  i := SynMemo.TopLine;
+  i2 := self.SynMemoPreview.TopLine;
+  if i < i2 then
+  begin
+  self.SynMemoPreview.TopLine := i;
+  end;
+
+
+  i := SynMemo.TopLine + SynMemo.LinesInWindow;
+  i2 := self.SynMemoPreview.TopLine + self.SynMemoPreview.LinesInWindow;
+
+  if i > i2 then
+  begin
+    self.SynMemoPreview.TopLine := self.SynMemoPreview.TopLine + i - i2;
+  end;
+
+  self.SynMemoPreview.Repaint;
+
+end;
+
+procedure TOneTabsheet.InfoToPreviewSelectionChanged;
+//var s: string;
+begin
+  //TODO Show the selText in Preview highlighted
+
+  //s :=  self.SynMemo.SelText;
+  //if length(s) > 10 then
+  //  begin
+  //  self.SynMemoPreview.SelStart := self.SynMemo.SelStart;
+  //  self.SynMemoPreview.SelEnd := self.SynMemo.SelEnd;
+  //  end;
+   self.SynMemoPreview.Repaint;
 end;
 
 
@@ -370,7 +415,7 @@ begin
 
   slColorScheme := TColorSchemeList.Create;
 
-  UserPropertys := TUserPropertys.create ;
+  UserPropertys := TUserPropertys.Create;
 
 end;
 
@@ -391,7 +436,7 @@ begin
   slOpendTabsheets.Free;
 
   slColorScheme.Free;
-  UserPropertys.free;
+  UserPropertys.Free;
 
   inherited Destroy;
 end;
@@ -602,17 +647,19 @@ begin
 end;
 
 procedure TFrmMainController.SetsPfad(AValue: string);
-var iOld : integer;
+var
+  iOld: integer;
 begin
-  if FsPfad=AValue then Exit;
-  FsPfad:=AValue;
+  if FsPfad = AValue then
+    Exit;
+  FsPfad := AValue;
 
   iOld := UserPropertys.slRecentPath.IndexOf(AValue);
 
   if iOld >= 0 then
-    self.UserPropertys.slRecentPath.Exchange(iOld ,0)
+    self.UserPropertys.slRecentPath.Exchange(iOld, 0)
   else
-    self.UserPropertys.slRecentPath.Insert(0,AValue);
+    self.UserPropertys.slRecentPath.Insert(0, AValue);
 end;
 
 procedure TFrmMainController.LookForNgInString(sLine: string;
@@ -1280,11 +1327,12 @@ begin
 end;
 
 
-procedure TFrmMainController.DeleteAllMarksWithIndexIndexMarkFound ;
-var i: integer;
-m: TSynEditMark;
+procedure TFrmMainController.DeleteAllMarksWithIndexIndexMarkFound;
+var
+  i: integer;
+  m: TSynEditMark;
 begin
-    for i := self.myActiveOneTabsheet.SynMemo.Marks.Count - 1 downto 0 do
+  for i := self.myActiveOneTabsheet.SynMemo.Marks.Count - 1 downto 0 do
   begin
     m := self.myActiveOneTabsheet.SynMemo.Marks[i];
     if m.ImageIndex = constItemIndexMarkFound then

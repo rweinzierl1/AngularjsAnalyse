@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynHighlighterHTML, SynMemo, SynEdit,
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
-  SynEditMarks, strutils,
+  SynEditMarks, strutils, SynEditTypes,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
   Clipbrd, ActnList, shellapi, SynEditMiscClasses, SynEditMarkupSpecialLine,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types;
@@ -22,6 +22,8 @@ type
     acSaveAll: TAction;
     acSynchronize: TAction;
     acAutosave: TAction;
+    acFontLarger: TAction;
+    acFontSmaller: TAction;
     ActionList1: TActionList;
     FindDialog1: TFindDialog;
     MainMenu1: TMainMenu;
@@ -74,12 +76,16 @@ type
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
     ToolButton6: TToolButton;
+    ToolButton7: TToolButton;
+    ToolButton8: TToolButton;
     TreeView1: TTreeView;
     procedure acAutosaveExecute(Sender: TObject);
+    procedure acFontLargerExecute(Sender: TObject);
     procedure acOpenAFileExecute(Sender: TObject);
     procedure acSaveAllExecute(Sender: TObject);
     procedure acSelectDirExecute(Sender: TObject);
     procedure acSynchronizeExecute(Sender: TObject);
+    procedure acFontSmallerExecute(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure FindDialog1Find(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
@@ -118,6 +124,7 @@ type
     procedure mnuShowInTreeClick(Sender: TObject);
     procedure mnuSmallerClick(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
+    procedure PageControl1Changing(Sender: TObject; var AllowChange: Boolean);
     procedure PopupMenuSyneditPopup(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
@@ -166,6 +173,7 @@ type
     procedure SynEditPreviewDblClick(Sender: TObject);
     procedure SynEditPreviewSpecialLineMarkup(Sender: TObject;
       Line: integer; var Special: boolean; Markup: TSynSelectedColor);
+    procedure SynMemo1StatusChange(Sender: TObject; Changes: TSynStatusChanges);
     procedure synmemoChange(Sender: TObject);
     procedure synmemoClick(Sender: TObject);
     procedure synmemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -230,6 +238,8 @@ begin
         OneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[n]);
         OneTabsheet.setActiveColorScheme(OneColorScheme);
 
+        self.Color:= OneColorScheme.Color ; //Avoid Blinking of Pagecontrol change
+
 
         end;
     end;
@@ -240,6 +250,10 @@ end;
 procedure TfrmMainView.DoRecentPathPM(Sender: TObject);
 var mi: TMenuItem;
 begin
+
+    if not CloseAllTabsheets then
+    exit;
+
    mi := TMenuItem(Sender) ;
   frmMainController.sPfad :=mi.caption ;
   StartPathAnalyse;
@@ -341,6 +355,11 @@ begin
 
 
   if SelectDirectory('Select a directory', 'C:\', chosenDirectory) then
+  if Uppercase(chosenDirectory) = 'C:\' then
+    begin
+    showmessage('C:\  ???');
+    end
+  else
   begin
     frmMainController.sPfad := chosenDirectory;
     StartPathAnalyse;
@@ -371,6 +390,15 @@ begin
   sl.Free;
 end;
 
+procedure TfrmMainView.acFontSmallerExecute(Sender: TObject);
+begin
+    if frmMainController.UserPropertys.iFontsize > 1 then
+  begin
+    frmMainController.UserPropertys.iFontsize := frmMainController.UserPropertys.iFontsize - 1;
+    frmMainController.SetHeightToAllSynedit;
+  end;
+end;
+
 procedure TfrmMainView.acOpenAFileExecute(Sender: TObject);
 begin
 Application.CreateForm(TfrmFileList, frmFileList);
@@ -393,6 +421,12 @@ begin
    self.frmMainController.UserPropertys.boolAutoSave:= not self.frmMainController.UserPropertys.boolAutoSave;
 
    setAcAutosaveToUserProperty;
+end;
+
+procedure TfrmMainView.acFontLargerExecute(Sender: TObject);
+begin
+    frmMainController.UserPropertys.iFontsize:= frmMainController.UserPropertys.iFontsize + 1;
+  frmMainController.SetHeightToAllSynedit;
 end;
 
 procedure TfrmMainView.acSaveAllExecute(Sender: TObject);
@@ -574,8 +608,7 @@ end;
 procedure TfrmMainView.mnuLargerClick(Sender: TObject);
 begin
 
-  frmMainController.UserPropertys.iFontsize:= frmMainController.UserPropertys.iFontsize + 1;
-  frmMainController.SetHeightToAllSynedit;
+
 
 end;
 
@@ -981,15 +1014,12 @@ end;
 
 procedure TfrmMainView.mnuSmallerClick(Sender: TObject);
 begin
-  if frmMainController.UserPropertys.iFontsize > 1 then
-  begin
-    frmMainController.UserPropertys.iFontsize := frmMainController.UserPropertys.iFontsize - 1;
-    frmMainController.SetHeightToAllSynedit;
-  end;
+
 end;
 
 procedure TfrmMainView.PageControl1Change(Sender: TObject);
 begin
+  PageControl1.Visible:= true;
   if PageControl1.ActivePage = nil then
   begin
     frmMainController.myActiveOneTabsheet.Tabsheet := nil;
@@ -997,6 +1027,12 @@ begin
   end
   else
     frmMainController.SetActiveTabsheet(PageControl1.ActivePage);
+end;
+
+procedure TfrmMainView.PageControl1Changing(Sender: TObject;
+  var AllowChange: Boolean);
+begin
+  PageControl1.Visible:= false;  //avoid blinking
 end;
 
 procedure TfrmMainView.PopupMenuSyneditPopup(Sender: TObject);
@@ -1206,13 +1242,45 @@ end;
 
 procedure TfrmMainView.SynEditPreviewSpecialLineMarkup(Sender: TObject;
   Line: integer; var Special: boolean; Markup: TSynSelectedColor);
+var SynMemo : TSynMemo;
+  SynPreview : TSynMemo;
+  //sSel : string;
+  //i : integer;
 begin
 
-  if frmMainController.myActiveOneTabsheet.SynMemo.CaretY = line then
+ SynMemo :=  frmMainController.myActiveOneTabsheet.SynMemo;
+  if SynMemo.CaretY = line then
   begin
     Markup.Background := clred;
     Special := True;
+  end
+  else
+  begin
+  if ( line >= SynMemo.TopLine  ) and
+    ( line <= SynMemo.TopLine +  SynMemo.LinesInWindow ) then
+    begin
+        Markup.Background := clGray ;
+    Special := True;
+    end;
   end;
+
+
+{ sSel := SynMemo.SelText;
+
+ if length(sSel) > 2 then
+   begin
+   SynPreview := TSynMemo(Sender);
+   i := pos(sSel,SynPreview.lines[line]);
+   if i > 0 then
+     begin
+     Markup.StartX:=i;
+     Markup.EndX  := i + length(sSel);
+     Markup.Background := clOlive ;
+     //Special := True;
+     end;
+
+   end;   }
+
 
 end;
 
@@ -1225,12 +1293,11 @@ end;
 
 procedure TfrmMainView.synmemoClick(Sender: TObject);
 begin
-  frmMainController.myActiveOneTabsheet.setCarentFromEditToPreview  ;
 end;
 
 procedure TfrmMainView.synmemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  frmMainController.myActiveOneTabsheet.setCarentFromEditToPreview  ;
+
 end;
 
 procedure TfrmMainView.SynEditPreviewDblClick(Sender: TObject);
@@ -1242,6 +1309,31 @@ begin
 
   i := TSynmemo(Sender).CaretY;
   AddEditMarkToLine(constItemIndexMarkFound, i );
+end;
+
+procedure TfrmMainView.SynMemo1StatusChange(Sender: TObject;
+  Changes: TSynStatusChanges);
+var ms : TSynmemo;
+begin
+
+
+  if scTopLine in changes then
+    begin
+    frmMainController.myActiveOneTabsheet.InfoToPreviewForToplineChanged ;
+    end;
+
+   if scCaretY in changes then
+    begin
+    frmMainController.myActiveOneTabsheet.setCarentFromEditToPreview  ;
+    end;
+
+   if scSelection in changes then
+    begin
+    frmMainController.myActiveOneTabsheet.InfoToPreviewSelectionChanged  ;
+    end;
+
+
+
 end;
 
 function TfrmMainView.SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
@@ -1309,6 +1401,8 @@ begin
   myOneTabsheet.SynMemo.Font.Quality := fqProof;
   myOneTabsheet.SynMemo.Font.Size := frmMainController.UserPropertys.iFontsize;
   myOneTabsheet.SynMemo.Font.Name := 'Consolas';
+
+  myOneTabsheet.SynMemo.OnStatusChange :=  @SynMemo1StatusChange;
 
 
   myOneTabsheet.Tabsheet := frmMainController.myActiveOneTabsheet.Tabsheet;
@@ -1408,7 +1502,6 @@ var
   i: integer;
   myItem: TTreenode;
 begin
-
   i := FindFirst(sPfad + sAngSeparator + '*', faAnyFile, sr);
   while (i = 0) do
   begin
@@ -1556,5 +1649,8 @@ begin
   m.Visible := True;
  frmMainController.myActiveOneTabsheet.SynMemo.Marks.Add(m);
 end;
+
+
+
 
 end.
