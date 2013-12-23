@@ -83,23 +83,23 @@ object frmSnippet: TfrmSnippet
     Caption = 'Content'
     ParentColor = False
   end
-  object BitBtn1: TBitBtn
-    Left = 308
+  object bOK: TBitBtn
+    Left = 292
     Height = 22
     Top = 129
-    Width = 90
+    Width = 106
     Anchors = [akRight, akBottom]
     Default = True
     DefaultCaption = True
     Kind = bkOK
-    OnClick = BitBtn1Click
+    OnClick = bOKClick
     TabOrder = 4
   end
-  object BitBtn2: TBitBtn
-    Left = 421
+  object bCancel: TBitBtn
+    Left = 413
     Height = 20
     Top = 131
-    Width = 90
+    Width = 98
     Anchors = [akRight, akBottom]
     Cancel = True
     DefaultCaption = True

@@ -11,7 +11,7 @@ uses
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
   Clipbrd, ActnList, shellapi, SynEditMiscClasses, SynEditMarkupSpecialLine,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types,
-  angSnippet,angfrmSnippet,angFrmSelectSnippet ;
+  angSnippet,angfrmSnippet,angFrmSelectSnippet,SynCompletion,LCLType ;
 
 type
 
@@ -30,7 +30,9 @@ type
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    mnuManageSnippet: TMenuItem;
     mnuCreateSnippet: TMenuItem;
+    mnuSnippet: TMenuItem;
     mnuSearch1: TMenuItem;
     mnuAutosave: TMenuItem;
     mnuSmaller: TMenuItem;
@@ -110,6 +112,7 @@ type
     procedure mnuCloseActivepageClick(Sender: TObject);
     procedure mnuFindNextClick(Sender: TObject);
     procedure mnuGotoLineClick(Sender: TObject);
+    procedure mnuManageSnippetClick(Sender: TObject);
     procedure mnuLargerClick(Sender: TObject);
     procedure mnuOpenAFileClick(Sender: TObject);
     procedure mnuOpenMarkedFileNameClick(Sender: TObject);
@@ -156,6 +159,7 @@ type
     treenodeScopeNurPunkt: TTreenode;
     treenodeScopeGleich: TTreenode;
     treenodeScopeGleichFunction: TTreenode;
+    frmSelectSnippet: TfrmSelectSnippet;
 
     frmMainController: TFrmMainController;
     procedure AddAllRecentPathtoPopupmenu;
@@ -176,6 +180,10 @@ type
     procedure setAcAutosaveToUserProperty;
     procedure ShowFileInPagecontrolAsTabsheet(const sPfad: string);
     procedure StartPathAnalyse;
+    procedure SynCompletionCodeCompletion(var Value: string;
+      SourceValue: string; var SourceStart, SourceEnd: TPoint;
+      KeyChar: TUTF8Char; Shift: TShiftState);
+    procedure SynCompletionDoExecute(Sender: TObject);
     procedure SynEditPreviewDblClick(Sender: TObject);
     procedure SynEditPreviewSpecialLineMarkup(Sender: TObject;
       Line: integer; var Special: boolean; Markup: TSynSelectedColor);
@@ -546,33 +554,35 @@ begin
 end;
 
 procedure TfrmMainView.mnuCreateSnippetClick(Sender: TObject);
-  var
-  frmSnippet: TfrmSnippet;
-  AngSnippet :  TAngSnippet;
+var
+frmSnippet: TfrmSnippet;
+AngSnippet :  TAngSnippet;
 begin
- frmSnippet := TfrmSnippet.create(self);
+frmSnippet := TfrmSnippet.create(self);
 
- AngSnippet :=  TAngSnippet.create;
- AngSnippet.sContent:= self.frmMainController.myActiveOneTabsheet.SynMemo.SelText;
- frmSnippet.ShowSnippet(AngSnippet);
+AngSnippet :=  TAngSnippet.create;
+AngSnippet.sContent:= self.frmMainController.myActiveOneTabsheet.SynMemo.SelText;
+frmSnippet.ShowSnippet(AngSnippet);
 
- frmSnippet.showmodal;
+frmSnippet.showmodal;
 
- if frmSnippet.ModalResult = mrOK then
-   begin
-   AngSnippet.MakeFilenameFromShortcut(frmMainController.sPfad );
-   AngSnippet.SaveToFile();
+if frmSnippet.ModalResult = mrOK then
+ begin
+ AngSnippet.MakeFilenameFromShortcut(frmMainController.sPfad );
+ AngSnippet.SaveToFile();
 
-   self.frmMainController.AngSnippetList.AddObject(AngSnippet.sShortcut,AngSnippet );
+ self.frmMainController.AngSnippetList.AddObject(AngSnippet.sShortcut,AngSnippet );
 
-   end
- else
-   AngSnippet.free;
+ end
+else
+ AngSnippet.free;
 
 
- frmSnippet.free;
+frmSnippet.free;
 
 end;
+
+
 
 procedure TfrmMainView.mnuDJKeywordsClick(Sender: TObject);
 begin
@@ -639,6 +649,23 @@ begin
       self.frmMainController.myActiveOneTabsheet.SynMemo.CaretY := i;
 
   end;
+
+end;
+
+
+procedure TfrmMainView.mnuManageSnippetClick(Sender: TObject);
+
+begin
+ frmSelectSnippet := TfrmSelectSnippet.create(self);
+
+ frmSelectSnippet.ShowSnippingList(self.frmMainController.AngSnippetList);
+ frmSelectSnippet.Showmodal;
+
+ if frmSelectSnippet.modalresult = mrOK then
+   if frmSelectSnippet.booltake then
+     frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(frmSelectSnippet.sContent );
+
+ frmSelectSnippet.free;
 
 end;
 
@@ -1287,15 +1314,7 @@ begin
 end;
 
 procedure TfrmMainView.ToolButton9Click(Sender: TObject);
- var
-  frmSelectSnippet: TfrmSelectSnippet;
 begin
-  frmSelectSnippet := TfrmSelectSnippet.create(self);
-
-  frmSelectSnippet.ShowSnippingList(self.frmMainController.AngSnippetList);
-  frmSelectSnippet.Showmodal;
-
-  frmSelectSnippet.free;
 
 end;
 
@@ -1395,6 +1414,49 @@ begin
 
 end;
 
+
+procedure TfrmMainView.SynCompletionDoExecute(Sender: TObject);
+var SynCompletion : TSynCompletion;
+i : integer;
+AngSnippet : TAngSnippet;
+begin
+  SynCompletion := TSynCompletion(sender);
+
+  SynCompletion.ItemList.Clear;
+
+  for i := 0 to self.frmMainController.AngSnippetList.Count -1 do
+    begin
+    AngSnippet := self.frmMainController.AngSnippetList.AngSnippet(i);
+    if pos(SynCompletion.CurrentString, AngSnippet.sShortcut) = 1 then
+      SynCompletion.ItemList.Add(AngSnippet.sShortcut);
+    end;
+
+
+  if SynCompletion.ItemList.Count = 0 then
+     self.frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(#9);
+end;
+
+procedure TfrmMainView.SynCompletionCodeCompletion(var Value: string;
+  SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
+  Shift: TShiftState);
+var AngSnippet : TAngSnippet;
+i: integer;
+begin
+
+  for i := 0 to self.frmMainController.AngSnippetList.Count -1 do
+    begin
+    AngSnippet := self.frmMainController.AngSnippetList.AngSnippet(i);
+    if Value =  AngSnippet.sShortcut then
+      begin
+      Value := AngSnippet.sContent ;
+
+      end;
+    end;
+
+
+end;
+
+
 function TfrmMainView.SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
 var
   i, i2, i3: integer;
@@ -1477,6 +1539,33 @@ begin
   frmMainController.slOpendTabsheets.AddObject(sMyFileName, myOneTabsheet);
 
   self.PageControl1.ActivePage := frmMainController.myActiveOneTabsheet.Tabsheet;
+
+
+  myOneTabsheet.SynCompletion := TSynCompletion.create(frmMainController.myActiveOneTabsheet.Tabsheet);
+
+
+  myOneTabsheet.SynCompletion.OnExecute := @SynCompletionDoExecute;
+  myOneTabsheet.SynCompletion.Position := 0 ;
+  myOneTabsheet.SynCompletion.LinesInWindow := 6;
+  myOneTabsheet.SynCompletion.SelectedColor := clHighlight;
+  myOneTabsheet.SynCompletion.CaseSensitive := True;
+  myOneTabsheet.SynCompletion.Width := 262;
+  myOneTabsheet.SynCompletion.ShowSizeDrag := True;
+  myOneTabsheet.SynCompletion.ShortCut := 9;
+  myOneTabsheet.SynCompletion.EndOfTokenChr := '()[].';
+  myOneTabsheet.SynCompletion.OnCodeCompletion := @SynCompletionCodeCompletion ;
+  myOneTabsheet.SynCompletion.Editor := myOneTabsheet.SynMemo  ;
+
+
+
+
+
+
+
+
+
+
+
   Result := True;
 
   mnuSave.Enabled := True;

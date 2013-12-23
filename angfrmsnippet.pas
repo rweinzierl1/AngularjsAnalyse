@@ -13,8 +13,8 @@ type
   { TfrmSnippet }
 
   TfrmSnippet = class(TForm)
-    BitBtn1: TBitBtn;
-    BitBtn2: TBitBtn;
+    bOK: TBitBtn;
+    bCancel: TBitBtn;
     cBoxsForFileType: TComboBox;
     cBoxLocation: TComboBox;
     eShortcut: TEdit;
@@ -25,13 +25,15 @@ type
     lblShortcut: TLabel;
     lblDescription: TLabel;
     mContent: TMemo;
-    procedure BitBtn1Click(Sender: TObject);
+    procedure bOKClick(Sender: TObject);
   private
     { private declarations }
     myAngSnippet : TAngSnippet ;
+
   public
     { public declarations }
     procedure ShowSnippet(mAngSnippet : TAngSnippet );
+    function DataFromViewToObject: boolean;
   end;
 
 
@@ -42,8 +44,9 @@ implementation
 
 { TfrmSnippet }
 
-procedure TfrmSnippet.BitBtn1Click(Sender: TObject);
+function TfrmSnippet.DataFromViewToObject : boolean;
 begin
+result := false;
 if eShortcut.text = '' then
   begin
   showmessage('Shortcut empty');
@@ -61,11 +64,14 @@ case cBoxLocation.ItemIndex of
   2 : myAngSnippet.SnippetLocation := snippetGlobal;
 end;
 
+result := true;
+end;
 
 
 
-
-
+procedure TfrmSnippet.bOKClick(Sender: TObject);
+begin
+  if not DataFromViewToObject then exit;
   modalresult := mrOK;
 end;
 

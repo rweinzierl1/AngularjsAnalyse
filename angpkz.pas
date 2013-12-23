@@ -51,7 +51,10 @@ constItemOpenListview = 31;
 constItemAutosave = 32;
 constItemFontBig = 33;
 constItemFontSmall = 34;
-
+constItemSnippetLocal = 35;
+constItemSnippetUser = 36;
+constItemSnippetGlobal = 37;
+constItemInsertSnippet = 38;
 
 implementation
 

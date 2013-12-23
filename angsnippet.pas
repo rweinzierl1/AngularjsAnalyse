@@ -41,6 +41,7 @@ type
 
     function AngSnippet(i: integer): TAngSnippet;
     procedure LoadFromDir(sPath: string; snippetLocation: TSnippetLocation);
+    procedure DeleteSnippet(AngSnippet1 : TAngSnippet);
     constructor Create;
   end;
 
@@ -116,6 +117,7 @@ function TAngSnippet.LoadfromFile(): boolean;
 var myIni : Tinifile;
   sl : TStringlist;
   i : integer;
+  s: string;
 begin
 
 myIni := Tinifile.create(sFilename);
@@ -125,14 +127,18 @@ sDescription := myIni.ReadString('init','Description','');
 sForFileType := myIni.ReadString('init','ForFileType','');
 
 sl := TStringlist.create;
-myIni.ReadSection('Content',sl);
+myIni.ReadSectionRaw('Content',sl);
 
 for i := 0 to sl.count -1 do
-  sl[i] := copy(sl[i],2,length(sl[i]));
+  begin
+  s :=   sl[i];
+  sl[i] := copy(s,2,length(s));
+
+  end;
 sContent := sl.text;
 
 
-myIni.ReadSection('LongDescription',sl);
+myIni.ReadSectionRaw('LongDescription',sl);
 
 for i := 0 to sl.count -1 do
   sl[i] := copy(sl[i],2,length(sl[i]));
@@ -239,6 +245,15 @@ for i := self.Count -1 downto 0 do
     i := Findnext(sr);
   end;
   FindClose(sr);
+end;
+
+procedure TAngSnippetList.DeleteSnippet(AngSnippet1: TAngSnippet);
+var i : integer;
+begin
+for i := self.Count - 1 downto 0 do
+  if self.AngSnippet(i) = AngSnippet1 then
+    self.Delete(i);
+
 end;
 
 

@@ -1,30 +1,106 @@
 object frmSelectSnippet: TfrmSelectSnippet
   Left = 643
-  Height = 240
+  Height = 365
   Top = 255
-  Width = 320
+  Width = 546
   Caption = 'frmSelectSnippet'
-  ClientHeight = 240
-  ClientWidth = 320
+  ClientHeight = 365
+  ClientWidth = 546
+  FormStyle = fsStayOnTop
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnResize = FormResize
   LCLVersion = '1.0.14.0'
   object ListView1: TListView
     Left = 0
-    Height = 240
+    Height = 189
     Top = 0
-    Width = 320
+    Width = 546
     Align = alClient
     Columns = <    
       item
         Caption = 'Keyword'
-        Width = 300
+        Width = 200
+      end    
+      item
+        Caption = 'Description'
+        Width = 200
       end>
     GridLines = True
     LargeImages = DataModule1.ImageList1
     ReadOnly = True
     RowSelect = True
     SmallImages = DataModule1.ImageList1
-    StateImages = DataModule1.ImageList1
     TabOrder = 0
     ViewStyle = vsReport
+    OnSelectItem = ListView1SelectItem
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 37
+    Top = 328
+    Width = 546
+    Align = alBottom
+    ClientHeight = 37
+    ClientWidth = 546
+    TabOrder = 1
+    object bDelete: TButton
+      Left = 16
+      Height = 28
+      Top = 3
+      Width = 100
+      Caption = 'Delete'
+      Enabled = False
+      OnClick = bDeleteClick
+      TabOrder = 0
+    end
+    object bTake: TButton
+      Left = 288
+      Height = 28
+      Top = 3
+      Width = 100
+      Caption = 'Take'
+      Enabled = False
+      OnClick = bTakeClick
+      TabOrder = 1
+    end
+    object BitBtn1: TBitBtn
+      Left = 432
+      Height = 28
+      Top = 3
+      Width = 100
+      Caption = 'Close'
+      Kind = bkClose
+      ModalResult = 11
+      TabOrder = 2
+    end
+    object bChange: TButton
+      Left = 144
+      Height = 28
+      Top = 3
+      Width = 100
+      Caption = 'Change'
+      Enabled = False
+      OnClick = bChangeClick
+      TabOrder = 3
+    end
+  end
+  object pnlEdit: TPanel
+    Left = 0
+    Height = 134
+    Top = 194
+    Width = 546
+    Align = alBottom
+    TabOrder = 2
+  end
+  object Splitter1: TSplitter
+    Cursor = crVSplit
+    Left = 0
+    Height = 5
+    Top = 189
+    Width = 546
+    Align = alBottom
+    OnMoved = Splitter1Moved
+    ResizeAnchor = akBottom
   end
 end

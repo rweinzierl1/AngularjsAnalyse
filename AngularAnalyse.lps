@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="45">
+    <Units Count="48">
       <Unit0>
         <Filename Value="AngularAnalyse.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -12,7 +12,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="53" Y="19"/>
-        <UsageCount Value="131"/>
+        <UsageCount Value="136"/>
       </Unit0>
       <Unit1>
         <Filename Value="frmmain.pas"/>
@@ -21,13 +21,14 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="frmMain"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1275"/>
-        <CursorPos X="53" Y="1293"/>
-        <UsageCount Value="131"/>
+        <TopLine Value="656"/>
+        <CursorPos X="87" Y="664"/>
+        <UsageCount Value="136"/>
         <Bookmarks Count="1">
-          <Item0 X="52" Y="1370" ID="2"/>
+          <Item0 X="52" Y="1389" ID="2"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -37,19 +38,19 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="angPKZ"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="14" Y="13"/>
-        <UsageCount Value="123"/>
+        <TopLine Value="27"/>
+        <CursorPos X="36" Y="54"/>
+        <UsageCount Value="128"/>
       </Unit2>
       <Unit3>
         <Filename Value="angfrmmaincontroller.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="angFrmMainController"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="196"/>
-        <CursorPos X="22" Y="226"/>
-        <UsageCount Value="119"/>
+        <TopLine Value="114"/>
+        <CursorPos X="5" Y="130"/>
+        <UsageCount Value="124"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
@@ -62,7 +63,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="43" Y="15"/>
-        <UsageCount Value="85"/>
+        <UsageCount Value="90"/>
       </Unit4>
       <Unit5>
         <Filename Value="angdatamodul.pas"/>
@@ -73,8 +74,8 @@
         <UnitName Value="angDatamodul"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
-        <CursorPos X="35" Y="3"/>
-        <UsageCount Value="85"/>
+        <CursorPos X="50" Y="8"/>
+        <UsageCount Value="90"/>
       </Unit5>
       <Unit6>
         <Filename Value="angfrmbookmarks.pas"/>
@@ -86,7 +87,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="3"/>
         <CursorPos X="38" Y="5"/>
-        <UsageCount Value="70"/>
+        <UsageCount Value="75"/>
       </Unit6>
       <Unit7>
         <Filename Value="angfilelist.pas"/>
@@ -98,20 +99,19 @@
         <WindowIndex Value="0"/>
         <TopLine Value="127"/>
         <CursorPos X="34" Y="114"/>
-        <UsageCount Value="65"/>
+        <UsageCount Value="70"/>
       </Unit7>
       <Unit8>
         <Filename Value="angsnippet.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="angSnippet"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="210"/>
-        <CursorPos X="1" Y="227"/>
-        <UsageCount Value="26"/>
+        <TopLine Value="227"/>
+        <CursorPos X="18" Y="255"/>
+        <UsageCount Value="31"/>
         <Bookmarks Count="1">
-          <Item0 X="1" Y="227" ID="1"/>
+          <Item0 X="1" Y="233" ID="1"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit8>
@@ -122,408 +122,432 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="angfrmSnippet"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="14"/>
-        <CursorPos X="44" Y="22"/>
-        <UsageCount Value="24"/>
+        <TopLine Value="30"/>
+        <CursorPos X="42" Y="47"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit9>
       <Unit10>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmSelectSnippet"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="angFrmSelectSnippet"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="146"/>
+        <CursorPos X="11" Y="151"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit10>
+      <Unit11>
         <Filename Value="C:\lazarus\lcl\include\menuitem.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="72"/>
         <CursorPos X="1" Y="85"/>
         <UsageCount Value="12"/>
-      </Unit10>
-      <Unit11>
+      </Unit11>
+      <Unit12>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\inc\objpash.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="174"/>
         <CursorPos X="23" Y="192"/>
         <UsageCount Value="12"/>
-      </Unit11>
-      <Unit12>
+      </Unit12>
+      <Unit13>
         <Filename Value="frmmain.lfm"/>
         <WindowIndex Value="0"/>
         <TopLine Value="499"/>
         <CursorPos X="9" Y="525"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
-      </Unit12>
-      <Unit13>
+      </Unit13>
+      <Unit14>
         <Filename Value="C:\lazarus\components\synedit\synedit.pp"/>
         <UnitName Value="SynEdit"/>
         <WindowIndex Value="0"/>
         <TopLine Value="862"/>
         <CursorPos X="20" Y="881"/>
         <UsageCount Value="12"/>
-      </Unit13>
-      <Unit14>
+      </Unit14>
+      <Unit15>
         <Filename Value="C:\lazarus\components\synedit\synedittypes.pp"/>
         <UnitName Value="SynEditTypes"/>
         <WindowIndex Value="0"/>
         <TopLine Value="77"/>
         <CursorPos X="42" Y="97"/>
         <UsageCount Value="13"/>
-      </Unit14>
-      <Unit15>
+      </Unit15>
+      <Unit16>
         <Filename Value="C:\lazarus\lcl\comctrls.pp"/>
         <UnitName Value="ComCtrls"/>
         <WindowIndex Value="0"/>
         <TopLine Value="517"/>
         <CursorPos X="14" Y="534"/>
         <UsageCount Value="10"/>
-      </Unit15>
-      <Unit16>
+      </Unit16>
+      <Unit17>
         <Filename Value="C:\lazarus\components\synedit\synmemo.pas"/>
         <UnitName Value="SynMemo"/>
         <WindowIndex Value="0"/>
         <TopLine Value="114"/>
         <CursorPos X="14" Y="131"/>
         <UsageCount Value="10"/>
-      </Unit16>
-      <Unit17>
+      </Unit17>
+      <Unit18>
         <Filename Value="C:\lazarus\lcl\dialogs.pp"/>
         <UnitName Value="Dialogs"/>
         <WindowIndex Value="0"/>
         <TopLine Value="20"/>
         <CursorPos X="21" Y="38"/>
         <UsageCount Value="11"/>
-      </Unit17>
-      <Unit18>
+      </Unit18>
+      <Unit19>
         <Filename Value="C:\lazarus\lcl\include\pagecontrol.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="5"/>
         <CursorPos X="1" Y="34"/>
         <UsageCount Value="9"/>
-      </Unit18>
-      <Unit19>
+      </Unit19>
+      <Unit20>
         <Filename Value="C:\lazarus\lcl\include\customnotebook.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="540"/>
         <CursorPos X="1" Y="560"/>
         <UsageCount Value="9"/>
-      </Unit19>
-      <Unit20>
+      </Unit20>
+      <Unit21>
         <Filename Value="C:\lazarus\components\synedit\syneditmarks.pp"/>
         <UnitName Value="SynEditMarks"/>
-        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="1" Y="1"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
-      </Unit20>
-      <Unit21>
+      </Unit21>
+      <Unit22>
         <Filename Value="C:\lazarus\components\synedit\syneditpointclasses.pas"/>
         <UnitName Value="SynEditPointClasses"/>
         <WindowIndex Value="0"/>
         <TopLine Value="71"/>
         <CursorPos X="3" Y="79"/>
         <UsageCount Value="11"/>
-      </Unit21>
-      <Unit22>
+      </Unit22>
+      <Unit23>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\inc\systemh.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="845"/>
         <CursorPos X="16" Y="866"/>
         <UsageCount Value="10"/>
-      </Unit22>
-      <Unit23>
+      </Unit23>
+      <Unit24>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\objpas\sysutils\finah.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="8"/>
         <CursorPos X="10" Y="23"/>
         <UsageCount Value="10"/>
-      </Unit23>
-      <Unit24>
+      </Unit24>
+      <Unit25>
         <Filename Value="C:\lazarus\components\synedit\synhighlighterany.pas"/>
         <UnitName Value="SynHighlighterAny"/>
         <WindowIndex Value="0"/>
         <TopLine Value="25"/>
         <CursorPos X="23" Y="54"/>
         <UsageCount Value="12"/>
-      </Unit24>
-      <Unit25>
-        <Filename Value="C:\lazarus\lcl\include\control.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="2701"/>
-        <CursorPos X="1" Y="2719"/>
-        <UsageCount Value="11"/>
       </Unit25>
       <Unit26>
+        <Filename Value="C:\lazarus\lcl\include\control.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2095"/>
+        <CursorPos X="1" Y="2112"/>
+        <UsageCount Value="11"/>
+      </Unit26>
+      <Unit27>
         <Filename Value="C:\lazarus\lcl\include\buttoncontrol.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="38"/>
         <CursorPos X="1" Y="56"/>
         <UsageCount Value="11"/>
-      </Unit26>
-      <Unit27>
+      </Unit27>
+      <Unit28>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\objpas\sysutils\sysstrh.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="59"/>
         <CursorPos X="10" Y="71"/>
         <UsageCount Value="11"/>
-      </Unit27>
-      <Unit28>
+      </Unit28>
+      <Unit29>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\objpas\math.pp"/>
         <UnitName Value="math"/>
         <WindowIndex Value="0"/>
         <TopLine Value="484"/>
         <CursorPos X="22" Y="526"/>
         <UsageCount Value="10"/>
-      </Unit28>
-      <Unit29>
+      </Unit29>
+      <Unit30>
         <Filename Value="C:\lazarus\lcl\include\treeview.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="449"/>
         <CursorPos X="1" Y="470"/>
         <UsageCount Value="12"/>
-      </Unit29>
-      <Unit30>
+      </Unit30>
+      <Unit31>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\win\wininc\defines.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="2647"/>
         <CursorPos X="16" Y="2668"/>
         <UsageCount Value="10"/>
-      </Unit30>
-      <Unit31>
+      </Unit31>
+      <Unit32>
         <Filename Value="C:\lazarus\components\synedit\synhighlightercss.pas"/>
         <UnitName Value="SynHighlighterCss"/>
         <WindowIndex Value="0"/>
         <TopLine Value="19"/>
         <CursorPos X="23" Y="46"/>
         <UsageCount Value="10"/>
-      </Unit31>
-      <Unit32>
+      </Unit32>
+      <Unit33>
         <Filename Value="C:\lazarus\lcl\clipbrd.pp"/>
         <UnitName Value="Clipbrd"/>
         <WindowIndex Value="0"/>
         <TopLine Value="100"/>
         <CursorPos X="13" Y="115"/>
         <UsageCount Value="10"/>
-      </Unit32>
-      <Unit33>
+      </Unit33>
+      <Unit34>
         <Filename Value="C:\lazarus\lcl\graphics.pp"/>
         <UnitName Value="Graphics"/>
         <WindowIndex Value="0"/>
         <TopLine Value="241"/>
         <CursorPos X="10" Y="254"/>
         <UsageCount Value="11"/>
-      </Unit33>
-      <Unit34>
+      </Unit34>
+      <Unit35>
         <Filename Value="C:\lazarus\lcl\menus.pp"/>
         <UnitName Value="Menus"/>
         <WindowIndex Value="0"/>
         <TopLine Value="115"/>
         <CursorPos X="3" Y="118"/>
         <UsageCount Value="10"/>
-      </Unit34>
-      <Unit35>
+      </Unit35>
+      <Unit36>
         <Filename Value="C:\lazarus\components\synedit\syneditmarkupspecialline.pp"/>
         <UnitName Value="SynEditMarkupSpecialLine"/>
         <WindowIndex Value="0"/>
         <TopLine Value="16"/>
         <CursorPos X="3" Y="33"/>
         <UsageCount Value="10"/>
-      </Unit35>
-      <Unit36>
+      </Unit36>
+      <Unit37>
         <Filename Value="C:\lazarus\components\synedit\syneditmiscclasses.pp"/>
         <UnitName Value="SynEditMiscClasses"/>
         <WindowIndex Value="0"/>
         <TopLine Value="206"/>
         <CursorPos X="3" Y="206"/>
         <UsageCount Value="10"/>
-      </Unit36>
-      <Unit37>
+      </Unit37>
+      <Unit38>
         <Filename Value="C:\lazarus\lcl\include\font.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="879"/>
         <CursorPos X="1" Y="899"/>
         <UsageCount Value="10"/>
-      </Unit37>
-      <Unit38>
+      </Unit38>
+      <Unit39>
         <Filename Value="C:\lazarus\lcl\controls.pp"/>
         <UnitName Value="Controls"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="328"/>
-        <CursorPos X="3" Y="347"/>
+        <TopLine Value="2926"/>
+        <CursorPos X="1" Y="2947"/>
         <UsageCount Value="10"/>
-      </Unit38>
-      <Unit39>
+      </Unit39>
+      <Unit40>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\objpas\sysutils\osutilsh.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="71" Y="5"/>
         <UsageCount Value="12"/>
-      </Unit39>
-      <Unit40>
+      </Unit40>
+      <Unit41>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\packages\fcl-base\src\inifiles.pp"/>
         <UnitName Value="IniFiles"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="160"/>
-        <CursorPos X="15" Y="179"/>
+        <TopLine Value="161"/>
+        <CursorPos X="29" Y="180"/>
         <UsageCount Value="10"/>
-      </Unit40>
-      <Unit41>
+      </Unit41>
+      <Unit42>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\objpas\sysutils\filutilh.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="79"/>
         <CursorPos X="10" Y="94"/>
         <UsageCount Value="10"/>
-      </Unit41>
-      <Unit42>
+      </Unit42>
+      <Unit43>
         <Filename Value="C:\lazarus\lcl\forms.pp"/>
         <UnitName Value="Forms"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1487"/>
         <CursorPos X="14" Y="1502"/>
         <UsageCount Value="10"/>
-      </Unit42>
-      <Unit43>
+      </Unit43>
+      <Unit44>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\objpas\classes\classesh.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="103"/>
         <CursorPos X="3" Y="120"/>
         <UsageCount Value="10"/>
-      </Unit43>
-      <Unit44>
-        <Filename Value="angfrmselectsnippet.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="frmSelectSnippet"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="angFrmSelectSnippet"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="15"/>
-        <CursorPos X="48" Y="29"/>
-        <UsageCount Value="21"/>
       </Unit44>
+      <Unit45>
+        <Filename Value="C:\lazarus\lcl\include\customlistview.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="227"/>
+        <CursorPos X="1" Y="244"/>
+        <UsageCount Value="10"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="C:\lazarus\lcl\include\wincontrol.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="7085"/>
+        <CursorPos X="1" Y="7092"/>
+        <UsageCount Value="10"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="C:\lazarus\components\synedit\syncompletion.pas"/>
+        <UnitName Value="SynCompletion"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="19"/>
+        <CursorPos X="56" Y="36"/>
+        <UsageCount Value="10"/>
+      </Unit47>
     </Units>
     <General>
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="214" Column="1" TopLine="195"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="24" Column="8" TopLine="15"/>
       </Position1>
       <Position2>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="216" Column="1" TopLine="195"/>
+        <Filename Value="angfrmsnippet.pas"/>
+        <Caret Line="15" Column="3" TopLine="1"/>
       </Position2>
       <Position3>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="218" Column="1" TopLine="195"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="102" Column="35" TopLine="72"/>
       </Position3>
       <Position4>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="237" Column="1" TopLine="214"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="34" Column="5" TopLine="11"/>
       </Position4>
       <Position5>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="216" Column="1" TopLine="209"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="93" Column="30" TopLine="89"/>
       </Position5>
       <Position6>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="218" Column="1" TopLine="209"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="119" Column="19" TopLine="116"/>
       </Position6>
       <Position7>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="237" Column="1" TopLine="209"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="78" Column="20" TopLine="61"/>
       </Position7>
       <Position8>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="216" Column="1" TopLine="209"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="2" Column="44" TopLine="1"/>
       </Position8>
       <Position9>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="225" Column="49" TopLine="209"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="78" Column="18" TopLine="49"/>
       </Position9>
       <Position10>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="173" Column="75" TopLine="205"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="119" Column="18" TopLine="90"/>
       </Position10>
       <Position11>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="225" Column="1" TopLine="206"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="101" Column="13" TopLine="94"/>
       </Position11>
       <Position12>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="227" Column="1" TopLine="206"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="107" Column="16" TopLine="107"/>
       </Position12>
       <Position13>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="228" Column="1" TopLine="206"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="125" Column="3" TopLine="114"/>
       </Position13>
       <Position14>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="229" Column="1" TopLine="206"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="113" Column="5" TopLine="108"/>
       </Position14>
       <Position15>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="230" Column="1" TopLine="206"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="127" Column="1" TopLine="114"/>
       </Position15>
       <Position16>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="233" Column="1" TopLine="206"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="115" Column="5" TopLine="108"/>
       </Position16>
       <Position17>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="225" Column="1" TopLine="206"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="160" Column="31" TopLine="62"/>
       </Position17>
       <Position18>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="227" Column="1" TopLine="206"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="129" Column="15" TopLine="123"/>
       </Position18>
       <Position19>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="111" Column="1" TopLine="93"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="131" Column="31" TopLine="118"/>
       </Position19>
       <Position20>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="113" Column="1" TopLine="93"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="37" Column="5" TopLine="20"/>
       </Position20>
       <Position21>
         <Filename Value="angsnippet.pas"/>
-        <Caret Line="112" Column="1" TopLine="93"/>
+        <Caret Line="44" Column="22" TopLine="19"/>
       </Position21>
       <Position22>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="113" Column="1" TopLine="93"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="37" Column="5" TopLine="20"/>
       </Position22>
       <Position23>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="228" Column="1" TopLine="211"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="137" Column="9" TopLine="123"/>
       </Position23>
       <Position24>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="229" Column="1" TopLine="211"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="574" Column="34" TopLine="555"/>
       </Position24>
       <Position25>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="69" Column="1" TopLine="51"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="129" Column="36" TopLine="119"/>
       </Position25>
       <Position26>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="70" Column="1" TopLine="51"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="39" Column="13" TopLine="21"/>
       </Position26>
       <Position27>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="71" Column="1" TopLine="51"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="89" Column="21" TopLine="85"/>
       </Position27>
       <Position28>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="72" Column="1" TopLine="51"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="663" Column="77" TopLine="656"/>
       </Position28>
       <Position29>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="230" Column="1" TopLine="213"/>
+        <Filename Value="angfrmselectsnippet.pas"/>
+        <Caret Line="46" Column="13" TopLine="26"/>
       </Position29>
       <Position30>
-        <Filename Value="angsnippet.pas"/>
-        <Caret Line="145" Column="28" TopLine="110"/>
+        <Filename Value="frmmain.pas"/>
+        <Caret Line="162" Column="5" TopLine="162"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>

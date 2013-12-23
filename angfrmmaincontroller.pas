@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils, Graphics,
-  inifiles, SynEditMarks,angSnippet;
+  inifiles, SynEditMarks,angSnippet,SynCompletion;
 
 type
 
@@ -65,6 +65,8 @@ type
     Tabsheet: TTabSheet;
     SynMemo: TsynMemo;
     SynMemoPreview: TsynMemo;
+    SynCompletion: TSynCompletion;
+
     procedure setPreviewText;
     procedure setCarentFromPreviewToEdit;
     procedure setCarentFromEditToPreview;
