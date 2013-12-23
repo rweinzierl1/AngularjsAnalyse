@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, frmMain, angPKZ, angFrmMainController, angKeyWords, angDatamodul, 
-angfrmBookmarks, angFileList;
+angfrmBookmarks, angFileList, angSnippet, angfrmSnippet, angFrmSelectSnippet;
 
 {$R *.res}
 

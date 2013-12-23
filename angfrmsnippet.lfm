@@ -1,0 +1,136 @@
+object frmSnippet: TfrmSnippet
+  Left = 569
+  Height = 161
+  Top = 360
+  Width = 517
+  Caption = 'Snippet'
+  ClientHeight = 161
+  ClientWidth = 517
+  Position = poScreenCenter
+  LCLVersion = '1.0.14.0'
+  object lblShortcut: TLabel
+    Left = 0
+    Height = 16
+    Top = 1
+    Width = 46
+    Caption = 'Shortcut'
+    ParentColor = False
+  end
+  object eShortcut: TEdit
+    Left = 64
+    Height = 23
+    Top = 1
+    Width = 151
+    Anchors = [akTop, akLeft, akRight]
+    TabOrder = 0
+  end
+  object lblDescription: TLabel
+    Left = 0
+    Height = 16
+    Top = 29
+    Width = 61
+    Caption = 'Description'
+    ParentColor = False
+  end
+  object eDescription: TEdit
+    Left = 64
+    Height = 23
+    Top = 29
+    Width = 451
+    Anchors = [akTop, akLeft, akRight]
+    TabOrder = 1
+  end
+  object cBoxsForFileType: TComboBox
+    Left = 287
+    Height = 23
+    Top = 1
+    Width = 57
+    Anchors = [akTop, akRight]
+    ItemHeight = 15
+    ItemIndex = 0
+    Items.Strings = (
+      'js'
+      'html'
+      'css'
+      'all'
+    )
+    TabOrder = 2
+    Text = 'js'
+  end
+  object lblForFileType: TLabel
+    Left = 215
+    Height = 16
+    Top = 2
+    Width = 68
+    Anchors = [akTop, akRight]
+    Caption = 'For File Type'
+    ParentColor = False
+  end
+  object mContent: TMemo
+    Left = 67
+    Height = 61
+    Top = 63
+    Width = 444
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ScrollBars = ssAutoBoth
+    TabOrder = 3
+  end
+  object lblContent: TLabel
+    Left = 0
+    Height = 16
+    Top = 64
+    Width = 44
+    Caption = 'Content'
+    ParentColor = False
+  end
+  object BitBtn1: TBitBtn
+    Left = 308
+    Height = 22
+    Top = 129
+    Width = 90
+    Anchors = [akRight, akBottom]
+    Default = True
+    DefaultCaption = True
+    Kind = bkOK
+    OnClick = BitBtn1Click
+    TabOrder = 4
+  end
+  object BitBtn2: TBitBtn
+    Left = 421
+    Height = 20
+    Top = 131
+    Width = 90
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    DefaultCaption = True
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 5
+  end
+  object lblLocation: TLabel
+    Left = 352
+    Height = 16
+    Top = 1
+    Width = 74
+    Anchors = [akTop, akRight]
+    Caption = 'Save Location'
+    ParentColor = False
+  end
+  object cBoxLocation: TComboBox
+    Left = 431
+    Height = 21
+    Top = 2
+    Width = 80
+    Anchors = [akTop, akRight]
+    ItemHeight = 15
+    ItemIndex = 1
+    Items.Strings = (
+      'Project'
+      'User'
+      'Global'
+    )
+    Style = csOwnerDrawFixed
+    TabOrder = 6
+    Text = 'User'
+  end
+end

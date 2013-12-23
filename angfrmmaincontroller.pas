@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils, Graphics,
-  inifiles, SynEditMarks;
+  inifiles, SynEditMarks,angSnippet;
 
 type
 
@@ -124,6 +124,8 @@ type
     sLastSearch: string;
     slColorScheme: TColorSchemeList;
     UserPropertys: TUserPropertys;
+
+    AngSnippetList : TAngSnippetList;
 
     function ChangeMinusToCamelCase(sSuchtext: string): string;
     function ChangeCamelCaseToMinusString(sSuchtext: string): string;
@@ -417,6 +419,8 @@ begin
 
   UserPropertys := TUserPropertys.Create;
 
+  AngSnippetList := TAngSnippetList.Create ;
+
 end;
 
 destructor TFrmMainController.Destroy;
@@ -437,6 +441,7 @@ begin
 
   slColorScheme.Free;
   UserPropertys.Free;
+  AngSnippetList.free;
 
   inherited Destroy;
 end;

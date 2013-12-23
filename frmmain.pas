@@ -10,7 +10,8 @@ uses
   SynEditMarks, strutils, SynEditTypes,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
   Clipbrd, ActnList, shellapi, SynEditMiscClasses, SynEditMarkupSpecialLine,
-  angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types;
+  angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types,
+  angSnippet,angfrmSnippet,angFrmSelectSnippet ;
 
 type
 
@@ -29,6 +30,8 @@ type
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    mnuCreateSnippet: TMenuItem;
+    mnuSearch1: TMenuItem;
     mnuAutosave: TMenuItem;
     mnuSmaller: TMenuItem;
     mnuLarger: TMenuItem;
@@ -78,6 +81,7 @@ type
     ToolButton6: TToolButton;
     ToolButton7: TToolButton;
     ToolButton8: TToolButton;
+    ToolButton9: TToolButton;
     TreeView1: TTreeView;
     procedure acAutosaveExecute(Sender: TObject);
     procedure acFontLargerExecute(Sender: TObject);
@@ -100,6 +104,7 @@ type
     procedure mnuBookMark1Click(Sender: TObject);
     procedure mnuBookmarksClick(Sender: TObject);
     procedure mnuColorSchemeClick(Sender: TObject);
+    procedure mnuCreateSnippetClick(Sender: TObject);
     procedure mnuDJKeywordsClick(Sender: TObject);
     procedure mnuFindClick(Sender: TObject);
     procedure mnuCloseActivepageClick(Sender: TObject);
@@ -131,6 +136,7 @@ type
     procedure ToolButton3Click(Sender: TObject);
     procedure ToolButton4Click(Sender: TObject);
     procedure ToolButton5Click(Sender: TObject);
+    procedure ToolButton9Click(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1DblClick(Sender: TObject);
   private
@@ -397,6 +403,8 @@ begin
     frmMainController.UserPropertys.iFontsize := frmMainController.UserPropertys.iFontsize - 1;
     frmMainController.SetHeightToAllSynedit;
   end;
+
+
 end;
 
 procedure TfrmMainView.acOpenAFileExecute(Sender: TObject);
@@ -534,6 +542,35 @@ end;
 
 procedure TfrmMainView.mnuColorSchemeClick(Sender: TObject);
 begin
+
+end;
+
+procedure TfrmMainView.mnuCreateSnippetClick(Sender: TObject);
+  var
+  frmSnippet: TfrmSnippet;
+  AngSnippet :  TAngSnippet;
+begin
+ frmSnippet := TfrmSnippet.create(self);
+
+ AngSnippet :=  TAngSnippet.create;
+ AngSnippet.sContent:= self.frmMainController.myActiveOneTabsheet.SynMemo.SelText;
+ frmSnippet.ShowSnippet(AngSnippet);
+
+ frmSnippet.showmodal;
+
+ if frmSnippet.ModalResult = mrOK then
+   begin
+   AngSnippet.MakeFilenameFromShortcut(frmMainController.sPfad );
+   AngSnippet.SaveToFile();
+
+   self.frmMainController.AngSnippetList.AddObject(AngSnippet.sShortcut,AngSnippet );
+
+   end
+ else
+   AngSnippet.free;
+
+
+ frmSnippet.free;
 
 end;
 
@@ -1040,12 +1077,21 @@ var
   s: string;
 begin
   mnuOpenMarkedFileName.Visible := False;
+  mnuCreateSnippet.visible := false;
+
+
   s := frmMainController.myActiveOneTabsheet.SynMemo.SelText;
   if length(s) > 3 then
   begin
     if frmMainController.GetFileNameToPartFileName(s) <> '' then
       mnuOpenMarkedFileName.Visible := True;
   end;
+
+
+  if length(s) > 10 then
+    begin
+    mnuCreateSnippet.visible := true;
+    end;
 
 end;
 
@@ -1238,6 +1284,19 @@ end;
 
 procedure TfrmMainView.ToolButton5Click(Sender: TObject);
 begin
+end;
+
+procedure TfrmMainView.ToolButton9Click(Sender: TObject);
+ var
+  frmSelectSnippet: TfrmSelectSnippet;
+begin
+  frmSelectSnippet := TfrmSelectSnippet.create(self);
+
+  frmSelectSnippet.ShowSnippingList(self.frmMainController.AngSnippetList);
+  frmSelectSnippet.Showmodal;
+
+  frmSelectSnippet.free;
+
 end;
 
 procedure TfrmMainView.SynEditPreviewSpecialLineMarkup(Sender: TObject;
@@ -1507,7 +1566,7 @@ begin
   begin
     if (sr.attr and faDirectory = faDirectory) then
     begin
-      if (sr.Name <> '.') and (sr.Name <> '..') then
+      if copy(sr.Name,1,1) <> '.' then    //  simple ignore all .hg .git ... (sr.Name <> '.') and (sr.Name <> '..')
       begin
         myItem := TreeView1.Items.AddChild(myItemRoot, sr.Name);
         myItem.ImageIndex := constItemIndexFolder;
