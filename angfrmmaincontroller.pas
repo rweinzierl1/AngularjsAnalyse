@@ -76,6 +76,16 @@ type
     procedure InfoToPreviewSelectionChanged;
   end;
 
+
+  { TOpenedTabsheetList }
+
+  TOpenedTabsheetList = class(TStringlist)
+    public
+    constructor create;
+    function OneTabsheet(i : integer) : TOneTabsheet;
+  end;
+
+
   { TUserPropertys }
 
   TUserPropertys = class
@@ -92,6 +102,14 @@ type
     destructor Destroy; override;
   end;
 
+
+    { TFilesFoundList }
+
+    TFilesFoundList = class(TStringlist)
+    public
+    function OneFileInfo(i: integer): TOneFileInfo;
+    constructor create;
+  end;
 
 
   { TFrmMainController }
@@ -113,7 +131,7 @@ type
 
   public
 
-    slAllFilesFound: TStringList;
+    slAllFilesFound: TFilesFoundList;
     slController: TStringList;
     slModule: TStringList;
     slService: TStringList;
@@ -122,7 +140,7 @@ type
     slDirective: TStringList;
     slConfig: TStringList;
     myActiveOneTabsheet: TOneTabsheet;
-    slOpendTabsheets: TStringList;
+    slOpendTabsheets: TOpenedTabsheetList;
     sLastSearch: string;
     slColorScheme: TColorSchemeList;
     UserPropertys: TUserPropertys;
@@ -166,6 +184,30 @@ type
 
 
 implementation
+
+{ TFilesFoundList }
+
+function TFilesFoundList.OneFileInfo(i: integer): TOneFileInfo;
+begin
+  result := TOneFileInfo(self.Objects[i]);
+end;
+
+constructor TFilesFoundList.create;
+begin
+    self.OwnsObjects := True;
+end;
+
+{ TOpenedTabsheetList }
+
+constructor TOpenedTabsheetList.create;
+begin
+  self.OwnsObjects := true;
+end;
+
+function TOpenedTabsheetList.OneTabsheet(i: integer): TOneTabsheet;
+begin
+ result :=  TOneTabsheet(self.Objects[i] );
+end;
 
 { TUserPropertys }
 
@@ -401,8 +443,8 @@ end;
 constructor TFrmMainController.Create;
 begin
   sPfad := '';
-  slAllFilesFound := TStringList.Create;
-  slAllFilesFound.OwnsObjects := True;
+  slAllFilesFound := TFilesFoundList.Create;
+
 
   slController := TStringList.Create;
   slModule := TStringList.Create;
@@ -414,8 +456,7 @@ begin
   slDJKeyWords := TStringList.Create;
   slAllScope := TStringList.Create;
 
-  slOpendTabsheets := TStringList.Create;
-  slOpendTabsheets.OwnsObjects := True;
+  slOpendTabsheets := TOpenedTabsheetList.Create;
 
   slColorScheme := TColorSchemeList.Create;
 
@@ -781,7 +822,7 @@ begin
   begin
     if self.slAllFilesFound[i] = sFilename then
     begin
-      oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+      oneFileInfo := slAllFilesFound.OneFileInfo(i);
       Result := oneFileInfo.pTreenodeInView;
       break;
     end;
@@ -820,7 +861,7 @@ begin
   Result := '';
   for i := 0 to self.slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    oneFileInfo := slAllFilesFound.OneFileInfo(i);
     if oneFileInfo.pTreenodeInView = p then
     begin
       Result := slAllFilesFound[i];
@@ -837,7 +878,7 @@ begin
   Result := nil;
   for i := 0 to self.slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    oneFileInfo := slAllFilesFound.OneFileInfo(i) ;
     if oneFileInfo.pTreenodeInView = p then
     begin
       Result := oneFileInfo;
@@ -856,7 +897,7 @@ begin
 
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    oneFileInfo := slAllFilesFound.OneFileInfo(i) ;
     for n := 0 to oneFileInfo.slScopeActions.Count - 1 do
       slAllScope.Add(oneFileInfo.slScopeActions[n]);
 
@@ -873,7 +914,7 @@ begin
   Result := '';
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    oneFileInfo := slAllFilesFound.OneFileInfo(i);
     for n := 0 to oneFileInfo.slDependencyInjektionNamen.Count - 1 do
       if oneFileInfo.slDependencyInjektionNamen[n] = sKeyWord then
         Result := slAllFilesFound[i];
@@ -899,7 +940,7 @@ begin
 
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    oneFileInfo := slAllFilesFound.OneFileInfo(i);
     if oneFileInfo.iImageindex <> constItemIndexUnknownFile then
     begin
       sFileUpper := uppercase(slAllFilesFound[i]);
@@ -927,7 +968,7 @@ begin
   begin
     if slAllFilesFound[i] = sFilename then
     begin
-      oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+      oneFileInfo := slAllFilesFound.OneFileInfo(i);
       Result := oneFileInfo.slFileInhalt.Text;
     end;
   end;
@@ -943,7 +984,7 @@ begin
 
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+    OneTabsheet := slOpendTabsheets.OneTabsheet(i);
 
     for n := 0 to 9 do
     begin
@@ -977,7 +1018,7 @@ var
 begin
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+    OneTabsheet := slOpendTabsheets.OneTabsheet(i);
     self.myActiveOneTabsheet := OneTabsheet;
 
   end;
@@ -993,7 +1034,7 @@ begin
   Result := nil;
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+    OneTabsheet := slOpendTabsheets.OneTabsheet(i);
     if slOpendTabsheets[i] = sFile then
       Result := OneTabsheet.SynMemo;
   end;
@@ -1011,7 +1052,7 @@ begin
 
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    oneFileInfo := slAllFilesFound.OneFileInfo(i) ;
     for n := 0 to oneFileInfo.slDependencyInjektionNamen.Count - 1 do
       slDJKeyWords.AddObject(oneFileInfo.slDependencyInjektionNamen[n],
         oneFileInfo.slDependencyInjektionNamen.objects[n]);
@@ -1092,7 +1133,7 @@ begin
 
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    oneFileInfo := slAllFilesFound.OneFileInfo(i);
     gefunden := False;
     sInhalt := oneFileInfo.slFileInhalt.Text;
     if pos(sSuchtext, sInhalt) > 0 then
@@ -1129,7 +1170,7 @@ begin
 
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+    OneTabsheet := slOpendTabsheets.OneTabsheet(i);
 
     if OneTabsheet.SynMemo.Modified then
     begin
@@ -1149,7 +1190,7 @@ begin
 
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+    OneTabsheet := slOpendTabsheets.OneTabsheet(i);
 
     if OneTabsheet.SynMemo.Modified then
     begin
@@ -1167,7 +1208,7 @@ var
 begin
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    OneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+    OneTabsheet := slOpendTabsheets.OneTabsheet(i);
 
     if OneTabsheet.Tabsheet = ActivePage then
     begin
@@ -1187,7 +1228,7 @@ begin
 
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    myOneTabsheet := TOneTabsheet(slOpendTabsheets.Objects[i]);
+    myOneTabsheet := slOpendTabsheets.OneTabsheet(i) ;
     if myOneTabsheet.Tabsheet = self.myActiveOneTabsheet.Tabsheet then
     begin
       Result := slOpendTabsheets[i];
@@ -1245,7 +1286,7 @@ begin
   begin
     if slAllFilesFound[i] = sFilename then
     begin
-      oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+      oneFileInfo := slAllFilesFound.OneFileInfo(i);
       sl := oneFileInfo.slDependencyInjektionNamen;
 
       for n := 0 to sl.Count - 1 do
@@ -1295,7 +1336,7 @@ begin
     sExt := uppercase(ExtractFileExt(slAllFilesFound[i]));
     if pos('.HTM', sExt) > 0 then
     begin
-      oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+      oneFileInfo := slAllFilesFound.OneFileInfo(i);
       sl.AddObject(GetFilenameWithoutRootPath(slAllFilesFound[i]),
         oneFileInfo.pTreenodeInView);
     end;
@@ -1311,7 +1352,7 @@ begin
 
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := TOneFileInfo(slAllFilesFound.Objects[i]);
+    oneFileInfo := slAllFilesFound.OneFileInfo(i);
     for n := 0 to oneFileInfo.slngWords.Count - 1 do
       sl.add(oneFileInfo.slngWords[n]);
 
@@ -1327,7 +1368,7 @@ begin
 
   for i := 0 to self.slOpendTabsheets.Count - 1 do
   begin
-    myOneTabsheet := TOneTabsheet(self.slOpendTabsheets.Objects[i]);
+    myOneTabsheet := self.slOpendTabsheets.OneTabsheet(i) ;
     myOneTabsheet.SynMemo.Font.Size := self.UserPropertys.iFontsize;
   end;
 

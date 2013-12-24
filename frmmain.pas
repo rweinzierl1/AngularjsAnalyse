@@ -249,7 +249,7 @@ begin
 
       for n := 0 to  frmMainController.slOpendTabsheets.Count -1 do
         begin
-        OneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[n]);
+        OneTabsheet := frmMainController.slOpendTabsheets.OneTabsheet(n) ;
         OneTabsheet.setActiveColorScheme(OneColorScheme);
 
         self.Color:= OneColorScheme.Color ; //Avoid Blinking of Pagecontrol change
@@ -562,6 +562,10 @@ frmSnippet := TfrmSnippet.create(self);
 
 AngSnippet :=  TAngSnippet.create;
 AngSnippet.sContent:= self.frmMainController.myActiveOneTabsheet.SynMemo.SelText;
+
+//AngSnippet
+
+
 frmSnippet.ShowSnippet(AngSnippet);
 
 frmSnippet.showmodal;
@@ -741,7 +745,7 @@ begin
 
   for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
   begin
-    myOneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[i]);
+    myOneTabsheet := frmMainController.slOpendTabsheets.OneTabsheet(i);
     if Pagecontrol1.ActivePage = myOneTabsheet.Tabsheet then
     begin
       if myOneTabsheet.SynMemo.Modified then
@@ -853,7 +857,7 @@ begin
 
   for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
   begin
-    myOneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[i]);
+    myOneTabsheet := frmMainController.slOpendTabsheets.OneTabsheet(i);
     if Pagecontrol1.ActivePage = myOneTabsheet.Tabsheet then
     begin
       if myOneTabsheet.SynMemo.Modified then
@@ -1063,7 +1067,7 @@ begin
 
   for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
   begin
-    myOneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[i]);
+    myOneTabsheet := frmMainController.slOpendTabsheets.OneTabsheet(i);
     if Pagecontrol1.ActivePage = myOneTabsheet.Tabsheet then
     begin
       p := frmMainController.FindTreenodePointerToFilename(
@@ -1468,7 +1472,7 @@ begin
   begin
     if frmMainController.slOpendTabsheets[i] = sMyFileName then
     begin
-      myOneTabsheet := TOneTabsheet(frmMainController.slOpendTabsheets.Objects[i]);
+      myOneTabsheet := frmMainController.slOpendTabsheets.OneTabsheet(i);
       self.PageControl1.ActivePage := myOneTabsheet.Tabsheet;
       exit;
     end;
