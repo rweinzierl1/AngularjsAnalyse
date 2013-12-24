@@ -42,18 +42,19 @@ object frmSnippet: TfrmSnippet
   end
   object cBoxsForFileType: TComboBox
     Left = 287
-    Height = 23
+    Height = 21
     Top = 1
     Width = 57
     Anchors = [akTop, akRight]
     ItemHeight = 15
-    ItemIndex = 0
+    ItemIndex = 2
     Items.Strings = (
-      'js'
       'html'
       'css'
+      'js'
       'all'
     )
+    Style = csOwnerDrawFixed
     TabOrder = 2
     Text = 'js'
   end

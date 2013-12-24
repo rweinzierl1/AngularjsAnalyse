@@ -11,7 +11,7 @@ uses
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
   Clipbrd, ActnList, shellapi, SynEditMiscClasses, SynEditMarkupSpecialLine,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types,
-  angSnippet,angfrmSnippet,angFrmSelectSnippet,SynCompletion,LCLType ;
+  angSnippet, angfrmSnippet, angFrmSelectSnippet, SynCompletion, LCLType, SynEditKeyCmds;
 
 type
 
@@ -132,7 +132,7 @@ type
     procedure mnuShowInTreeClick(Sender: TObject);
     procedure mnuSmallerClick(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
-    procedure PageControl1Changing(Sender: TObject; var AllowChange: Boolean);
+    procedure PageControl1Changing(Sender: TObject; var AllowChange: boolean);
     procedure PopupMenuSyneditPopup(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
@@ -166,6 +166,9 @@ type
     procedure AddAngularJSKeyWordsInTreeview;
     procedure AddEditMarkToLine(iImageindex, iLine: integer);
     procedure AddSearchInPathToTree(const s: string);
+    procedure AddTreenodeNgToNode(OneFileInfo: TOneFileInfo; treenode: TTreenode);
+    procedure AddTreenodeScopeToNode(const OneFileInfo: TOneFileInfo;
+      const treenode: TTreenode);
     procedure ChangeSchema(Sender: TObject);
     function CloseAllTabsheets: boolean;
     procedure DoCloseActivePagecontrolPage;
@@ -184,13 +187,21 @@ type
       SourceValue: string; var SourceStart, SourceEnd: TPoint;
       KeyChar: TUTF8Char; Shift: TShiftState);
     procedure SynCompletionDoExecute(Sender: TObject);
+    procedure SynEdit1CutCopy(Sender: TObject; var AText: string;
+      var AMode: TSynSelectionMode; ALogStartPos: TPoint;
+      var AnAction: TSynCopyPasteAction);
+    procedure SynEdit1Paste(Sender: TObject; var AText: string;
+      var AMode: TSynSelectionMode; ALogStartPos: TPoint;
+      var AnAction: TSynCopyPasteAction);
+    procedure SynEditCommandProcessed(Sender: TObject;
+      var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure SynEditPreviewDblClick(Sender: TObject);
     procedure SynEditPreviewSpecialLineMarkup(Sender: TObject;
       Line: integer; var Special: boolean; Markup: TSynSelectedColor);
     procedure SynMemo1StatusChange(Sender: TObject; Changes: TSynStatusChanges);
     procedure synmemoChange(Sender: TObject);
     procedure synmemoClick(Sender: TObject);
-    procedure synmemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure synmemoKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
 
 
   public
@@ -226,14 +237,14 @@ end;
 procedure TfrmMainView.ChangeSchema(Sender: TObject);
 var
   mi: TMenuItem;
-  i,n: integer;
+  i, n: integer;
   OneColorScheme: TOneColorScheme;
   OneTabsheet: TOneTabsheet;
 begin
   mi := TMenuItem(Sender);
 
 
-  frmMainController.UserPropertys.sSchema := mi.caption;
+  frmMainController.UserPropertys.sSchema := mi.Caption;
 
   for i := 0 to mi.Parent.Count - 1 do
     mi.Parent.Items[i].Checked := False;
@@ -247,29 +258,29 @@ begin
       frmMainController.slColorScheme.activeColorScheme := OneColorScheme;
       mi.Checked := True;
 
-      for n := 0 to  frmMainController.slOpendTabsheets.Count -1 do
-        begin
-        OneTabsheet := frmMainController.slOpendTabsheets.OneTabsheet(n) ;
+      for n := 0 to frmMainController.slOpendTabsheets.Count - 1 do
+      begin
+        OneTabsheet := frmMainController.slOpendTabsheets.OneTabsheet(n);
         OneTabsheet.setActiveColorScheme(OneColorScheme);
 
-        self.Color:= OneColorScheme.Color ; //Avoid Blinking of Pagecontrol change
+        self.Color := OneColorScheme.Color; //Avoid Blinking of Pagecontrol change
 
-
-        end;
+      end;
     end;
   end;
 end;
 
 
 procedure TfrmMainView.DoRecentPathPM(Sender: TObject);
-var mi: TMenuItem;
+var
+  mi: TMenuItem;
 begin
 
-    if not CloseAllTabsheets then
+  if not CloseAllTabsheets then
     exit;
 
-   mi := TMenuItem(Sender) ;
-  frmMainController.sPfad :=mi.caption ;
+  mi := TMenuItem(Sender);
+  frmMainController.sPfad := mi.Caption;
   StartPathAnalyse;
 end;
 
@@ -277,7 +288,7 @@ end;
 procedure OnDeactivate1(Sender: TObject);
 begin
 
-  showmessage('ddd');
+  ShowMessage('ddd');
 end;
 
 procedure TfrmMainView.FormCreate(Sender: TObject);
@@ -304,8 +315,7 @@ begin
   setAcAutosaveToUserProperty;
 
 
-  application.OnDeactivate:= @FormDeactivate;
-
+  application.OnDeactivate := @FormDeactivate;
 
 end;
 
@@ -360,7 +370,7 @@ begin
 end;
 
 procedure TfrmMainView.acSelectDirExecute(Sender: TObject);
-  var
+var
   chosenDirectory: string;
 begin
 
@@ -369,20 +379,20 @@ begin
 
 
   if SelectDirectory('Select a directory', 'C:\', chosenDirectory) then
-  if Uppercase(chosenDirectory) = 'C:\' then
+    if Uppercase(chosenDirectory) = 'C:\' then
     begin
-    showmessage('C:\  ???');
+      ShowMessage('C:\  ???');
     end
-  else
-  begin
-    frmMainController.sPfad := chosenDirectory;
-    StartPathAnalyse;
-    AddAllRecentPathtoPopupmenu;
-  end;
+    else
+    begin
+      frmMainController.sPfad := chosenDirectory;
+      StartPathAnalyse;
+      AddAllRecentPathtoPopupmenu;
+    end;
 end;
 
 procedure TfrmMainView.acSynchronizeExecute(Sender: TObject);
-  var
+var
   sl: TStringList;
   i: integer;
 begin
@@ -406,18 +416,18 @@ end;
 
 procedure TfrmMainView.acFontSmallerExecute(Sender: TObject);
 begin
-    if frmMainController.UserPropertys.iFontsize > 1 then
+  if frmMainController.UserPropertys.iFontsize > 1 then
   begin
-    frmMainController.UserPropertys.iFontsize := frmMainController.UserPropertys.iFontsize - 1;
+    frmMainController.UserPropertys.iFontsize :=
+      frmMainController.UserPropertys.iFontsize - 1;
     frmMainController.SetHeightToAllSynedit;
   end;
-
 
 end;
 
 procedure TfrmMainView.acOpenAFileExecute(Sender: TObject);
 begin
-Application.CreateForm(TfrmFileList, frmFileList);
+  Application.CreateForm(TfrmFileList, frmFileList);
 
   frmFileList.SynAnySyn1 := SynAnySyn1;
   frmFileList.SynCssSyn1 := SynCssSyn1;
@@ -434,20 +444,22 @@ end;
 
 procedure TfrmMainView.acAutosaveExecute(Sender: TObject);
 begin
-   self.frmMainController.UserPropertys.boolAutoSave:= not self.frmMainController.UserPropertys.boolAutoSave;
+  self.frmMainController.UserPropertys.boolAutoSave :=
+    not self.frmMainController.UserPropertys.boolAutoSave;
 
-   setAcAutosaveToUserProperty;
+  setAcAutosaveToUserProperty;
 end;
 
 procedure TfrmMainView.acFontLargerExecute(Sender: TObject);
 begin
-    frmMainController.UserPropertys.iFontsize:= frmMainController.UserPropertys.iFontsize + 1;
+  frmMainController.UserPropertys.iFontsize :=
+    frmMainController.UserPropertys.iFontsize + 1;
   frmMainController.SetHeightToAllSynedit;
 end;
 
 procedure TfrmMainView.acSaveAllExecute(Sender: TObject);
 begin
-   frmMainController.SaveAll;
+  frmMainController.SaveAll;
 end;
 
 procedure TfrmMainView.FormCloseQuery(Sender: TObject; var CanClose: boolean);
@@ -455,10 +467,10 @@ var
   iAnswer: integer;
 begin
   if frmMainController.UserPropertys.boolAutoSave then
-    begin
+  begin
     frmMainController.SaveAll;
     exit;
-    end;
+  end;
 
 
   if frmMainController.SynMemoModifiedAvailable then
@@ -485,7 +497,6 @@ end;
 
 procedure TfrmMainView.MenuItem2Click(Sender: TObject);
 begin
-  showmessage('este');
 end;
 
 procedure TfrmMainView.MenuItem3Click(Sender: TObject);
@@ -555,34 +566,49 @@ end;
 
 procedure TfrmMainView.mnuCreateSnippetClick(Sender: TObject);
 var
-frmSnippet: TfrmSnippet;
-AngSnippet :  TAngSnippet;
+  frmSnippet: TfrmSnippet;
+  AngSnippet: TAngSnippet;
+  i: integer;
 begin
-frmSnippet := TfrmSnippet.create(self);
+  frmSnippet := TfrmSnippet.Create(self);
 
-AngSnippet :=  TAngSnippet.create;
-AngSnippet.sContent:= self.frmMainController.myActiveOneTabsheet.SynMemo.SelText;
-
-//AngSnippet
+  AngSnippet := TAngSnippet.Create;
+  AngSnippet.sContent := self.frmMainController.myActiveOneTabsheet.SynMemo.SelText;
 
 
-frmSnippet.ShowSnippet(AngSnippet);
+  AngSnippet.MakeShortcutFromSContent();
 
-frmSnippet.showmodal;
+  i := self.frmMainController.CalculateIndexOfFileExtension(
+    self.frmMainController.myActiveOneTabsheet.sFilename);
 
-if frmSnippet.ModalResult = mrOK then
- begin
- AngSnippet.MakeFilenameFromShortcut(frmMainController.sPfad );
- AngSnippet.SaveToFile();
-
- self.frmMainController.AngSnippetList.AddObject(AngSnippet.sShortcut,AngSnippet );
-
- end
-else
- AngSnippet.free;
+  case i of
+    constItemIndexHTML: AngSnippet.ForFileType := snippetFileHTML;
+    constItemIndexCss: AngSnippet.ForFileType := snippetFileCSS;
+    constItemIndexJavascript: AngSnippet.ForFileType := snippetFileJS;
+    else
+      AngSnippet.ForFileType := snippetFileALL;
+  end;
 
 
-frmSnippet.free;
+
+
+  frmSnippet.ShowSnippet(AngSnippet);
+
+  frmSnippet.showmodal;
+
+  if frmSnippet.ModalResult = mrOk then
+  begin
+    AngSnippet.MakeFilenameFromShortcut(frmMainController.sPfad);
+    AngSnippet.SaveToFile();
+
+    self.frmMainController.AngSnippetList.AddObject(AngSnippet.sShortcut, AngSnippet);
+
+  end
+  else
+    AngSnippet.Free;
+
+
+  frmSnippet.Free;
 
 end;
 
@@ -660,29 +686,27 @@ end;
 procedure TfrmMainView.mnuManageSnippetClick(Sender: TObject);
 
 begin
- frmSelectSnippet := TfrmSelectSnippet.create(self);
+  frmSelectSnippet := TfrmSelectSnippet.Create(self);
 
- frmSelectSnippet.ShowSnippingList(self.frmMainController.AngSnippetList);
- frmSelectSnippet.Showmodal;
+  frmSelectSnippet.ShowSnippingList(self.frmMainController.AngSnippetList);
+  frmSelectSnippet.Showmodal;
 
- if frmSelectSnippet.modalresult = mrOK then
-   if frmSelectSnippet.booltake then
-     frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(frmSelectSnippet.sContent );
+  if frmSelectSnippet.modalresult = mrOk then
+    if frmSelectSnippet.booltake then
+      frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(
+        frmSelectSnippet.sContent);
 
- frmSelectSnippet.free;
+  frmSelectSnippet.Free;
 
 end;
 
 procedure TfrmMainView.mnuLargerClick(Sender: TObject);
 begin
 
-
-
 end;
 
 procedure TfrmMainView.mnuOpenAFileClick(Sender: TObject);
 begin
-
 
 end;
 
@@ -846,12 +870,12 @@ procedure TfrmMainView.DoCloseActivePagecontrolPage;
 var
   i, iAnswer: integer;
   myOneTabsheet: TOneTabsheet;
-  myTabsheet : TTabsheet;
+  myTabsheet: TTabSheet;
 begin
   if pagecontrol1.PageCount = 0 then
     exit;
 
-    if self.frmMainController.UserPropertys.boolAutoSave then
+  if self.frmMainController.UserPropertys.boolAutoSave then
     frmMainController.SaveAll;
 
 
@@ -879,12 +903,12 @@ begin
       break;
     end;
   end;
-  myTabsheet :=  Pagecontrol1.ActivePage;
+  myTabsheet := Pagecontrol1.ActivePage;
 
   if Pagecontrol1.ActivePage.TabIndex > 0 then    //avoid white blinking
-    begin
-    Pagecontrol1.ActivePageIndex:= Pagecontrol1.ActivePage.TabIndex -1 ;
-    end;
+  begin
+    Pagecontrol1.ActivePageIndex := Pagecontrol1.ActivePage.TabIndex - 1;
+  end;
 
   myTabsheet.Free;
 end;
@@ -950,12 +974,12 @@ end;
 
 procedure TfrmMainView.setAcAutosaveToUserProperty;
 begin
-  acAutosave.Checked:= self.frmMainController.UserPropertys.boolAutoSave;
+  acAutosave.Checked := self.frmMainController.UserPropertys.boolAutoSave;
   if acAutosave.Checked then
     acAutosave.Caption := 'Autosave is on'
   else
     acAutosave.Caption := 'Autosave is off';
-  acAutosave.Hint:= acAutosave.Caption;
+  acAutosave.Hint := acAutosave.Caption;
 end;
 
 procedure TfrmMainView.ShowFileInPagecontrolAsTabsheet(const sPfad: string);
@@ -1027,18 +1051,18 @@ begin
 end;
 
 procedure TfrmMainView.AddAllRecentPathtoPopupmenu;
-var mi: TMenuItem;
-   i: integer;
+var
+  mi: TMenuItem;
+  i: integer;
 begin
   PopupMenuRecentPath.Items.Clear;
-  for i := 0 to frmMainController.UserPropertys.slRecentPath.Count -1 do
-    begin
+  for i := 0 to frmMainController.UserPropertys.slRecentPath.Count - 1 do
+  begin
     mi := TMenuItem.Create(PopupMenuRecentPath);
     PopupMenuRecentPath.Items.Add(mi);
-    mi.Caption:= frmMainController.UserPropertys.slRecentPath[i] ;
+    mi.Caption := frmMainController.UserPropertys.slRecentPath[i];
     mi.OnClick := @DoRecentPathPM;
-    end;
-
+  end;
 
 end;
 
@@ -1087,7 +1111,7 @@ end;
 
 procedure TfrmMainView.PageControl1Change(Sender: TObject);
 begin
-  PageControl1.Visible:= true;
+  PageControl1.Visible := True;
   if PageControl1.ActivePage = nil then
   begin
     frmMainController.myActiveOneTabsheet.Tabsheet := nil;
@@ -1097,10 +1121,9 @@ begin
     frmMainController.SetActiveTabsheet(PageControl1.ActivePage);
 end;
 
-procedure TfrmMainView.PageControl1Changing(Sender: TObject;
-  var AllowChange: Boolean);
+procedure TfrmMainView.PageControl1Changing(Sender: TObject; var AllowChange: boolean);
 begin
-  PageControl1.Visible:= false;  //avoid blinking
+  PageControl1.Visible := False;  //avoid blinking
 end;
 
 procedure TfrmMainView.PopupMenuSyneditPopup(Sender: TObject);
@@ -1108,7 +1131,7 @@ var
   s: string;
 begin
   mnuOpenMarkedFileName.Visible := False;
-  mnuCreateSnippet.visible := false;
+  mnuCreateSnippet.Visible := False;
 
 
   s := frmMainController.myActiveOneTabsheet.SynMemo.SelText;
@@ -1120,9 +1143,9 @@ begin
 
 
   if length(s) > 10 then
-    begin
-    mnuCreateSnippet.visible := true;
-    end;
+  begin
+    mnuCreateSnippet.Visible := True;
+  end;
 
 end;
 
@@ -1131,10 +1154,11 @@ end;
 procedure TfrmMainView.AddAngularJSFilesAsTreenode(myTreeNode: TTreenode;
   sl: TStringList; iImageindex: integer);
 var
-  i, n: integer;
-  treenode, treenodeDISchluessel, treenodeScopeLokal: TTreenode;
+  i, i2, n: integer;
+  treenode, treenodeDISchluessel: TTreenode;
   OneFileInfo: TOneFileInfo;
-  treenodeScope1: TTreenode;
+  treenodeFilestructure: TTreenode;
+  sFilename: string;
 begin
 
   for i := 0 to sl.Count - 1 do
@@ -1146,6 +1170,15 @@ begin
     OneFileInfo := frmMainController.FindOneFileInfoToDataPointer(
       TObject(treenode.Data));
 
+    treenodeFilestructure := TTreenode(OneFileInfo.pTreenodeInView);
+
+    sFilename := frmMainController.findFileNameToDataPointer(
+      OneFileInfo.pTreenodeInView);
+    i2 := frmMainController.GetImageindexForFileIfItContainsOnlyTheSameType(sFilename);
+    if i2 <> -1 then
+      treenodeFilestructure.ImageIndex := i2;
+
+
     if OneFileInfo <> nil then
     begin
       for n := 0 to OneFileInfo.slDependencyInjektionNamen.Count - 1 do
@@ -1153,38 +1186,26 @@ begin
         treenodeDISchluessel :=
           TreeView1.Items.AddChild(treenode, OneFileInfo.slDependencyInjektionNamen[n]);
         treenodeDISchluessel.ImageIndex := constItemIndexKey;
+
+        treenodeDISchluessel :=
+          TreeView1.Items.AddChild(treenodeFilestructure,
+          OneFileInfo.slDependencyInjektionNamen[n]);
+        treenodeDISchluessel.ImageIndex := constItemIndexKey;
+
       end;
 
 
       if OneFileInfo.slngLines.Count > 0 then
       begin
-        treenodeScope1 := TreeView1.Items.AddChild(treenode, 'ng   ' +
-          ansireplacestr(OneFileInfo.slngWords.Text, #13#10, ' | '));
-        treenodeScope1.ImageIndex := constItemIndexAngular;
-
-        for n := 0 to OneFileInfo.slngLines.Count - 1 do
-        begin
-          treenodeScopeLokal :=
-            TreeView1.Items.AddChild(treenodeScope1, OneFileInfo.slngLines[n]);
-          treenodeScopeLokal.ImageIndex := constItemIndexAngular;
-        end;
-
+        AddTreenodeNgToNode(OneFileInfo, treenode);
+        AddTreenodeNgToNode(OneFileInfo, treenodeFilestructure);
       end;
 
 
       if OneFileInfo.slScopeActions.Count > 0 then
       begin
-        treenodeScope1 := TreeView1.Items.AddChild(treenode, 'scope.');
-        treenodeScope1.ImageIndex := constItemScope;
-
-        for n := 0 to OneFileInfo.slScopeActions.Count - 1 do
-        begin
-
-          treenodeScopeLokal :=
-            TreeView1.Items.AddChild(treenodeScope1, OneFileInfo.slScopeActions[n]);
-          treenodeScopeLokal.ImageIndex := constItemScope;
-        end;
-
+        AddTreenodeScopeToNode(OneFileInfo, treenode);
+        AddTreenodeScopeToNode(OneFileInfo, treenodeFilestructure);
       end;
 
     end;
@@ -1202,9 +1223,9 @@ var
   treenode: TTreenode;
 begin
   //mnuOpenAFile.Enabled := True;
-  acOpenAFile.Enabled := true;
-  self.acSaveAll.enabled := true;
-  self.acSynchronize.Enabled:=true;
+  acOpenAFile.Enabled := True;
+  self.acSaveAll.Enabled := True;
+  self.acSynchronize.Enabled := True;
 
 
   AddRootTreenodesToTreeview;
@@ -1305,7 +1326,6 @@ end;
 procedure TfrmMainView.ToolButton3Click(Sender: TObject);
 begin
 
-
 end;
 
 procedure TfrmMainView.ToolButton4Click(Sender: TObject);
@@ -1324,13 +1344,14 @@ end;
 
 procedure TfrmMainView.SynEditPreviewSpecialLineMarkup(Sender: TObject;
   Line: integer; var Special: boolean; Markup: TSynSelectedColor);
-var SynMemo : TSynMemo;
-  SynPreview : TSynMemo;
+var
+  SynMemo: TSynMemo;
+  SynPreview: TSynMemo;
   //sSel : string;
   //i : integer;
 begin
 
- SynMemo :=  frmMainController.myActiveOneTabsheet.SynMemo;
+  SynMemo := frmMainController.myActiveOneTabsheet.SynMemo;
   if SynMemo.CaretY = line then
   begin
     Markup.Background := clred;
@@ -1338,11 +1359,11 @@ begin
   end
   else
   begin
-  if ( line >= SynMemo.TopLine  ) and
-    ( line <= SynMemo.TopLine +  SynMemo.LinesInWindow ) then
+    if (line >= SynMemo.TopLine) and (line <= SynMemo.TopLine +
+      SynMemo.LinesInWindow) then
     begin
-        Markup.Background := clGray ;
-    Special := True;
+      Markup.Background := clGray;
+      Special := True;
     end;
   end;
 
@@ -1363,7 +1384,6 @@ begin
 
    end;   }
 
-
 end;
 
 
@@ -1377,86 +1397,205 @@ procedure TfrmMainView.synmemoClick(Sender: TObject);
 begin
 end;
 
-procedure TfrmMainView.synmemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmMainView.synmemoKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
 begin
 
 end;
 
 procedure TfrmMainView.SynEditPreviewDblClick(Sender: TObject);
-var i : integer;
+var
+  i: integer;
 begin
   frmMainController.myActiveOneTabsheet.setCarentFromPreviewToEdit;
 
   frmMainController.DeleteAllMarksWithIndexIndexMarkFound;
 
   i := TSynmemo(Sender).CaretY;
-  AddEditMarkToLine(constItemIndexMarkFound, i );
+  AddEditMarkToLine(constItemIndexMarkFound, i);
 end;
 
 procedure TfrmMainView.SynMemo1StatusChange(Sender: TObject;
   Changes: TSynStatusChanges);
-var ms : TSynmemo;
+var
+  ms: TSynmemo;
 begin
 
-
   if scTopLine in changes then
-    begin
-    frmMainController.myActiveOneTabsheet.InfoToPreviewForToplineChanged ;
-    end;
+  begin
+    frmMainController.myActiveOneTabsheet.InfoToPreviewForToplineChanged;
+  end;
 
-   if scCaretY in changes then
-    begin
-    frmMainController.myActiveOneTabsheet.setCarentFromEditToPreview  ;
-    end;
+  if scCaretY in changes then
+  begin
+    frmMainController.myActiveOneTabsheet.setCarentFromEditToPreview;
+  end;
 
-   if scSelection in changes then
-    begin
-    frmMainController.myActiveOneTabsheet.InfoToPreviewSelectionChanged  ;
-    end;
-
-
+  if scSelection in changes then
+  begin
+    frmMainController.myActiveOneTabsheet.InfoToPreviewSelectionChanged;
+  end;
 
 end;
 
 
 procedure TfrmMainView.SynCompletionDoExecute(Sender: TObject);
-var SynCompletion : TSynCompletion;
-i : integer;
-AngSnippet : TAngSnippet;
+var
+  SynCompletion: TSynCompletion;
+  i, i2: integer;
+  AngSnippet: TAngSnippet;
+  myForFiletype: TSnippetForFiletype;
 begin
-  SynCompletion := TSynCompletion(sender);
+  SynCompletion := TSynCompletion(Sender);
+
+  i2 := self.frmMainController.CalculateIndexOfFileExtension(
+    self.frmMainController.myActiveOneTabsheet.sFilename);
+
+  case i2 of
+    constItemIndexHTML: myForFiletype := snippetFileHTML;
+    constItemIndexCss: myForFiletype := snippetFileCSS;
+    constItemIndexJavascript: myForFiletype := snippetFileJS;
+    else
+      myForFiletype := snippetFileALL;
+  end;
+
 
   SynCompletion.ItemList.Clear;
 
-  for i := 0 to self.frmMainController.AngSnippetList.Count -1 do
-    begin
+  for i := 0 to self.frmMainController.AngSnippetList.Count - 1 do
+  begin
     AngSnippet := self.frmMainController.AngSnippetList.AngSnippet(i);
     if pos(SynCompletion.CurrentString, AngSnippet.sShortcut) = 1 then
-      SynCompletion.ItemList.Add(AngSnippet.sShortcut);
-    end;
+      if AngSnippet.ForFileTypeOK(myForFiletype) then
+        SynCompletion.ItemList.Add(AngSnippet.sShortcut);
+  end;
 
 
   if SynCompletion.ItemList.Count = 0 then
-     self.frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(#9);
+    self.frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(#9);
 end;
 
 procedure TfrmMainView.SynCompletionCodeCompletion(var Value: string;
   SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
   Shift: TShiftState);
-var AngSnippet : TAngSnippet;
-i: integer;
+var
+  AngSnippet: TAngSnippet;
+  i: integer;
 begin
 
-  for i := 0 to self.frmMainController.AngSnippetList.Count -1 do
-    begin
+  for i := 0 to self.frmMainController.AngSnippetList.Count - 1 do
+  begin
     AngSnippet := self.frmMainController.AngSnippetList.AngSnippet(i);
-    if Value =  AngSnippet.sShortcut then
+    if Value = AngSnippet.sShortcut then
+    begin
+      Value := AngSnippet.sContent;
+
+    end;
+  end;
+
+end;
+
+
+
+
+procedure TfrmMainView.SynEditCommandProcessed(Sender: TObject;
+  var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+var
+  sysMemo: TsynMemo;
+  s: string;
+  i: integer;
+  s2, s3, s4,s5: string;
+  gefunden: boolean;
+  myPoint: TPoint;
+begin
+
+  if AChar = '>' then
+  begin
+
+    if self.frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex =
+      constItemIndexHTML then
+    begin
+      sysMemo := TsynMemo(Sender);
+      myPoint := sysMemo.LogicalCaretXY;
+      s := sysMemo.Lines[myPoint.y  - 1];
+
+      s2 := '';
+      gefunden := False;
+      for i := myPoint.x -2 downto 1 do
       begin
-      Value := AngSnippet.sContent ;
+        if i = myPoint.x - 2 then
+          if s[i] = '/' then
+          begin
+            break;
+          end;
+
+        if s[i] = '<' then
+        begin
+          gefunden := True;
+          break;
+        end;
+        s2 := s[i] + s2;
+      end;
+
+      if gefunden then
+      begin
+        s3 := '';
+        for i := 1 to length(s2) do
+        begin
+          if (s2[i] = ' ') or (s2[i] = #9) then
+            break
+          else
+            s3 := s3 + s2[i];
+        end;
+
+        if s3 <> '' then
+          if s3[1] <> '/' then
+          if not self.frmMainController.IsHTMLTagSelfClosing(s3)  then
+          begin
+            s4 := '</' + s3 + '>';
+            if pos(s4, s) = 0 then
+            begin
+              gefunden := False;
+              for i := sysMemo.CaretY to sysMemo.Lines.Count - 1 do
+              begin
+                s5 := sysMemo.Lines[i];
+                if pos('<' + s3, s5) > 0 then
+                  break;
+                if pos('</' + s3, s5) > 0 then
+                begin
+                  gefunden := True;
+                  break;
+                end;
+              end;
+
+              if not gefunden then
+              begin
+                myPoint := sysMemo.LogicalCaretXY;
+                sysMemo.InsertTextAtCaret(s4);
+                sysMemo.LogicalCaretXY := myPoint;
+              end;
+            end;
+          end;
 
       end;
     end;
 
+  end;
+
+end;
+
+
+procedure TfrmMainView.SynEdit1CutCopy(Sender: TObject; var AText: string;
+  var AMode: TSynSelectionMode; ALogStartPos: TPoint;
+  var AnAction: TSynCopyPasteAction);
+begin
+
+end;
+
+
+procedure TfrmMainView.SynEdit1Paste(Sender: TObject; var AText: string;
+  var AMode: TSynSelectionMode; ALogStartPos: TPoint;
+  var AnAction: TSynCopyPasteAction);
+begin
 
 end;
 
@@ -1512,14 +1651,14 @@ begin
   myOneTabsheet.SynMemo.OnChange := @synmemoChange;
   myOneTabsheet.SynMemo.OnClick := @synmemoClick;
   myOneTabsheet.SynMemo.OnKeyUp := @synmemoKeyUp;
+  myOneTabsheet.SynMemo.OnCommandProcessed := @SynEditCommandProcessed;
 
 
 
   if frmMainController.slColorScheme.activeColorScheme <> nil then
   begin
-    myOneTabsheet.setActiveColorScheme(frmMainController.slColorScheme.activeColorScheme);
-
-
+    myOneTabsheet.setActiveColorScheme(
+      frmMainController.slColorScheme.activeColorScheme);
 
   end;
 
@@ -1527,7 +1666,7 @@ begin
   myOneTabsheet.SynMemo.Font.Size := frmMainController.UserPropertys.iFontsize;
   myOneTabsheet.SynMemo.Font.Name := 'Consolas';
 
-  myOneTabsheet.SynMemo.OnStatusChange :=  @SynMemo1StatusChange;
+  myOneTabsheet.SynMemo.OnStatusChange := @SynMemo1StatusChange;
 
 
   myOneTabsheet.Tabsheet := frmMainController.myActiveOneTabsheet.Tabsheet;
@@ -1541,15 +1680,17 @@ begin
     frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex := i2;
 
   frmMainController.slOpendTabsheets.AddObject(sMyFileName, myOneTabsheet);
+  myOneTabsheet.sFileName := sMyFileName;
 
   self.PageControl1.ActivePage := frmMainController.myActiveOneTabsheet.Tabsheet;
 
 
-  myOneTabsheet.SynCompletion := TSynCompletion.create(frmMainController.myActiveOneTabsheet.Tabsheet);
+  myOneTabsheet.SynCompletion :=
+    TSynCompletion.Create(frmMainController.myActiveOneTabsheet.Tabsheet);
 
 
   myOneTabsheet.SynCompletion.OnExecute := @SynCompletionDoExecute;
-  myOneTabsheet.SynCompletion.Position := 0 ;
+  myOneTabsheet.SynCompletion.Position := 0;
   myOneTabsheet.SynCompletion.LinesInWindow := 6;
   myOneTabsheet.SynCompletion.SelectedColor := clHighlight;
   myOneTabsheet.SynCompletion.CaseSensitive := True;
@@ -1557,15 +1698,8 @@ begin
   myOneTabsheet.SynCompletion.ShowSizeDrag := True;
   myOneTabsheet.SynCompletion.ShortCut := 9;
   myOneTabsheet.SynCompletion.EndOfTokenChr := '()[].';
-  myOneTabsheet.SynCompletion.OnCodeCompletion := @SynCompletionCodeCompletion ;
-  myOneTabsheet.SynCompletion.Editor := myOneTabsheet.SynMemo  ;
-
-
-
-
-
-
-
+  myOneTabsheet.SynCompletion.OnCodeCompletion := @SynCompletionCodeCompletion;
+  myOneTabsheet.SynCompletion.Editor := myOneTabsheet.SynMemo;
 
 
 
@@ -1659,7 +1793,8 @@ begin
   begin
     if (sr.attr and faDirectory = faDirectory) then
     begin
-      if copy(sr.Name,1,1) <> '.' then    //  simple ignore all .hg .git ... (sr.Name <> '.') and (sr.Name <> '..')
+      if copy(sr.Name, 1, 1) <> '.' then
+        //  simple ignore all .hg .git ... (sr.Name <> '.') and (sr.Name <> '..')
       begin
         myItem := TreeView1.Items.AddChild(myItemRoot, sr.Name);
         myItem.ImageIndex := constItemIndexFolder;
@@ -1681,7 +1816,7 @@ end;
 
 procedure TfrmMainView.MarkLineContainsThisWord(sWord: string);
 var
-  i : integer ;
+  i: integer;
   ipos: integer;
   s: string;
 
@@ -1761,6 +1896,44 @@ begin
 
 end;
 
+procedure TfrmMainView.AddTreenodeNgToNode(OneFileInfo: TOneFileInfo;
+  treenode: TTreenode);
+var
+  n: integer;
+  treenodeScope1: TTreenode;
+  treenodeScopeLokal: TTreenode;
+begin
+  treenodeScope1 := TreeView1.Items.AddChild(treenode, 'ng   ' +
+    ansireplacestr(OneFileInfo.slngWords.Text, #13#10, ' | '));
+  treenodeScope1.ImageIndex := constItemIndexAngular;
+
+  for n := 0 to OneFileInfo.slngLines.Count - 1 do
+  begin
+    treenodeScopeLokal :=
+      TreeView1.Items.AddChild(treenodeScope1, OneFileInfo.slngLines[n]);
+    treenodeScopeLokal.ImageIndex := constItemIndexAngular;
+  end;
+end;
+
+procedure TfrmMainView.AddTreenodeScopeToNode(const OneFileInfo: TOneFileInfo;
+  const treenode: TTreenode);
+var
+  treenodeScope1: TTreenode;
+  treenodeScopeLokal: TTreenode;
+  n: integer;
+begin
+  treenodeScope1 := TreeView1.Items.AddChild(treenode, 'scope.');
+  treenodeScope1.ImageIndex := constItemScope;
+
+  for n := 0 to OneFileInfo.slScopeActions.Count - 1 do
+  begin
+
+    treenodeScopeLokal :=
+      TreeView1.Items.AddChild(treenodeScope1, OneFileInfo.slScopeActions[n]);
+    treenodeScopeLokal.ImageIndex := constItemScope;
+  end;
+end;
+
 function TfrmMainView.CloseAllTabsheets: boolean;
 var
   i: integer;
@@ -1799,7 +1972,14 @@ begin
   m.ImageList := DataModule1.ImageList1;
   m.ImageIndex := iImageindex;
   m.Visible := True;
- frmMainController.myActiveOneTabsheet.SynMemo.Marks.Add(m);
+  frmMainController.myActiveOneTabsheet.SynMemo.Marks.Add(m);
+
+
+
+
+
+
+
 end;
 
 

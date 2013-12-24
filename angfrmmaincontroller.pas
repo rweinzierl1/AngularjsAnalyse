@@ -66,6 +66,7 @@ type
     SynMemo: TsynMemo;
     SynMemoPreview: TsynMemo;
     SynCompletion: TSynCompletion;
+    sFileName : string;
 
     procedure setPreviewText;
     procedure setCarentFromPreviewToEdit;
@@ -119,7 +120,6 @@ type
     FsPfad: string;
     slDJKeyWords: TStringList;
     slAllScope: TStringList;
-
     procedure LookForNgInString(sLine: string; oneFileInfo: TOneFileInfo);
     procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
     function SchluesselwortInZeileGefundenUndStringInKlammern(
@@ -147,6 +147,7 @@ type
 
     AngSnippetList : TAngSnippetList;
 
+    function IsHTMLTagSelfClosing(s: string): boolean;
     function ChangeMinusToCamelCase(sSuchtext: string): string;
     function ChangeCamelCaseToMinusString(sSuchtext: string): string;
     function GetFilenameWithoutRootPath(sDateiname: string): string;
@@ -708,6 +709,10 @@ begin
     self.UserPropertys.slRecentPath.Exchange(iOld, 0)
   else
     self.UserPropertys.slRecentPath.Insert(0, AValue);
+
+
+
+  self.AngSnippetList.LoadFromDir(AValue + sAngSeparator  + '.AngularAnalyse'+ sAngSeparator ,snippetProject);
 end;
 
 procedure TFrmMainController.LookForNgInString(sLine: string;
@@ -1388,7 +1393,28 @@ begin
   end;
 end;
 
+function TFrmMainController.IsHTMLTagSelfClosing(s : string) : boolean;
+begin
+result := false;
+
+if s = 'area' then result := true;
+if s = 'base' then result := true;
+if s = 'br' then result := true;
+if s = 'col' then result := true;
+if s = 'command' then result := true;
+if s = 'embed' then result := true;
+if s = 'hr' then result := true;
+if s = 'img' then result := true;
+if s = 'input' then result := true;
+if s = 'keygen' then result := true;
+if s = 'link' then result := true;
+if s = 'meta' then result := true;
+if s = 'param' then result := true;
+if s = 'source' then result := true;
+if s = 'track' then result := true;
+if s = 'wbr' then result := true;
 
 
+end;
 
 end.

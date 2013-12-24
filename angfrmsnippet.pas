@@ -56,7 +56,16 @@ if eShortcut.text = '' then
 myAngSnippet.sShortcut   :=  eShortcut.text  ;
 myAngSnippet.sDescription  :=  eDescription.text  ;
 myAngSnippet.sContent  :=  mContent.text  ;
-myAngSnippet.sForFileType:=   cBoxsForFileType.Text ;
+
+
+
+
+case cBoxsForFileType.ItemIndex of
+  0 : myAngSnippet.ForFileType  := snippetFileHTML;
+  1 : myAngSnippet.ForFileType := snippetFileCSS;
+  2 : myAngSnippet.ForFileType := snippetFileJS;
+  3 : myAngSnippet.ForFileType := snippetFileALL;
+end;
 
 case cBoxLocation.ItemIndex of
   0 : myAngSnippet.SnippetLocation := snippetProject;
@@ -81,7 +90,15 @@ myAngSnippet := mAngSnippet;
   eShortcut.text :=  myAngSnippet.sShortcut;
   eDescription.text :=  myAngSnippet.sDescription ;
   mContent.text :=  myAngSnippet.sContent ;
-  cBoxsForFileType.Text:= myAngSnippet.sForFileType ;
+
+    case  myAngSnippet.ForFileType  of
+    snippetFileHTML : cBoxsForFileType.ItemIndex:= 0;
+    snippetFileCSS    : cBoxsForFileType.ItemIndex:= 1;
+    snippetFileJS  : cBoxsForFileType.ItemIndex:= 2;
+    snippetFileALL  : cBoxsForFileType.ItemIndex:= 3;
+  end;
+
+
 
   case  myAngSnippet.SnippetLocation of
     snippetProject : cBoxLocation.ItemIndex:= 0;

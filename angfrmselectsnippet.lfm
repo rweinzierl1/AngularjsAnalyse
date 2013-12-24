@@ -3,7 +3,7 @@ object frmSelectSnippet: TfrmSelectSnippet
   Height = 365
   Top = 255
   Width = 546
-  Caption = 'frmSelectSnippet'
+  Caption = 'Manage Snippet'
   ClientHeight = 365
   ClientWidth = 546
   FormStyle = fsStayOnTop

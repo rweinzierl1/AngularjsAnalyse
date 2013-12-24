@@ -10,6 +10,7 @@ uses
 type
 
   TSnippetLocation = (snippetProject, snippetUser, snippetGlobal);
+  TSnippetForFiletype = (snippetFileHTML, snippetFileCSS, snippetFileJS, snippetFileALL );
 
   { TAngSnippet }
 
@@ -20,12 +21,14 @@ type
   public
     sShortcut: string;
     sDescription: string;
-    sForFileType: string;
+    ForFileType: TSnippetForFiletype;
     sContent: string;
     sLongDescription: string;
     SnippetLocation: TSnippetLocation;
     property sFilename: string read FsFilename write SetsFilename ;
 
+    function ForFileTypeOK(myType : TSnippetForFiletype) : boolean;
+    procedure MakeShortcutFromSContent;
     procedure MakeFilenameFromShortcut(sProjectPath : string);
     constructor create;
     function LoadfromFile(): boolean;
@@ -54,8 +57,15 @@ implementation
 function GetPathFromSnippingLoaction(sProjectPath : string;  SnippetLocation1 :TSnippetLocation ): string;
 begin
   case SnippetLocation1 of
-    snippetProject : result := sProjectPath + '.AngularAnalyse'+
-      sAngSeparator+'Snippet'+ sAngSeparator;
+    snippetProject :
+      begin
+      if  sProjectPath <> '' then
+        if sProjectPath[length(sProjectPath)] <> sAngSeparator then
+          sProjectPath := sProjectPath +  sAngSeparator;
+
+        result := sProjectPath + '.AngularAnalyse'+ sAngSeparator+'Snippet'+ sAngSeparator;
+
+      end;
     snippetUser    :  begin
       result := extractfilepath(GetAppConfigFile(False)) + 'Snippet'+
         sAngSeparator ;
@@ -70,6 +80,36 @@ procedure TAngSnippet.SetsFilename(AValue: string);
 begin
   if FsFilename=AValue then Exit;
   FsFilename:=AValue;
+end;
+
+function TAngSnippet.ForFileTypeOK(myType: TSnippetForFiletype): boolean;
+begin
+  result := false;
+  if myType = snippetFileALL then
+    result := true;
+
+  if self.ForFileType = myType then
+    result := true;
+end;
+
+procedure TAngSnippet.MakeShortcutFromSContent;
+var i : integer;
+s,s2 : string;
+begin
+
+s := trim(self.sContent);
+s2 := '';
+
+for i := 1 to length(s) do
+  begin
+  if (s[i] in ['A'..'Z']) or (s[i] in ['a'..'z']) then
+    s2 := s2 + s[i];
+  if length(s2) = 10 then break;
+  end;
+
+
+self.sShortcut:= s2;
+
 end;
 
 
@@ -124,7 +164,19 @@ myIni := Tinifile.create(sFilename);
 
 sShortcut := myIni.ReadString('init','Shortcut','');
 sDescription := myIni.ReadString('init','Description','');
-sForFileType := myIni.ReadString('init','ForFileType','');
+
+i := myIni.ReadInteger('init','ForFileType',0);
+
+case i of
+  0  : ForFileType := snippetFileHTML;
+  1  : ForFileType := snippetFileCSS;
+  2  : ForFileType := snippetFileJS;
+  else   ForFileType := snippetFileALL;
+
+  end;
+
+
+
 
 sl := TStringlist.create;
 myIni.ReadSectionRaw('Content',sl);
@@ -161,7 +213,17 @@ sl2 := TStringlist.create;
 sl.add('[init]');
 sl.add('Shortcut='+sShortcut);
 sl.add('Description='+sDescription);
-sl.add('ForFileType='+sForFileType);
+
+
+
+case ForFileType of
+  snippetFileHTML : sl.add('ForFileType=0');
+  snippetFileCSS: sl.add('ForFileType=1');
+  snippetFileJS: sl.add('ForFileType=2');
+  else   sl.add('ForFileType=3');
+
+  end;
+
 
 sl.add(' ');
 sl.add('[Content]');
