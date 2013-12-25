@@ -1,0 +1,62 @@
+object frmIntelligence: TfrmIntelligence
+  Left = 546
+  Height = 208
+  Top = 331
+  Width = 425
+  BorderIcons = []
+  BorderStyle = bsNone
+  Caption = 'frmIntelligence'
+  ClientHeight = 208
+  ClientWidth = 425
+  Color = clPurple
+  FormStyle = fsStayOnTop
+  LCLVersion = '1.0.14.0'
+  object ListView1: TListView
+    Left = 0
+    Height = 208
+    Top = 0
+    Width = 425
+    Align = alClient
+    Color = 14206908
+    Columns = <    
+      item
+        Caption = 'Snippet'
+        Width = 150
+      end    
+      item
+        Caption = 'Desciption'
+        Width = 250
+      end>
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -11
+    Font.Name = 'Consolas'
+    Font.Pitch = fpFixed
+    Font.Quality = fqDraft
+    GridLines = True
+    ParentFont = False
+    RowSelect = True
+    ShowColumnHeaders = False
+    TabOrder = 1
+    ViewStyle = vsReport
+    OnDblClick = ListView1DblClick
+    OnKeyPress = ListView1KeyPress
+  end
+  object Panel1: TPanel
+    Cursor = crSizeNESW
+    Left = 409
+    Height = 8
+    Top = 200
+    Width = 16
+    Anchors = [akRight, akBottom]
+    Caption = '...'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -11
+    Font.Name = 'Consolas'
+    Font.Pitch = fpFixed
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 0
+    OnMouseDown = Panel1MouseDown
+    OnMouseUp = Panel1MouseUp
+  end
+end

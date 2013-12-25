@@ -1,0 +1,12 @@
+[init]
+Shortcut=useS
+Description=Use Strict 
+ForFileType=2
+ 
+[Content]
+_(function () {
+_    "use strict";
+_
+_
+_})(); 
+[LongDescription]

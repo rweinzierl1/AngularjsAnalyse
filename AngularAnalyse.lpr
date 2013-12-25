@@ -7,8 +7,9 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, frmMain, angPKZ, angFrmMainController, angKeyWords, angDatamodul, 
-angfrmBookmarks, angFileList, angSnippet, angfrmSnippet, angFrmSelectSnippet;
+  Forms, frmMain, angPKZ, angFrmMainController, angKeyWords, angDatamodul,
+  angfrmBookmarks, angFileList, angSnippet, angfrmSnippet, angFrmSelectSnippet,
+  angFrmIntelligence;
 
 {$R *.res}
 

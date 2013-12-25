@@ -193,6 +193,7 @@ object frmMainView: TfrmMainView
     end
     object MenuItem1: TMenuItem
       Caption = 'Edit'
+      OnClick = MenuItem1Click
       object mnuFind: TMenuItem
         Caption = 'Find'
         Enabled = False
@@ -203,6 +204,7 @@ object frmMainView: TfrmMainView
     end
     object mnuPreferences: TMenuItem
       Caption = 'Preferences'
+      OnClick = mnuPreferencesClick
       object mnuFont: TMenuItem
         Caption = 'Font'
         object mnuLarger: TMenuItem
@@ -224,6 +226,7 @@ object frmMainView: TfrmMainView
     end
     object mnuHelp: TMenuItem
       Caption = 'Help'
+      OnClick = mnuHelpClick
       object mnuInfo: TMenuItem
         Caption = 'Info'
         ImageIndex = 23

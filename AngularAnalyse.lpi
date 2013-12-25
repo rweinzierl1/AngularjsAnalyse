@@ -42,7 +42,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="12">
       <Unit0>
         <Filename Value="AngularAnalyse.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -119,6 +119,14 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="angFrmSelectSnippet"/>
       </Unit10>
+      <Unit11>
+        <Filename Value="angfrmintelligence.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmIntelligence"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="angFrmIntelligence"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

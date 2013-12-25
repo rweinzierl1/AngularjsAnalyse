@@ -5,9 +5,26 @@ unit angSnippet;
 interface
 
 uses
-  Classes, SysUtils, angPkz,inifiles;
+  Classes, SysUtils, angPkz,inifiles,strutils ;
 
 type
+
+  TAngHTMLTag = class
+    public
+    sTag : string;
+    sDescription : string;
+  end;
+
+   { TAngHTMLTagList }
+
+   TAngHTMLTagList = class(TStringList)
+    public
+    function  AngHTMLTag(i : integer) : TAngHTMLTag;
+    constructor create;
+    procedure LoadFromFile;
+
+   end;
+
 
   TSnippetLocation = (snippetProject, snippetUser, snippetGlobal);
   TSnippetForFiletype = (snippetFileHTML, snippetFileCSS, snippetFileJS, snippetFileALL );
@@ -74,6 +91,54 @@ begin
     result := extractfilepath(paramstr(0)) + 'Snippet'+ sAngSeparator;
 
     end;
+end;
+
+{ TAngHTMLTagList }
+
+function TAngHTMLTagList.AngHTMLTag(i: integer): TAngHTMLTag;
+begin
+  result := TAngHTMLTag( self.Objects[i]);
+end;
+
+constructor TAngHTMLTagList.create;
+begin
+  self.OwnsObjects:=true;
+  LoadFromFile;
+end;
+
+procedure TAngHTMLTagList.LoadFromFile;
+var sl : TStringlist;
+  sl2 : TStringlist;
+  sFilename : string;
+  i : integer;
+  AngHTMLTag1 : TAngHTMLTag;
+begin
+  sFilename := extractfilepath(paramstr(0)) + 'Snippet' + sAngSeparator + 'TagReferenz.ATR';
+
+  if fileexists(sFilename) then
+    begin
+    sl2 := TStringlist.create;
+    sl := TStringlist.create;
+    sl.LoadFromFile(sFilename);
+
+    for i := 0 to sl.count -1 do
+      begin
+      sl2.text := ansireplacetext( sl[i] , #9,#13#10);
+      if sl2.count >= 2 then
+        begin
+        AngHTMLTag1 := TAngHTMLTag.create;
+        AngHTMLTag1.sTag:=sl2[0];
+        AngHTMLTag1.sDescription :=sl2[1];
+        self.AddObject(AngHTMLTag1.sTag,AngHTMLTag1 );
+        end;
+
+      end;
+
+    sl.free;
+    sl2.free;
+    end;
+
+
 end;
 
 procedure TAngSnippet.SetsFilename(AValue: string);

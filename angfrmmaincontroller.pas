@@ -145,6 +145,8 @@ type
     slColorScheme: TColorSchemeList;
     UserPropertys: TUserPropertys;
 
+    AngHTMLTagList: TAngHTMLTagList;
+
     AngSnippetList : TAngSnippetList;
 
     function IsHTMLTagSelfClosing(s: string): boolean;
@@ -464,6 +466,7 @@ begin
   UserPropertys := TUserPropertys.Create;
 
   AngSnippetList := TAngSnippetList.Create ;
+  AngHTMLTagList := TAngHTMLTagList.create;
 
 end;
 
@@ -486,6 +489,7 @@ begin
   slColorScheme.Free;
   UserPropertys.Free;
   AngSnippetList.free;
+  AngHTMLTagList.free;
 
   inherited Destroy;
 end;
