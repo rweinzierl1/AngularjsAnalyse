@@ -75,6 +75,7 @@ type
     SynAnySyn1: TSynAnySyn;
     SynCssSyn1: TSynCssSyn;
     SynHTMLSyn1: TSynHTMLSyn;
+    timerCloseIntelligence: TTimer;
     ToolBar1: TToolBar;
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
@@ -139,6 +140,7 @@ type
     procedure PageControl1Change(Sender: TObject);
     procedure PageControl1Changing(Sender: TObject; var AllowChange: boolean);
     procedure PopupMenuSyneditPopup(Sender: TObject);
+    procedure timerCloseIntelligenceTimer(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
     procedure ToolButton3Click(Sender: TObject);
@@ -180,6 +182,7 @@ type
     procedure DoRecentPathPM(Sender: TObject);
     procedure DoSaveActivePage;
     procedure FillIntelligenceDlgWithHTM5Tags;
+    procedure InsertIntoSysMemoIntelligenceText;
     procedure IntelligenceItemSelected(Sender: TObject);
     procedure MarkLineContainsThisWord(sWord: string);
     procedure OpenIntelligenceDlg;
@@ -189,6 +192,7 @@ type
     procedure ReadPathToTreeview(myItemRoot: TTreenode; sPfad: string);
     procedure AddRootTreenodesToTreeview;
     procedure setAcAutosaveToUserProperty;
+    procedure ShouldHTMLTagClosed;
     procedure ShowFileInPagecontrolAsTabsheet(const sPfad: string);
     procedure StartPathAnalyse;
     procedure SynCompletionCodeCompletion(var Value: string;
@@ -206,11 +210,13 @@ type
     procedure SynEditPreviewDblClick(Sender: TObject);
     procedure SynEditPreviewSpecialLineMarkup(Sender: TObject;
       Line: integer; var Special: boolean; Markup: TSynSelectedColor);
+    procedure SynEditProcessedCommand(Sender: TObject;
+      var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure SynMemo1StatusChange(Sender: TObject; Changes: TSynStatusChanges);
     procedure synmemoChange(Sender: TObject);
     procedure synmemoClick(Sender: TObject);
     procedure synmemoKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
-    procedure IntelligenceFormularFreigeben;
+    procedure IntelligenceFrmCloseAndFree;
 
   public
   end;
@@ -226,7 +232,7 @@ implementation
 
 procedure TfrmMainView.mnuDateiClick(Sender: TObject);
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
 end;
 
 procedure TfrmMainView.mnuInfoClick(Sender: TObject);
@@ -298,14 +304,17 @@ begin
 
 end;
 
-procedure TfrmMainView.IntelligenceFormularFreigeben;
+procedure TfrmMainView.IntelligenceFrmCloseAndFree;
 begin
 
   if frmIntelligence <> nil then
   begin
-    frmIntelligence.Close;
-    frmIntelligence.Free;
-    frmIntelligence := nil;
+    if not frmIntelligence.boolCallbackActive then
+    begin
+      frmIntelligence.Close;
+      frmIntelligence.Free;
+      frmIntelligence := nil;
+    end;
   end;
 
 end;
@@ -392,7 +401,7 @@ procedure TfrmMainView.acSelectDirExecute(Sender: TObject);
 var
   chosenDirectory: string;
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
   if not CloseAllTabsheets then
     exit;
 
@@ -415,7 +424,7 @@ var
   sl: TStringList;
   i: integer;
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
 
   sl := TStringList.Create;
   sl.Text := frmMainController.slOpendTabsheets.Text;
@@ -436,7 +445,7 @@ end;
 
 procedure TfrmMainView.acFontSmallerExecute(Sender: TObject);
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
   if frmMainController.UserPropertys.iFontsize > 1 then
   begin
     frmMainController.UserPropertys.iFontsize :=
@@ -448,7 +457,7 @@ end;
 
 procedure TfrmMainView.acOpenAFileExecute(Sender: TObject);
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
   Application.CreateForm(TfrmFileList, frmFileList);
 
   frmFileList.SynAnySyn1 := SynAnySyn1;
@@ -466,7 +475,7 @@ end;
 
 procedure TfrmMainView.acAutosaveExecute(Sender: TObject);
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
   self.frmMainController.UserPropertys.boolAutoSave :=
     not self.frmMainController.UserPropertys.boolAutoSave;
 
@@ -475,7 +484,7 @@ end;
 
 procedure TfrmMainView.acFontLargerExecute(Sender: TObject);
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
   frmMainController.UserPropertys.iFontsize :=
     frmMainController.UserPropertys.iFontsize + 1;
   frmMainController.SetHeightToAllSynedit;
@@ -483,7 +492,7 @@ end;
 
 procedure TfrmMainView.acSaveAllExecute(Sender: TObject);
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
   frmMainController.SaveAll;
 end;
 
@@ -512,7 +521,7 @@ end;
 procedure TfrmMainView.FormDestroy(Sender: TObject);
 begin
   frmMainController.Free;
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
 end;
 
 procedure TfrmMainView.FormMouseWheel(Sender: TObject; Shift: TShiftState;
@@ -523,7 +532,7 @@ end;
 
 procedure TfrmMainView.MenuItem1Click(Sender: TObject);
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
 end;
 
 procedure TfrmMainView.MenuItem2Click(Sender: TObject);
@@ -715,13 +724,35 @@ end;
 
 procedure TfrmMainView.mnuHelpClick(Sender: TObject);
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
+end;
+
+procedure TfrmMainView.InsertIntoSysMemoIntelligenceText;
+var
+  mySyn: TSynMemo;
+  s: string;
+begin
+  mySyn := self.frmMainController.myActiveOneTabsheet.SynMemo;
+
+  s := frmIntelligence.sSelText;
+
+  Delete(s, 1, length(frmIntelligence.sFilter));
+
+
+  mySyn.InsertTextAtCaret(s);
+
+
+  if s <> '' then
+    if s[Length(s)] = '>' then
+      ShouldHTMLTagClosed;
+
 end;
 
 procedure TfrmMainView.IntelligenceItemSelected(Sender: TObject);
 begin
+  InsertIntoSysMemoIntelligenceText;
+  timerCloseIntelligence.Enabled := True;
 
-  self.frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret( frmIntelligence.sSelText ) ;
 end;
 
 procedure TfrmMainView.mnuIntelligenceClick(Sender: TObject);
@@ -731,7 +762,8 @@ end;
 
 procedure TfrmMainView.FillIntelligenceDlgWithHTM5Tags;
 begin
-  frmIntelligence.FillWithHtml5Tags(self.frmMainController.AngHTMLTagList );
+  frmIntelligence.FillWithHtml5Tags(self.frmMainController.AngHTMLTagList);
+  frmIntelligence.setFocusToFirstElement;
 
 end;
 
@@ -826,7 +858,7 @@ end;
 
 procedure TfrmMainView.mnuPreferencesClick(Sender: TObject);
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
 end;
 
 procedure TfrmMainView.mnuResyncClick(Sender: TObject);
@@ -1203,7 +1235,7 @@ end;
 
 procedure TfrmMainView.PageControl1Changing(Sender: TObject; var AllowChange: boolean);
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
   PageControl1.Visible := False;  //avoid blinking
 end;
 
@@ -1227,6 +1259,13 @@ begin
   begin
     mnuCreateSnippet.Visible := True;
   end;
+
+end;
+
+procedure TfrmMainView.timerCloseIntelligenceTimer(Sender: TObject);
+begin
+  timerCloseIntelligence.Enabled := False;
+  IntelligenceFrmCloseAndFree;
 
 end;
 
@@ -1477,7 +1516,7 @@ end;
 procedure TfrmMainView.synmemoClick(Sender: TObject);
 begin
 
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
 end;
 
 
@@ -1578,11 +1617,69 @@ begin
 
 end;
 
+procedure TfrmMainView.SynEditProcessedCommand(Sender: TObject;
+  var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+begin
 
+  if (AChar = #27) or (Command in [2, 3, 5]) then
+    IntelligenceFrmCloseAndFree;
 
+  if Command = 509 then //Enter
+    if frmIntelligence <> nil then
+      if frmIntelligence.Visible then
+      begin
+        frmIntelligence.SetSelTextToPublic;
+        InsertIntoSysMemoIntelligenceText;
+        IntelligenceFrmCloseAndFree;
+        Command := 0;
+      end;
+
+  if Command = 4 then  //key down   ???
+  begin
+    if frmIntelligence <> nil then
+      if frmIntelligence.Visible then
+      begin
+        frmIntelligence.SetFocus;
+
+        Command := 0;
+      end;
+  end;
+
+  if AChar = '<' then
+  begin
+    if self.frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex =
+      constItemIndexHTML then
+    begin
+      OpenIntelligenceDlg;
+    end;
+
+  end;
+
+  if frmIntelligence <> nil then
+    if frmIntelligence.Visible then
+    begin
+      if trim(AChar) <> '' then
+      begin
+        frmIntelligence.sFilter := frmIntelligence.sFilter + AChar;
+        FillIntelligenceDlgWithHTM5Tags;
+        if frmIntelligence.ListView1.Items.Count = 0 then
+          IntelligenceFrmCloseAndFree;
+
+      end;
+    end;
+end;
 
 procedure TfrmMainView.SynEditCommandProcessed(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+begin
+  if AChar = '>' then
+  begin
+    ShouldHTMLTagClosed;
+  end;
+
+end;
+
+procedure TfrmMainView.ShouldHTMLTagClosed;
 var
   sysMemo: TsynMemo;
   s: string;
@@ -1592,89 +1689,73 @@ var
   myPoint: TPoint;
 begin
 
-  if AChar = '<' then
+  if self.frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex =
+    constItemIndexHTML then
   begin
-    if self.frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex =
-      constItemIndexHTML then
+    IntelligenceFrmCloseAndFree;
+
+    sysMemo := self.frmMainController.myActiveOneTabsheet.SynMemo ;
+    myPoint := sysMemo.LogicalCaretXY;
+    s := sysMemo.Lines[myPoint.y - 1];
+
+    s2 := '';
+    gefunden := False;
+    for i := myPoint.x - 2 downto 1 do
     begin
-      OpenIntelligenceDlg;
-      FillIntelligenceDlgWithHTM5Tags;
-    end;
-
-  end;
-
-
-  if AChar = '>' then
-  begin
-
-    if self.frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex =
-      constItemIndexHTML then
-    begin
-      IntelligenceFormularFreigeben;
-
-      sysMemo := TsynMemo(Sender);
-      myPoint := sysMemo.LogicalCaretXY;
-      s := sysMemo.Lines[myPoint.y - 1];
-
-      s2 := '';
-      gefunden := False;
-      for i := myPoint.x - 2 downto 1 do
-      begin
-        if i = myPoint.x - 2 then
-          if s[i] = '/' then
-          begin
-            break;
-          end;
-
-        if s[i] = '<' then
+      if i = myPoint.x - 2 then
+        if s[i] = '/' then
         begin
-          gefunden := True;
           break;
         end;
-        s2 := s[i] + s2;
+
+      if s[i] = '<' then
+      begin
+        gefunden := True;
+        break;
+      end;
+      s2 := s[i] + s2;
+    end;
+
+    if gefunden then
+    begin
+      s3 := '';
+      for i := 1 to length(s2) do
+      begin
+        if (s2[i] = ' ') or (s2[i] = #9) then
+          break
+        else
+          s3 := s3 + s2[i];
       end;
 
-      if gefunden then
-      begin
-        s3 := '';
-        for i := 1 to length(s2) do
-        begin
-          if (s2[i] = ' ') or (s2[i] = #9) then
-            break
-          else
-            s3 := s3 + s2[i];
-        end;
-
-        if s3 <> '' then
-          if s3[1] <> '/' then
-            if not self.frmMainController.IsHTMLTagSelfClosing(s3) then
+      if s3 <> '' then
+        if s3[1] <> '/' then
+          if not self.frmMainController.IsHTMLTagSelfClosing(s3) then
+          begin
+            s4 := '</' + s3 + '>';
+            if pos(s4, s) = 0 then
             begin
-              s4 := '</' + s3 + '>';
-              if pos(s4, s) = 0 then
+              gefunden := False;
+              for i := sysMemo.CaretY to sysMemo.Lines.Count - 1 do
               begin
-                gefunden := False;
-                for i := sysMemo.CaretY to sysMemo.Lines.Count - 1 do
+                s5 := sysMemo.Lines[i];
+                if pos('<' + s3, s5) > 0 then
+                  break;
+                if pos('</' + s3, s5) > 0 then
                 begin
-                  s5 := sysMemo.Lines[i];
-                  if pos('<' + s3, s5) > 0 then
-                    break;
-                  if pos('</' + s3, s5) > 0 then
-                  begin
-                    gefunden := True;
-                    break;
-                  end;
-                end;
-
-                if not gefunden then
-                begin
-                  myPoint := sysMemo.LogicalCaretXY;
-                  sysMemo.InsertTextAtCaret(s4);
-                  sysMemo.LogicalCaretXY := myPoint;
+                  gefunden := True;
+                  break;
                 end;
               end;
-            end;
 
-      end;
+              if not gefunden then
+              begin
+                myPoint := sysMemo.LogicalCaretXY;
+                sysMemo.InsertTextAtCaret(s4);
+                sysMemo.LogicalCaretXY := myPoint;
+              end;
+            end;
+          end;
+
     end;
 
   end;
@@ -1750,6 +1831,7 @@ begin
   myOneTabsheet.SynMemo.OnClick := @synmemoClick;
   myOneTabsheet.SynMemo.OnKeyUp := @synmemoKeyUp;
   myOneTabsheet.SynMemo.OnCommandProcessed := @SynEditCommandProcessed;
+  myOneTabsheet.SynMemo.OnProcessCommand := @SynEditProcessedCommand;
 
 
 
@@ -1816,7 +1898,7 @@ var
   sl: TStringList;
   i: integer;
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
   treenode := TreeView1.Selected;
   if treenode = nil then
     exit;
@@ -1847,7 +1929,7 @@ var
   parentNode: TTreenode;
   s: string;
 begin
-  IntelligenceFormularFreigeben;
+  IntelligenceFrmCloseAndFree;
   treenode := TreeView1.Selected;
   if treenode = nil then
     exit;

@@ -779,4 +779,11 @@ object frmMainView: TfrmMainView
       OnClick = MenuItem2Click
     end
   end
+  object timerCloseIntelligence: TTimer
+    Enabled = False
+    Interval = 10
+    OnTimer = timerCloseIntelligenceTimer
+    left = 246
+    top = 414
+  end
 end

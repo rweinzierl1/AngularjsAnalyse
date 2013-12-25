@@ -10,6 +10,7 @@ object frmIntelligence: TfrmIntelligence
   ClientWidth = 425
   Color = clPurple
   FormStyle = fsStayOnTop
+  OnCreate = FormCreate
   LCLVersion = '1.0.14.0'
   object ListView1: TListView
     Left = 0
