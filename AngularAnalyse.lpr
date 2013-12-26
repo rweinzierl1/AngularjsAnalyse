@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, frmMain, angPKZ, angFrmMainController, angKeyWords, angDatamodul,
   angfrmBookmarks, angFileList, angSnippet, angfrmSnippet, angFrmSelectSnippet,
-  angFrmIntelligence;
+  angFrmIntelligence, angPasteHistorie, angFrmClipboardHistorie;
 
 {$R *.res}
 

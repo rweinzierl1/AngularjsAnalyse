@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils, Graphics,
-  inifiles, SynEditMarks,angSnippet,SynCompletion;
+  inifiles, SynEditMarks,angSnippet,SynCompletion,angPasteHistorie;
 
 type
 
@@ -144,10 +144,10 @@ type
     sLastSearch: string;
     slColorScheme: TColorSchemeList;
     UserPropertys: TUserPropertys;
-
     AngHTMLTagList: TAngHTMLTagList;
-
     AngSnippetList : TAngSnippetList;
+    AngClipboardHistorieList: TAngClipboardHistorieList;
+
 
     function IsHTMLTagSelfClosing(s: string): boolean;
     function ChangeMinusToCamelCase(sSuchtext: string): string;
@@ -467,6 +467,8 @@ begin
 
   AngSnippetList := TAngSnippetList.Create ;
   AngHTMLTagList := TAngHTMLTagList.create;
+  AngClipboardHistorieList := TAngClipboardHistorieList.create;
+
 
 end;
 
@@ -490,6 +492,7 @@ begin
   UserPropertys.Free;
   AngSnippetList.free;
   AngHTMLTagList.free;
+  AngClipboardHistorieList.free;
 
   inherited Destroy;
 end;

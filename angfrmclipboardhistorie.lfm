@@ -1,0 +1,62 @@
+object frmPasteHistorie: TfrmPasteHistorie
+  Left = 411
+  Height = 342
+  Top = 179
+  Width = 408
+  Caption = 'Paste from Historie'
+  ClientHeight = 342
+  ClientWidth = 408
+  OnCreate = FormCreate
+  Position = poScreenCenter
+  LCLVersion = '1.0.14.0'
+  object ListBox1: TListBox
+    Left = 0
+    Height = 136
+    Top = 0
+    Width = 408
+    Align = alTop
+    ItemHeight = 0
+    OnSelectionChange = ListBox1SelectionChange
+    TabOrder = 0
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 50
+    Top = 292
+    Width = 408
+    Align = alBottom
+    ClientHeight = 50
+    ClientWidth = 408
+    TabOrder = 1
+    object BitBtn1: TBitBtn
+      Left = 94
+      Height = 30
+      Top = 15
+      Width = 100
+      Default = True
+      DefaultCaption = True
+      Kind = bkOK
+      ModalResult = 1
+      TabOrder = 0
+    end
+    object BitBtn2: TBitBtn
+      Left = 229
+      Height = 30
+      Top = 15
+      Width = 100
+      Caption = 'Abort'
+      Kind = bkAbort
+      ModalResult = 3
+      TabOrder = 1
+    end
+  end
+  object Memo1: TMemo
+    Left = 0
+    Height = 156
+    Top = 136
+    Width = 408
+    Align = alClient
+    ScrollBars = ssAutoBoth
+    TabOrder = 2
+  end
+end

@@ -12,7 +12,7 @@ uses
   Clipbrd, ActnList, shellapi, SynEditMiscClasses, SynEditMarkupSpecialLine,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types,
   angSnippet, angfrmSnippet, angFrmSelectSnippet, SynCompletion, LCLType, SynEditKeyCmds,
-  angFrmIntelligence;
+  angFrmIntelligence,angFrmClipboardHistorie ;
 
 type
 
@@ -31,6 +31,9 @@ type
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    mnuPasteFromHistorie: TMenuItem;
+    mnuCloseAllOthers: TMenuItem;
+    mnuCloseWithoutSave: TMenuItem;
     mnuManageSnippet: TMenuItem;
     mnuCreateSnippet: TMenuItem;
     mnuSnippet: TMenuItem;
@@ -108,6 +111,8 @@ type
     procedure mnuAutosaveClick(Sender: TObject);
     procedure mnuBookMark1Click(Sender: TObject);
     procedure mnuBookmarksClick(Sender: TObject);
+    procedure mnuCloseAllOthersClick(Sender: TObject);
+    procedure mnuCloseWithoutSaveClick(Sender: TObject);
     procedure mnuColorSchemeClick(Sender: TObject);
     procedure mnuCreateSnippetClick(Sender: TObject);
     procedure mnuDJKeywordsClick(Sender: TObject);
@@ -122,6 +127,7 @@ type
     procedure mnuOpenAFileClick(Sender: TObject);
     procedure mnuOpenMarkedFileNameClick(Sender: TObject);
     procedure mnuOpenShellClick(Sender: TObject);
+    procedure mnuPasteFromHistorieClick(Sender: TObject);
     procedure mnuPreferencesClick(Sender: TObject);
     procedure mnuResyncClick(Sender: TObject);
     procedure mnuSave1Click(Sender: TObject);
@@ -139,6 +145,7 @@ type
     procedure mnuSmallerClick(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
     procedure PageControl1Changing(Sender: TObject; var AllowChange: boolean);
+    procedure PopupMenu1Popup(Sender: TObject);
     procedure PopupMenuSyneditPopup(Sender: TObject);
     procedure timerCloseIntelligenceTimer(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
@@ -178,7 +185,7 @@ type
       const treenode: TTreenode);
     procedure ChangeSchema(Sender: TObject);
     function CloseAllTabsheets: boolean;
-    procedure DoCloseActivePagecontrolPage;
+    procedure DoCloseActivePagecontrolPage(boolSaveChanges: boolean);
     procedure DoRecentPathPM(Sender: TObject);
     procedure DoSaveActivePage;
     procedure FillIntelligenceDlgWithHTM5Tags;
@@ -599,6 +606,31 @@ begin
   frmBookmarks.Free;
 end;
 
+procedure TfrmMainView.mnuCloseAllOthersClick(Sender: TObject);
+var myTab : TTabsheet;
+i : integer;
+begin
+
+  myTab := self.PageControl1.ActivePage;
+
+for i := self.PageControl1.PageCount -1 downto 0 do
+  begin
+  if self.PageControl1.Pages[i] <>myTab then
+    begin
+    self.PageControl1.ActivePageIndex:=i;
+    DoCloseActivePagecontrolPage(True);
+
+    end;
+
+
+  end;
+end;
+
+procedure TfrmMainView.mnuCloseWithoutSaveClick(Sender: TObject);
+begin
+  DoCloseActivePagecontrolPage(False);
+end;
+
 procedure TfrmMainView.mnuColorSchemeClick(Sender: TObject);
 begin
 
@@ -681,7 +713,7 @@ end;
 
 procedure TfrmMainView.mnuCloseActivepageClick(Sender: TObject);
 begin
-  DoCloseActivePagecontrolPage;
+  DoCloseActivePagecontrolPage(True);
 end;
 
 procedure TfrmMainView.mnuFindNextClick(Sender: TObject);
@@ -856,6 +888,17 @@ begin
 
 end;
 
+procedure TfrmMainView.mnuPasteFromHistorieClick(Sender: TObject);
+begin
+  frmPasteHistorie := TfrmPasteHistorie.create(self);
+  frmPasteHistorie.FillListbox(self.frmMainController.AngClipboardHistorieList );
+
+  frmPasteHistorie.ShowModal;
+  if frmPasteHistorie.ModalResult = mrOK then
+    self.frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(frmPasteHistorie.Memo1.Text ) ;
+  frmPasteHistorie.free;
+end;
+
 procedure TfrmMainView.mnuPreferencesClick(Sender: TObject);
 begin
   IntelligenceFrmCloseAndFree;
@@ -975,10 +1018,10 @@ end;
 
 procedure TfrmMainView.mnuCloseClick(Sender: TObject);
 begin
-  DoCloseActivePagecontrolPage;
+  DoCloseActivePagecontrolPage(True);
 end;
 
-procedure TfrmMainView.DoCloseActivePagecontrolPage;
+procedure TfrmMainView.DoCloseActivePagecontrolPage(boolSaveChanges: boolean);
 var
   i, iAnswer: integer;
   myOneTabsheet: TOneTabsheet;
@@ -987,8 +1030,9 @@ begin
   if pagecontrol1.PageCount = 0 then
     exit;
 
-  if self.frmMainController.UserPropertys.boolAutoSave then
-    frmMainController.SaveAll;
+  if boolSaveChanges then
+    if self.frmMainController.UserPropertys.boolAutoSave then
+      frmMainController.SaveAll;
 
 
   for i := 0 to frmMainController.slOpendTabsheets.Count - 1 do
@@ -996,20 +1040,21 @@ begin
     myOneTabsheet := frmMainController.slOpendTabsheets.OneTabsheet(i);
     if Pagecontrol1.ActivePage = myOneTabsheet.Tabsheet then
     begin
-      if myOneTabsheet.SynMemo.Modified then
-      begin
-        iAnswer := MessageDlg('Save changes', mtConfirmation,
-          [mbYes, mbNo, mbAbort], 0);
-        if iAnswer = mrAbort then
-          exit;
-
-        if iAnswer = mrYes then
+      if boolSaveChanges then
+        if myOneTabsheet.SynMemo.Modified then
         begin
-          myOneTabsheet.SynMemo.Lines.SaveToFile(
-            frmMainController.slOpendTabsheets[i]);
-          myOneTabsheet.SynMemo.Modified := False;
+          iAnswer := MessageDlg('Save changes', mtConfirmation,
+            [mbYes, mbNo, mbAbort], 0);
+          if iAnswer = mrAbort then
+            exit;
+
+          if iAnswer = mrYes then
+          begin
+            myOneTabsheet.SynMemo.Lines.SaveToFile(
+              frmMainController.slOpendTabsheets[i]);
+            myOneTabsheet.SynMemo.Modified := False;
+          end;
         end;
-      end;
 
       frmMainController.slOpendTabsheets.Delete(i);
       break;
@@ -1237,6 +1282,14 @@ procedure TfrmMainView.PageControl1Changing(Sender: TObject; var AllowChange: bo
 begin
   IntelligenceFrmCloseAndFree;
   PageControl1.Visible := False;  //avoid blinking
+end;
+
+procedure TfrmMainView.PopupMenu1Popup(Sender: TObject);
+begin
+
+  if self.frmMainController.UserPropertys.boolAutoSave then
+    mnuCloseWithoutSave.Visible := True;
+
 end;
 
 procedure TfrmMainView.PopupMenuSyneditPopup(Sender: TObject);
@@ -1694,7 +1747,7 @@ begin
   begin
     IntelligenceFrmCloseAndFree;
 
-    sysMemo := self.frmMainController.myActiveOneTabsheet.SynMemo ;
+    sysMemo := self.frmMainController.myActiveOneTabsheet.SynMemo;
     myPoint := sysMemo.LogicalCaretXY;
     s := sysMemo.Lines[myPoint.y - 1];
 
@@ -1767,7 +1820,7 @@ procedure TfrmMainView.SynEdit1CutCopy(Sender: TObject; var AText: string;
   var AMode: TSynSelectionMode; ALogStartPos: TPoint;
   var AnAction: TSynCopyPasteAction);
 begin
-
+   self.frmMainController.AngClipboardHistorieList.AddToHistorie(AText) ;
 end;
 
 
@@ -1775,7 +1828,7 @@ procedure TfrmMainView.SynEdit1Paste(Sender: TObject; var AText: string;
   var AMode: TSynSelectionMode; ALogStartPos: TPoint;
   var AnAction: TSynCopyPasteAction);
 begin
-
+  self.frmMainController.AngClipboardHistorieList.AddToHistorie(AText) ;
 end;
 
 
@@ -1832,6 +1885,11 @@ begin
   myOneTabsheet.SynMemo.OnKeyUp := @synmemoKeyUp;
   myOneTabsheet.SynMemo.OnCommandProcessed := @SynEditCommandProcessed;
   myOneTabsheet.SynMemo.OnProcessCommand := @SynEditProcessedCommand;
+
+  myOneTabsheet.SynMemo.OnCutCopy := @SynEdit1CutCopy;
+  myOneTabsheet.SynMemo.OnPaste := @SynEdit1Paste;
+
+  myOneTabsheet.SynMemo.RightEdge := 0;
 
 
 

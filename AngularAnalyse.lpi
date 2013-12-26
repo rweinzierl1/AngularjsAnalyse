@@ -42,7 +42,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="14">
       <Unit0>
         <Filename Value="AngularAnalyse.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -127,6 +127,18 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="angFrmIntelligence"/>
       </Unit11>
+      <Unit12>
+        <Filename Value="angpastehistorie.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="angPasteHistorie"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="angfrmclipboardhistorie.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmPasteHistorie"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="angFrmClipboardHistorie"/>
+      </Unit13>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -335,11 +335,21 @@ object frmMainView: TfrmMainView
   end
   object PopupMenu1: TPopupMenu
     Images = DataModule1.ImageList1
+    OnPopup = PopupMenu1Popup
     left = 632
     top = 280
     object mnuClose: TMenuItem
       Caption = 'close'
       OnClick = mnuCloseClick
+    end
+    object mnuCloseWithoutSave: TMenuItem
+      Caption = 'close without save'
+      Visible = False
+      OnClick = mnuCloseWithoutSaveClick
+    end
+    object mnuCloseAllOthers: TMenuItem
+      Caption = 'close all others'
+      OnClick = mnuCloseAllOthersClick
     end
     object mnuSave1: TMenuItem
       Caption = 'Save'
@@ -706,6 +716,12 @@ object frmMainView: TfrmMainView
       object mnuCreateSnippet: TMenuItem
         Caption = 'CreateSnippet'
         OnClick = mnuCreateSnippetClick
+      end
+      object mnuPasteFromHistorie: TMenuItem
+        Caption = 'Paste from Historie'
+        ImageIndex = 39
+        ShortCut = 49238
+        OnClick = mnuPasteFromHistorieClick
       end
     end
   end
