@@ -8,6 +8,27 @@ uses
   Classes, SysUtils, angPkz,inifiles,strutils ;
 
 type
+  TAngComponenttype = (AngComponentService,AngComponentfunction,AngComponentfilter,AngComponentDirective,AngComponentproperty );
+
+  TAngComponent = class
+     public
+    sTag : string;
+    sDescription : string;
+    angComponenttyp : TAngComponenttype;
+  end;
+
+
+  { TAngComponentList }
+
+  TAngComponentList = class(TStringList)
+    public
+    function  AngComponent(i : integer) : TAngComponent;
+    constructor create;
+    procedure LoadFromFile;
+
+   end;
+
+
 
   TAngHTMLTag = class
     public
@@ -66,6 +87,17 @@ type
   end;
 
 
+   { TAngIntellisence }
+
+   TAngIntellisence = class
+     public
+           AngHTMLTagList: TAngHTMLTagList;
+    AngSnippetList : TAngSnippetList;
+    AngComponentList : TAngComponentList ;
+    AngComponentProjectList : TAngComponentList ;
+    constructor create;
+    destructor destroy; override;
+   end;
 
 
 implementation
@@ -91,6 +123,89 @@ begin
     result := extractfilepath(paramstr(0)) + 'Snippet'+ sAngSeparator;
 
     end;
+end;
+
+{ TAngIntellisence }
+
+constructor TAngIntellisence.create;
+begin
+  AngSnippetList := TAngSnippetList.Create ;
+  AngHTMLTagList := TAngHTMLTagList.create;
+  AngComponentList := TAngComponentList.create ;
+  AngComponentList.LoadFromFile;
+  AngComponentProjectList := TAngComponentList.create ;
+end;
+
+destructor TAngIntellisence.destroy;
+begin
+    AngSnippetList.free ;
+  AngHTMLTagList.free;
+  AngComponentList.free ;
+  AngComponentProjectList.free ;
+  inherited destroy;
+end;
+
+{ TAngComponentList }
+
+function TAngComponentList.AngComponent(i: integer): TAngComponent;
+begin
+  result := TAngComponent( self.Objects[i]);
+end;
+
+constructor TAngComponentList.create;
+begin
+self.OwnsObjects:=true;
+end;
+
+procedure TAngComponentList.LoadFromFile;
+var sl : TStringlist;
+  sl2 : TStringlist;
+  sFilename : string;
+  i : integer;
+  AngComponent1 : TAngComponent;
+begin
+  sFilename := extractfilepath(paramstr(0)) + 'Snippet' + sAngSeparator + 'AngularComponents.ACP';
+
+  if fileexists(sFilename) then
+    begin
+    sl2 := TStringlist.create;
+    sl := TStringlist.create;
+    sl.LoadFromFile(sFilename);
+
+    for i := 0 to sl.count -1 do
+      begin
+      sl2.text := ansireplacetext( sl[i] , #9,#13#10);
+      if sl2.count >= 3 then
+        begin
+        AngComponent1 := TAngComponent.create;
+        AngComponent1.sTag:=sl2[0];
+        AngComponent1.sDescription :=sl2[1];
+        if sl2[2] = 'directive' then
+          AngComponent1.angComponenttyp:=AngComponentDirective;
+        if sl2[2] = 'filter' then
+          begin
+          AngComponent1.angComponenttyp:=AngComponentfilter;
+          AngComponent1.sTag :=  '|' + AngComponent1.sTag ;
+          end;
+        if sl2[2] = 'function' then
+          AngComponent1.angComponenttyp:=AngComponentfunction;
+        if sl2[2] = 'property' then
+          AngComponent1.angComponenttyp:=AngComponentproperty;
+        if sl2[2] = 'service' then
+          AngComponent1.angComponenttyp:=AngComponentService;
+
+
+
+
+        self.AddObject(AngComponent1.sTag,AngComponent1 );
+        end;
+
+      end;
+
+    sl.free;
+    sl2.free;
+    end;
+
 end;
 
 { TAngHTMLTagList }

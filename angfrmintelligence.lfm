@@ -37,6 +37,7 @@ object frmIntelligence: TfrmIntelligence
     ParentFont = False
     RowSelect = True
     ShowColumnHeaders = False
+    SmallImages = DataModule1.ImageList1
     TabOrder = 1
     ViewStyle = vsReport
     OnDblClick = ListView1DblClick

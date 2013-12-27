@@ -182,6 +182,8 @@ begin
       myitem.SubItems.add(FileListFileInfo.Types);
       myitem.Data := FileListFileInfo.oneFileInfo;
 
+      myitem.SubItems.add(datetimetostr( FileListFileInfo.oneFileInfo.modifiedDateTime)  );
+
 
       myitem.ImageIndex := FileListFileInfo.iImageindex;
     end;
@@ -316,10 +318,17 @@ begin
   else
   begin
     i := ColumnToSort - 1;
-    if i = 1 then
+    if i = 1 then   //lines
     begin
       Compare := CompareValue(strtointdef(Item1.SubItems[i], 0),
         strtointdef(Item2.SubItems[i], 0));
+
+    end
+    else
+    if i = 6 then  //Datetime
+    begin
+      Compare :=  CompareValue (strtodatetimedef (Item2.SubItems[i], 0),
+        strtodatetimedef(Item1.SubItems[i], 0));
 
     end
     else

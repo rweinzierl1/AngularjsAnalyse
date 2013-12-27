@@ -1,7 +1,7 @@
 object frmFileList: TfrmFileList
-  Left = 521
+  Left = 440
   Height = 338
-  Top = 302
+  Top = 269
   Width = 806
   Caption = 'File List'
   ClientHeight = 338
@@ -60,16 +60,19 @@ object frmFileList: TfrmFileList
     Align = alClient
     Columns = <    
       item
+        AutoSize = True
         Caption = 'File'
-        Width = 300
+        Width = 30
       end    
       item
         AutoSize = True
         Caption = 'Path'
-        Width = 502
+        Width = 36
       end    
       item
+        AutoSize = True
         Caption = 'Lines'
+        Width = 39
       end    
       item
         Caption = 'Type'
@@ -82,6 +85,11 @@ object frmFileList: TfrmFileList
       end    
       item
         Caption = 'Type'
+      end    
+      item
+        AutoSize = True
+        Caption = 'Modified'
+        Width = 497
       end>
     GridLines = True
     PopupMenu = pmAngFileList

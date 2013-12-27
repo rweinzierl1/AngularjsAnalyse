@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils, Graphics,
-  inifiles, SynEditMarks,angSnippet,SynCompletion,angPasteHistorie;
+  inifiles, SynEditMarks, angSnippet, SynCompletion, angPasteHistorie;
 
 type
 
@@ -28,6 +28,7 @@ type
     slngLines: TStringList;
     slngWords: TStringList;
     iImageindex: integer;
+    modifiedDateTime: TDatetime;
 
     pTreenodeInView: TObject;
     constructor Create;
@@ -66,7 +67,7 @@ type
     SynMemo: TsynMemo;
     SynMemoPreview: TsynMemo;
     SynCompletion: TSynCompletion;
-    sFileName : string;
+    sFileName: string;
 
     procedure setPreviewText;
     procedure setCarentFromPreviewToEdit;
@@ -80,10 +81,10 @@ type
 
   { TOpenedTabsheetList }
 
-  TOpenedTabsheetList = class(TStringlist)
-    public
-    constructor create;
-    function OneTabsheet(i : integer) : TOneTabsheet;
+  TOpenedTabsheetList = class(TStringList)
+  public
+    constructor Create;
+    function OneTabsheet(i: integer): TOneTabsheet;
   end;
 
 
@@ -104,13 +105,16 @@ type
   end;
 
 
-    { TFilesFoundList }
+  { TFilesFoundList }
 
-    TFilesFoundList = class(TStringlist)
-    public
+  TFilesFoundList = class(TStringList)
+  public
     function OneFileInfo(i: integer): TOneFileInfo;
-    constructor create;
+    constructor Create(boolOwnObject : boolean ; boolDuplicates : boolean);
   end;
+
+
+
 
 
   { TFrmMainController }
@@ -129,23 +133,24 @@ type
     procedure SearchForNGInFile(oneFileInfo: TOneFileInfo);
     procedure SetsPfad(AValue: string);
 
+
   public
 
     slAllFilesFound: TFilesFoundList;
-    slController: TStringList;
-    slModule: TStringList;
-    slService: TStringList;
-    slFactory: TStringList;
-    slFilter: TStringList;
-    slDirective: TStringList;
-    slConfig: TStringList;
+    slController: TFilesFoundList;
+    slModule: TFilesFoundList;
+    slService: TFilesFoundList;
+    slFactory: TFilesFoundList;
+    slFilter: TFilesFoundList;
+    slDirective: TFilesFoundList;
+    slConfig: TFilesFoundList;
     myActiveOneTabsheet: TOneTabsheet;
     slOpendTabsheets: TOpenedTabsheetList;
     sLastSearch: string;
     slColorScheme: TColorSchemeList;
     UserPropertys: TUserPropertys;
-    AngHTMLTagList: TAngHTMLTagList;
-    AngSnippetList : TAngSnippetList;
+    AngIntellisence: TAngIntellisence;
+
     AngClipboardHistorieList: TAngClipboardHistorieList;
 
 
@@ -181,6 +186,7 @@ type
     procedure SetHeightToAllSynedit;
     procedure DeleteAllMarksWithIndexIndexMarkFound;
     property sPfad: string read FsPfad write SetsPfad;
+    procedure AddAllProjectWordsToIntellisence;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -192,24 +198,35 @@ implementation
 
 function TFilesFoundList.OneFileInfo(i: integer): TOneFileInfo;
 begin
-  result := TOneFileInfo(self.Objects[i]);
+  Result := TOneFileInfo(self.Objects[i]);
 end;
 
-constructor TFilesFoundList.create;
+constructor TFilesFoundList.Create(boolOwnObject: boolean;
+  boolDuplicates: boolean);
 begin
-    self.OwnsObjects := True;
+  if boolOwnObject then
+  self.OwnsObjects := True;
+
+
+
+  if not boolDuplicates then
+    begin
+    self.Sorted:=true;
+    self.Duplicates:= dupIgnore;
+    end;
+
 end;
 
 { TOpenedTabsheetList }
 
-constructor TOpenedTabsheetList.create;
+constructor TOpenedTabsheetList.Create;
 begin
-  self.OwnsObjects := true;
+  self.OwnsObjects := True;
 end;
 
 function TOpenedTabsheetList.OneTabsheet(i: integer): TOneTabsheet;
 begin
- result :=  TOneTabsheet(self.Objects[i] );
+  Result := TOneTabsheet(self.Objects[i]);
 end;
 
 { TUserPropertys }
@@ -336,7 +353,7 @@ begin
   i2 := self.SynMemoPreview.TopLine;
   if i < i2 then
   begin
-  self.SynMemoPreview.TopLine := i;
+    self.SynMemoPreview.TopLine := i;
   end;
 
 
@@ -363,7 +380,7 @@ begin
   //  self.SynMemoPreview.SelStart := self.SynMemo.SelStart;
   //  self.SynMemoPreview.SelEnd := self.SynMemo.SelEnd;
   //  end;
-   self.SynMemoPreview.Repaint;
+  self.SynMemoPreview.Repaint;
 end;
 
 
@@ -446,16 +463,16 @@ end;
 constructor TFrmMainController.Create;
 begin
   sPfad := '';
-  slAllFilesFound := TFilesFoundList.Create;
+  slAllFilesFound := TFilesFoundList.Create(true,true);
 
 
-  slController := TStringList.Create;
-  slModule := TStringList.Create;
-  slService := TStringList.Create;
-  slFactory := TStringList.Create;
-  slFilter := TStringList.Create;
-  slDirective := TStringList.Create;
-  slConfig := TStringList.Create;
+  slController := TFilesFoundList.Create(false,false);
+  slModule := TFilesFoundList.Create(false,false);
+  slService := TFilesFoundList.Create(false,false);
+  slFactory := TFilesFoundList.Create(false,false);
+  slFilter := TFilesFoundList.Create(false,false);
+  slDirective := TFilesFoundList.Create(false,false);
+  slConfig := TFilesFoundList.Create(false,false);
   slDJKeyWords := TStringList.Create;
   slAllScope := TStringList.Create;
 
@@ -465,10 +482,10 @@ begin
 
   UserPropertys := TUserPropertys.Create;
 
-  AngSnippetList := TAngSnippetList.Create ;
-  AngHTMLTagList := TAngHTMLTagList.create;
-  AngClipboardHistorieList := TAngClipboardHistorieList.create;
 
+
+  AngIntellisence := TAngIntellisence.Create;
+  AngClipboardHistorieList := TAngClipboardHistorieList.Create;
 
 end;
 
@@ -490,9 +507,8 @@ begin
 
   slColorScheme.Free;
   UserPropertys.Free;
-  AngSnippetList.free;
-  AngHTMLTagList.free;
-  AngClipboardHistorieList.free;
+  AngIntellisence.Free;
+  AngClipboardHistorieList.Free;
 
   inherited Destroy;
 end;
@@ -510,6 +526,9 @@ begin
   if i > 0 then
   begin
     s2 := copy(sZeile, i + length(sSchluesselwort), length(sZeile));
+
+
+
 
     if s2 <> '' then
       if s2[1] = '(' then    //find the Word in ("xxxx")
@@ -571,6 +590,7 @@ var
   ZeileVerarbeitet: boolean;
   sDateiNameOhneRootPfad: string;
   sExt: string;
+  ThisAge: longint;
 begin
   boolModuleGefunden := False;
   boolControllerGefunden := False;
@@ -588,12 +608,17 @@ begin
   begin
     oneFileInfo.slFileInhalt.loadfromfile(sDateiname);
     SearchForNGInFile(oneFileInfo);
+
+    ThisAge := FileAge(sDateiname);
+    oneFileInfo.modifiedDateTime := FileDateToDateTime(ThisAge);
+
   end
   else
   if sExt = '.JS' then
   begin
     sDateiNameOhneRootPfad := GetFilenameWithoutRootPath(sDateiname);
-
+    ThisAge := FileAge(sDateiname);
+    oneFileInfo.modifiedDateTime := FileDateToDateTime(ThisAge);
 
     if pos('angular', ExtractFileName(sDateiname)) = 0 then   //  ignore  Angular Files
       oneFileInfo.slFileInhalt.loadfromfile(sDateiname);
@@ -615,7 +640,7 @@ begin
           s, '.controller', oneFileInfo, constItemIndexController) then
         begin
           if not boolControllerGefunden then
-            slController.addobject(sDateiNameOhneRootPfad, oneFileInfo.pTreenodeInView);
+            slController.addobject(sDateiNameOhneRootPfad, oneFileInfo);
 
           boolControllerGefunden := True;
           ZeileVerarbeitet := True;
@@ -626,7 +651,7 @@ begin
           if SchluesselwortInZeileGefundenUndStringInKlammern(
             s, '.filter', oneFileInfo, constItemIndexFilter) then
           begin
-            slFilter.addobject(sDateiNameOhneRootPfad, oneFileInfo.pTreenodeInView);
+            slFilter.addobject(sDateiNameOhneRootPfad, oneFileInfo);
             boolFilterGefunden := True;
             ZeileVerarbeitet := True;
           end;
@@ -636,17 +661,17 @@ begin
           if SchluesselwortInZeileGefundenUndStringInKlammern(
             s, '.service', oneFileInfo, constItemIndexService) then
           begin
-            slService.addobject(sDateiNameOhneRootPfad, oneFileInfo.pTreenodeInView);
+            slService.addobject(sDateiNameOhneRootPfad, oneFileInfo);
             boolServiceGefunden := True;
             ZeileVerarbeitet := True;
           end;
 
-      if not boolDirectiveGefunden then
+     // if not boolDirectiveGefunden then
         if not ZeileVerarbeitet then
           if SchluesselwortInZeileGefundenUndStringInKlammern(
             s, '.directive', oneFileInfo, constItemIndexDirective) then
           begin
-            slDirective.addobject(sDateiNameOhneRootPfad, oneFileInfo.pTreenodeInView);
+            slDirective.addobject(sDateiNameOhneRootPfad, oneFileInfo);
             boolDirectiveGefunden := True;
             ZeileVerarbeitet := True;
           end;
@@ -656,7 +681,7 @@ begin
           if SchluesselwortInZeileGefundenUndStringInKlammern(
             s, '.factory', oneFileInfo, constItemIndexFactory) then
           begin
-            slFactory.addobject(sDateiNameOhneRootPfad, oneFileInfo.pTreenodeInView);
+            slFactory.addobject(sDateiNameOhneRootPfad, oneFileInfo);
             boolFactoryGefunden := True;
             ZeileVerarbeitet := True;
           end;
@@ -666,7 +691,7 @@ begin
           if SchluesselwortInZeileGefundenUndStringInKlammern(
             s, '.config', oneFileInfo, constItemIndexConfig) then
           begin
-            slConfig.addobject(sDateiNameOhneRootPfad, oneFileInfo.pTreenodeInView);
+            slConfig.addobject(sDateiNameOhneRootPfad, oneFileInfo);
             boolConfigGefunden := True;
             ZeileVerarbeitet := True;
           end;
@@ -676,7 +701,7 @@ begin
           if SchluesselwortInZeileGefundenUndStringInKlammern(
             s, 'angular.module', oneFileInfo, constItemIndexModule) then
           begin
-            slModule.addobject(sDateiNameOhneRootPfad, oneFileInfo.pTreenodeInView);
+            slModule.addobject(sDateiNameOhneRootPfad, oneFileInfo);
             boolModuleGefunden := True;
             ZeileVerarbeitet := True;
           end;
@@ -717,9 +742,9 @@ begin
   else
     self.UserPropertys.slRecentPath.Insert(0, AValue);
 
-
-
-  self.AngSnippetList.LoadFromDir(AValue + sAngSeparator  + '.AngularAnalyse'+ sAngSeparator ,snippetProject);
+  self.AngIntellisence.AngSnippetList.LoadFromDir(AValue + sAngSeparator +
+    '.AngularAnalyse' + sAngSeparator, snippetProject);
+  self.AngIntellisence.AngComponentProjectList.Clear;
 end;
 
 procedure TFrmMainController.LookForNgInString(sLine: string;
@@ -890,7 +915,7 @@ begin
   Result := nil;
   for i := 0 to self.slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := slAllFilesFound.OneFileInfo(i) ;
+    oneFileInfo := slAllFilesFound.OneFileInfo(i);
     if oneFileInfo.pTreenodeInView = p then
     begin
       Result := oneFileInfo;
@@ -909,7 +934,7 @@ begin
 
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := slAllFilesFound.OneFileInfo(i) ;
+    oneFileInfo := slAllFilesFound.OneFileInfo(i);
     for n := 0 to oneFileInfo.slScopeActions.Count - 1 do
       slAllScope.Add(oneFileInfo.slScopeActions[n]);
 
@@ -1064,7 +1089,7 @@ begin
 
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
-    oneFileInfo := slAllFilesFound.OneFileInfo(i) ;
+    oneFileInfo := slAllFilesFound.OneFileInfo(i);
     for n := 0 to oneFileInfo.slDependencyInjektionNamen.Count - 1 do
       slDJKeyWords.AddObject(oneFileInfo.slDependencyInjektionNamen[n],
         oneFileInfo.slDependencyInjektionNamen.objects[n]);
@@ -1240,7 +1265,7 @@ begin
 
   for i := 0 to slOpendTabsheets.Count - 1 do
   begin
-    myOneTabsheet := slOpendTabsheets.OneTabsheet(i) ;
+    myOneTabsheet := slOpendTabsheets.OneTabsheet(i);
     if myOneTabsheet.Tabsheet = self.myActiveOneTabsheet.Tabsheet then
     begin
       Result := slOpendTabsheets[i];
@@ -1350,7 +1375,7 @@ begin
     begin
       oneFileInfo := slAllFilesFound.OneFileInfo(i);
       sl.AddObject(GetFilenameWithoutRootPath(slAllFilesFound[i]),
-        oneFileInfo.pTreenodeInView);
+        oneFileInfo);
     end;
 
   end;
@@ -1380,7 +1405,7 @@ begin
 
   for i := 0 to self.slOpendTabsheets.Count - 1 do
   begin
-    myOneTabsheet := self.slOpendTabsheets.OneTabsheet(i) ;
+    myOneTabsheet := self.slOpendTabsheets.OneTabsheet(i);
     myOneTabsheet.SynMemo.Font.Size := self.UserPropertys.iFontsize;
   end;
 
@@ -1400,27 +1425,69 @@ begin
   end;
 end;
 
-function TFrmMainController.IsHTMLTagSelfClosing(s : string) : boolean;
+procedure TFrmMainController.AddAllProjectWordsToIntellisence;
+var
+  i, i2: integer;
+  AngComponent: TAngComponent;
+  sl: TStringList;
 begin
-result := false;
 
-if s = 'area' then result := true;
-if s = 'base' then result := true;
-if s = 'br' then result := true;
-if s = 'col' then result := true;
-if s = 'command' then result := true;
-if s = 'embed' then result := true;
-if s = 'hr' then result := true;
-if s = 'img' then result := true;
-if s = 'input' then result := true;
-if s = 'keygen' then result := true;
-if s = 'link' then result := true;
-if s = 'meta' then result := true;
-if s = 'param' then result := true;
-if s = 'source' then result := true;
-if s = 'track' then result := true;
-if s = 'wbr' then result := true;
 
+  sl := GetslDJKeyWords();
+
+
+  for i := 0 to sl.Count - 1 do
+  begin
+    i2 := integer(sl.Objects[i]);
+    if i2 = constItemIndexFilter then
+    begin
+      AngComponent := TAngComponent.Create;
+      AngComponent.sTag := '|' + sl[i];
+      AngComponent.angComponenttyp := AngComponentfilter ;
+      self.AngIntellisence.AngComponentProjectList.AddObject(
+        AngComponent.sTag, AngComponent);
+    end;
+  end;
+
+
+end;
+
+function TFrmMainController.IsHTMLTagSelfClosing(s: string): boolean;
+begin
+  Result := False;
+
+  if s = 'area' then
+    Result := True;
+  if s = 'base' then
+    Result := True;
+  if s = 'br' then
+    Result := True;
+  if s = 'col' then
+    Result := True;
+  if s = 'command' then
+    Result := True;
+  if s = 'embed' then
+    Result := True;
+  if s = 'hr' then
+    Result := True;
+  if s = 'img' then
+    Result := True;
+  if s = 'input' then
+    Result := True;
+  if s = 'keygen' then
+    Result := True;
+  if s = 'link' then
+    Result := True;
+  if s = 'meta' then
+    Result := True;
+  if s = 'param' then
+    Result := True;
+  if s = 'source' then
+    Result := True;
+  if s = 'track' then
+    Result := True;
+  if s = 'wbr' then
+    Result := True;
 
 end;
 

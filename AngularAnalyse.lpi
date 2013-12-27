@@ -18,7 +18,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
-      <BuildNr Value="1"/>
+      <BuildNr Value="2"/>
       <StringTable InternalName="AngularJS Anlyze tool" ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">
@@ -34,13 +34,16 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="3">
       <Item1>
-        <PackageName Value="SynEdit"/>
+        <PackageName Value="TurboPowerIPro"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="SynEdit"/>
       </Item2>
+      <Item3>
+        <PackageName Value="LCL"/>
+      </Item3>
     </RequiredPackages>
     <Units Count="14">
       <Unit0>
@@ -136,6 +139,7 @@
         <Filename Value="angfrmclipboardhistorie.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmPasteHistorie"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="angFrmClipboardHistorie"/>
       </Unit13>

@@ -105,6 +105,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: integer; MousePos: TPoint; var Handled: boolean);
+    procedure htmlPreviewClick(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure MenuItem2Click(Sender: TObject);
     procedure MenuItem3Click(Sender: TObject);
@@ -188,7 +189,6 @@ type
     procedure DoCloseActivePagecontrolPage(boolSaveChanges: boolean);
     procedure DoRecentPathPM(Sender: TObject);
     procedure DoSaveActivePage;
-    procedure FillIntelligenceDlgWithHTM5Tags;
     procedure InsertIntoSysMemoIntelligenceText;
     procedure IntelligenceItemSelected(Sender: TObject);
     procedure MarkLineContainsThisWord(sWord: string);
@@ -537,6 +537,11 @@ begin
 
 end;
 
+procedure TfrmMainView.htmlPreviewClick(Sender: TObject);
+begin
+
+end;
+
 procedure TfrmMainView.MenuItem1Click(Sender: TObject);
 begin
   IntelligenceFrmCloseAndFree;
@@ -673,7 +678,7 @@ begin
     AngSnippet.MakeFilenameFromShortcut(frmMainController.sPfad);
     AngSnippet.SaveToFile();
 
-    self.frmMainController.AngSnippetList.AddObject(AngSnippet.sShortcut, AngSnippet);
+    self.frmMainController.AngIntellisence.AngSnippetList.AddObject(AngSnippet.sShortcut, AngSnippet);
 
   end
   else
@@ -792,12 +797,7 @@ begin
 
 end;
 
-procedure TfrmMainView.FillIntelligenceDlgWithHTM5Tags;
-begin
-  frmIntelligence.FillWithHtml5Tags(self.frmMainController.AngHTMLTagList);
-  frmIntelligence.setFocusToFirstElement;
 
-end;
 
 procedure TfrmMainView.OpenIntelligenceDlg;
 begin
@@ -827,7 +827,7 @@ procedure TfrmMainView.mnuManageSnippetClick(Sender: TObject);
 begin
   frmSelectSnippet := TfrmSelectSnippet.Create(self);
 
-  frmSelectSnippet.ShowSnippingList(self.frmMainController.AngSnippetList);
+  frmSelectSnippet.ShowSnippingList(self.frmMainController.AngIntellisence.AngSnippetList);
   frmSelectSnippet.Showmodal;
 
   if frmSelectSnippet.modalresult = mrOk then
@@ -1256,6 +1256,8 @@ begin
 
       Treeview1.Selected := TTreenode(p);
 
+      treeview1.Selected.ExpandParents;
+
     end;
   end;
 
@@ -1327,7 +1329,7 @@ end;
 procedure TfrmMainView.AddAngularJSFilesAsTreenode(myTreeNode: TTreenode;
   sl: TStringList; iImageindex: integer);
 var
-  i, i2, n: integer;
+  i, i2, n,iIdx: integer;
   treenode, treenodeDISchluessel: TTreenode;
   OneFileInfo: TOneFileInfo;
   treenodeFilestructure: TTreenode;
@@ -1340,8 +1342,9 @@ begin
     treenode.ImageIndex := iImageindex;
     treenode.Data := sl.Objects[i];
 
-    OneFileInfo := frmMainController.FindOneFileInfoToDataPointer(
-      TObject(treenode.Data));
+
+    OneFileInfo := TOneFileInfo(treenode.Data);
+
 
     treenodeFilestructure := TTreenode(OneFileInfo.pTreenodeInView);
 
@@ -1356,14 +1359,16 @@ begin
     begin
       for n := 0 to OneFileInfo.slDependencyInjektionNamen.Count - 1 do
       begin
+        iIdx := integer(OneFileInfo.slDependencyInjektionNamen.Objects[n] );
+
         treenodeDISchluessel :=
           TreeView1.Items.AddChild(treenode, OneFileInfo.slDependencyInjektionNamen[n]);
-        treenodeDISchluessel.ImageIndex := constItemIndexKey;
+        treenodeDISchluessel.ImageIndex := iIdx;
 
         treenodeDISchluessel :=
           TreeView1.Items.AddChild(treenodeFilestructure,
           OneFileInfo.slDependencyInjektionNamen[n]);
-        treenodeDISchluessel.ImageIndex := constItemIndexKey;
+        treenodeDISchluessel.ImageIndex := iIdx;
 
       end;
 
@@ -1480,6 +1485,9 @@ begin
   TreeView1.EndUpdate;
 
   mnuFind.Enabled := True;
+
+
+  self.frmMainController.AddAllProjectWordsToIntellisence;
 
 end;
 
@@ -1637,9 +1645,9 @@ begin
 
   SynCompletion.ItemList.Clear;
 
-  for i := 0 to self.frmMainController.AngSnippetList.Count - 1 do
+  for i := 0 to self.frmMainController.AngIntellisence.AngSnippetList.Count - 1 do
   begin
-    AngSnippet := self.frmMainController.AngSnippetList.AngSnippet(i);
+    AngSnippet := self.frmMainController.AngIntellisence.AngSnippetList.AngSnippet(i);
     if pos(SynCompletion.CurrentString, AngSnippet.sShortcut) = 1 then
       if AngSnippet.ForFileTypeOK(myForFiletype) then
         SynCompletion.ItemList.Add(AngSnippet.sShortcut);
@@ -1658,9 +1666,9 @@ var
   i: integer;
 begin
 
-  for i := 0 to self.frmMainController.AngSnippetList.Count - 1 do
+  for i := 0 to self.frmMainController.AngIntellisence.AngSnippetList.Count - 1 do
   begin
-    AngSnippet := self.frmMainController.AngSnippetList.AngSnippet(i);
+    AngSnippet := self.frmMainController.AngIntellisence.AngSnippetList.AngSnippet(i);
     if Value = AngSnippet.sShortcut then
     begin
       Value := AngSnippet.sContent;
@@ -1674,7 +1682,7 @@ procedure TfrmMainView.SynEditProcessedCommand(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
 begin
 
-  if (AChar = #27) or (Command in [2, 3, 5]) then
+  if (AChar = #27) or (Command in [2, 3, 5]) then   //ESC or left key ...
     IntelligenceFrmCloseAndFree;
 
   if Command = 509 then //Enter
@@ -1698,12 +1706,17 @@ begin
       end;
   end;
 
-  if AChar = '<' then
+  if (AChar = '<') or (AChar = '|') then
   begin
     if self.frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex =
       constItemIndexHTML then
     begin
-      OpenIntelligenceDlg;
+      if frmIntelligence <> nil then
+        if not frmIntelligence.Visible then
+          IntelligenceFrmCloseAndFree;
+
+      if frmIntelligence = nil then
+        OpenIntelligenceDlg;
     end;
 
   end;
@@ -1711,10 +1724,21 @@ begin
   if frmIntelligence <> nil then
     if frmIntelligence.Visible then
     begin
+      if Command = 501 then
+        begin
+        if length(frmIntelligence.sFilter) > 0 then
+          begin
+          delete(frmIntelligence.sFilter,length(frmIntelligence.sFilter) ,1);
+          frmIntelligence.FillWithHtml5Tags(self.frmMainController.AngIntellisence);
+          end;
+        end;
+
       if trim(AChar) <> '' then
       begin
         frmIntelligence.sFilter := frmIntelligence.sFilter + AChar;
-        FillIntelligenceDlgWithHTM5Tags;
+        frmIntelligence.FillWithHtml5Tags(self.frmMainController.AngIntellisence);
+
+
         if frmIntelligence.ListView1.Items.Count = 0 then
           IntelligenceFrmCloseAndFree;
 

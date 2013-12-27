@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ComCtrls,angSnippet;
+  ExtCtrls, ComCtrls, angSnippet, angPkz;
 
 type
 
@@ -20,25 +20,28 @@ type
     procedure ListView1DblClick(Sender: TObject);
     procedure ListView1KeyPress(Sender: TObject; var Key: char);
     procedure Panel1MouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+      Shift: TShiftState; X, Y: integer);
     procedure Panel1MouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+      Shift: TShiftState; X, Y: integer);
   private
-    FOnIntelligenceItemSelected: TNotifyevent;
+    FOnIntelligenceItemSelected: TNotifyEvent;
     { private declarations }
-    xMouseDown,YMouseDown : integer;
+    xMouseDown, YMouseDown: integer;
+    procedure AddFilterKeysToListview(AngCompList: TAngComponentList;
+      iIndex: integer);
     procedure DoOnIntelligenceItemSelected;
-    procedure SetOnIntelligenceItemSelected(AValue: TNotifyevent);
-
+    procedure SetOnIntelligenceItemSelected(AValue: TNotifyEvent);
+    procedure setFocusToFirstElement;
   public
     { public declarations }
-    sSelText : string;
-    boolCallbackActive : boolean ;
-    sFilter : string;
-    procedure setFocusToFirstElement;
+    sSelText: string;
+    boolCallbackActive: boolean;
+    sFilter: string;
+
     procedure SetSelTextToPublic;
-    procedure FillWithHtml5Tags(AngHTMLTagList : TAngHTMLTagList);
-    property OnIntelligenceItemSelected : TNotifyevent read FOnIntelligenceItemSelected write SetOnIntelligenceItemSelected;
+    procedure FillWithHtml5Tags(AngIntellisence: TAngIntellisence);
+    property OnIntelligenceItemSelected: TNotifyEvent
+      read FOnIntelligenceItemSelected write SetOnIntelligenceItemSelected;
   end;
 
 var
@@ -56,108 +59,149 @@ end;
 
 procedure TfrmIntelligence.FormCreate(Sender: TObject);
 begin
-  boolCallbackActive := false;
+  boolCallbackActive := False;
 end;
 
 procedure TfrmIntelligence.SetSelTextToPublic;
-var i : integer;
+var
+  i: integer;
 begin
   i := Listview1.ItemIndex;
 
   if i <> -1 then
-    sSelText := Listview1.Items[i].Caption ;
+    sSelText := Listview1.Items[i].Caption;
 end;
 
 
 procedure TfrmIntelligence.DoOnIntelligenceItemSelected;
 begin
-if assigned(OnIntelligenceItemSelected)  then
-    begin
-    boolCallbackActive := true;
+  if assigned(OnIntelligenceItemSelected) then
+  begin
+    boolCallbackActive := True;
     OnIntelligenceItemSelected(self);
-    boolCallbackActive := false;
-    end;
+    boolCallbackActive := False;
+  end;
+end;
+
+procedure TfrmIntelligence.AddFilterKeysToListview(AngCompList: TAngComponentList;
+  iIndex: integer);
+var
+  AngComponent: TAngComponent;
+  i: integer;
+  myItem: TListitem;
+begin
+  for i := 0 to AngCompList.Count - 1 do
+  begin
+    AngComponent := AngCompList.AngComponent(i);
+    if AngComponent.angComponenttyp = AngComponentfilter then
+      if pos(sFilter, AngComponent.sTag) = 1 then
+      begin
+        myItem := ListView1.Items.Add;
+        myItem.Caption := AngComponent.sTag;
+        myItem.SubItems.Add(AngComponent.sDescription);
+        myItem.ImageIndex := iIndex;
+      end;
+  end;
 end;
 
 procedure TfrmIntelligence.setFocusToFirstElement;
 begin
   if listview1.Items.Count > 0 then
-    listview1.ItemIndex:=0 ;
+    listview1.ItemIndex := 0;
 
 end;
 
 procedure TfrmIntelligence.ListView1DblClick(Sender: TObject);
 begin
- SetSelTextToPublic;
- DoOnIntelligenceItemSelected
-
+  SetSelTextToPublic;
+  DoOnIntelligenceItemSelected;
 
 end;
 
 procedure TfrmIntelligence.ListView1KeyPress(Sender: TObject; var Key: char);
 begin
   if Key = #13 then
-    begin
+  begin
     SetSelTextToPublic;
     DoOnIntelligenceItemSelected;
+  end;
+
+  if Key = #27 then
+    begin
+    Close;
     end;
-
-  if Key = #27 then    //
-    close;
-
 end;
 
 procedure TfrmIntelligence.Panel1MouseDown(Sender: TObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+  Button: TMouseButton; Shift: TShiftState; X, Y: integer);
 begin
-   xMouseDown := x;
-   YMouseDown := Y;
+  xMouseDown := x;
+  YMouseDown := Y;
 end;
 
 procedure TfrmIntelligence.Panel1MouseUp(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-var widthNewX,heightNewY : integer;
+  Shift: TShiftState; X, Y: integer);
+var
+  widthNewX, heightNewY: integer;
 begin
-widthNewX := self.Width + (x-xMouseDown);
-heightNewY := self.Height + (Y-YMouseDown);
+  widthNewX := self.Width + (x - xMouseDown);
+  heightNewY := self.Height + (Y - YMouseDown);
 
 
-if widthNewX < 100 then widthNewX := 100;
-if heightNewY < 100 then heightNewY := 100;
+  if widthNewX < 100 then
+    widthNewX := 100;
+  if heightNewY < 100 then
+    heightNewY := 100;
 
-self.Width  := widthNewX;
-self.Height := heightNewY;
+  self.Width := widthNewX;
+  self.Height := heightNewY;
 
 end;
 
-procedure TfrmIntelligence.SetOnIntelligenceItemSelected(AValue: TNotifyevent);
+procedure TfrmIntelligence.SetOnIntelligenceItemSelected(AValue: TNotifyEvent);
 begin
-  if FOnIntelligenceItemSelected=AValue then Exit;
-  FOnIntelligenceItemSelected:=AValue;
+  if FOnIntelligenceItemSelected = AValue then
+    Exit;
+  FOnIntelligenceItemSelected := AValue;
 end;
 
-procedure TfrmIntelligence.FillWithHtml5Tags(AngHTMLTagList: TAngHTMLTagList);
-var myItem : TListitem;
-  i : integer;
-  AngHTMLTag : TAngHTMLTag;
+procedure TfrmIntelligence.FillWithHtml5Tags(AngIntellisence: TAngIntellisence);
+var
+  myItem: TListitem;
+  i: integer;
+  AngHTMLTag: TAngHTMLTag;
 begin
   ListView1.Clear;
   ListView1.BeginUpdate;
 
-  for i := 0 to AngHTMLTagList.Count -1 do
-    begin
-    AngHTMLTag := AngHTMLTagList.AngHTMLTag(i) ;
 
-    if pos(sFilter,AngHTMLTag.sTag) = 1 then
+  if copy(sFilter, 1, 1) = '|' then
+  begin
+    AddFilterKeysToListview(AngIntellisence.AngComponentProjectList , constItemIndexFilter);
+    AddFilterKeysToListview(AngIntellisence.AngComponentList, constItemIndexAngular);
+  end;
+
+
+  if copy(sFilter, 1, 1) = '<' then
+  begin
+    for i := 0 to AngIntellisence.AngHTMLTagList.Count - 1 do
+    begin
+      AngHTMLTag := AngIntellisence.AngHTMLTagList.AngHTMLTag(i);
+
+      if pos(sFilter, AngHTMLTag.sTag) = 1 then
       begin
-      myItem := ListView1.Items.Add;
-      myItem.Caption:= AngHTMLTag.sTag ;
-      myItem.SubItems.Add(AngHTMLTag.sDescription ) ;
+        myItem := ListView1.Items.Add;
+        myItem.Caption := AngHTMLTag.sTag;
+        myItem.SubItems.Add(AngHTMLTag.sDescription);
+        myItem.ImageIndex := constItemIndexHTML;
       end;
     end;
+  end;
 
-   ListView1.EndUpdate ;
+
+ setFocusToFirstElement;
+
+  ListView1.EndUpdate;
 end;
 
 end.
-
