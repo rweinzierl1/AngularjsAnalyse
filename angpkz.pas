@@ -55,6 +55,8 @@ constItemSnippetLocal = 35;
 constItemSnippetUser = 36;
 constItemSnippetGlobal = 37;
 constItemInsertSnippet = 38;
+constItemCopyHistorie = 39;
+constItemEvent = 40;
 
 implementation
 

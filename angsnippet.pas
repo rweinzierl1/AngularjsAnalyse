@@ -95,6 +95,9 @@ type
     AngSnippetList : TAngSnippetList;
     AngComponentList : TAngComponentList ;
     AngComponentProjectList : TAngComponentList ;
+    slHtmlGlobalAttr  : TStringlist;
+    slHtmlEventhandlerAttributes : TStringlist;
+
     constructor create;
     destructor destroy; override;
    end;
@@ -128,12 +131,26 @@ end;
 { TAngIntellisence }
 
 constructor TAngIntellisence.create;
+var sFilename : string;
 begin
   AngSnippetList := TAngSnippetList.Create ;
   AngHTMLTagList := TAngHTMLTagList.create;
   AngComponentList := TAngComponentList.create ;
   AngComponentList.LoadFromFile;
   AngComponentProjectList := TAngComponentList.create ;
+
+  slHtmlGlobalAttr  := TStringlist.create ;
+
+  sFilename := extractfilepath(paramstr(0)) + 'Snippet' + sAngSeparator + 'HtmlGlobalAttr.txt';
+  if fileexists(sFilename) then
+    slHtmlGlobalAttr.LoadFromFile(sFilename);
+
+  slHtmlEventhandlerAttributes := TStringlist.create;
+  sFilename := extractfilepath(paramstr(0)) + 'Snippet' + sAngSeparator + 'HtmlEventhandlerAttributes.txt';
+
+  if fileexists(sFilename) then
+    slHtmlEventhandlerAttributes.LoadFromFile(sFilename);
+
 end;
 
 destructor TAngIntellisence.destroy;
@@ -142,6 +159,8 @@ begin
   AngHTMLTagList.free;
   AngComponentList.free ;
   AngComponentProjectList.free ;
+  slHtmlGlobalAttr.free ;
+  slHtmlEventhandlerAttributes.free;
   inherited destroy;
 end;
 

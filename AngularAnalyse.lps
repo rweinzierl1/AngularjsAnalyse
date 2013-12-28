@@ -12,7 +12,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="53" Y="19"/>
-        <UsageCount Value="176"/>
+        <UsageCount Value="177"/>
       </Unit0>
       <Unit1>
         <Filename Value="frmmain.pas"/>
@@ -23,9 +23,9 @@
         <UnitName Value="frmMain"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1687"/>
+        <TopLine Value="1686"/>
         <CursorPos X="39" Y="1746"/>
-        <UsageCount Value="176"/>
+        <UsageCount Value="177"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -33,20 +33,22 @@
         <Filename Value="angpkz.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="angPKZ"/>
+        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="13"/>
-        <CursorPos X="24" Y="32"/>
-        <UsageCount Value="168"/>
+        <TopLine Value="33"/>
+        <CursorPos X="15" Y="59"/>
+        <UsageCount Value="169"/>
+        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="angfrmmaincontroller.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="angFrmMainController"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1534"/>
         <CursorPos X="1" Y="1549"/>
-        <UsageCount Value="164"/>
+        <UsageCount Value="165"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
@@ -59,7 +61,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="49"/>
         <CursorPos X="75" Y="68"/>
-        <UsageCount Value="130"/>
+        <UsageCount Value="131"/>
       </Unit4>
       <Unit5>
         <Filename Value="angdatamodul.pas"/>
@@ -68,10 +70,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
         <UnitName Value="angDatamodul"/>
+        <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
-        <CursorPos X="50" Y="10"/>
-        <UsageCount Value="130"/>
+        <CursorPos X="43" Y="7"/>
+        <UsageCount Value="131"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="angfrmbookmarks.pas"/>
@@ -83,7 +88,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="3"/>
         <CursorPos X="38" Y="5"/>
-        <UsageCount Value="115"/>
+        <UsageCount Value="116"/>
       </Unit6>
       <Unit7>
         <Filename Value="angfilelist.pas"/>
@@ -95,19 +100,19 @@
         <WindowIndex Value="0"/>
         <TopLine Value="40"/>
         <CursorPos X="57" Y="40"/>
-        <UsageCount Value="110"/>
+        <UsageCount Value="111"/>
       </Unit7>
       <Unit8>
         <Filename Value="angsnippet.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="angSnippet"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="105" Y="11"/>
-        <UsageCount Value="71"/>
+        <TopLine Value="125"/>
+        <CursorPos X="12" Y="147"/>
+        <UsageCount Value="72"/>
         <Bookmarks Count="1">
-          <Item0 X="15" Y="268" ID="3"/>
+          <Item0 X="12" Y="147" ID="1"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit8>
@@ -121,7 +126,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="44"/>
         <CursorPos X="58" Y="87"/>
-        <UsageCount Value="69"/>
+        <UsageCount Value="70"/>
       </Unit9>
       <Unit10>
         <Filename Value="angfrmselectsnippet.pas"/>
@@ -133,7 +138,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="138"/>
         <CursorPos X="1" Y="154"/>
-        <UsageCount Value="66"/>
+        <UsageCount Value="67"/>
       </Unit10>
       <Unit11>
         <Filename Value="angfrmintelligence.pas"/>
@@ -145,14 +150,15 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="87"/>
-        <CursorPos X="65" Y="99"/>
-        <UsageCount Value="51"/>
+        <TopLine Value="138"/>
+        <CursorPos X="53" Y="154"/>
+        <UsageCount Value="52"/>
         <Bookmarks Count="2">
-          <Item0 X="1" Y="119" ID="2"/>
-          <Item1 X="5" Y="228" ID="1"/>
+          <Item0 X="1" Y="120" ID="2"/>
+          <Item1 X="28" Y="146" ID="3"/>
         </Bookmarks>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit11>
       <Unit12>
         <Filename Value="angpastehistorie.pas"/>
@@ -161,7 +167,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="30"/>
         <CursorPos X="43" Y="30"/>
-        <UsageCount Value="42"/>
+        <UsageCount Value="43"/>
       </Unit12>
       <Unit13>
         <Filename Value="angfrmclipboardhistorie.pas"/>
@@ -173,7 +179,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="28"/>
         <CursorPos X="1" Y="55"/>
-        <UsageCount Value="42"/>
+        <UsageCount Value="43"/>
       </Unit13>
       <Unit14>
         <Filename Value="C:\lazarus\lcl\include\menuitem.inc"/>
@@ -184,10 +190,12 @@
       </Unit14>
       <Unit15>
         <Filename Value="C:\lazarus\fpc\2.6.2\source\rtl\inc\objpash.inc"/>
+        <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
         <TopLine Value="176"/>
         <CursorPos X="23" Y="192"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
       </Unit15>
       <Unit16>
         <Filename Value="frmmain.lfm"/>
@@ -547,123 +555,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="frmmain.pas"/>
-        <Caret Line="1761" Column="73" TopLine="1734"/>
+        <Caret Line="1766" Column="1" TopLine="1741"/>
       </Position1>
       <Position2>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1742" Column="1" TopLine="1734"/>
+        <Filename Value="angfrmintelligence.pas"/>
+        <Caret Line="197" Column="1" TopLine="190"/>
       </Position2>
       <Position3>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1743" Column="1" TopLine="1734"/>
+        <Filename Value="angfrmintelligence.pas"/>
+        <Caret Line="198" Column="1" TopLine="190"/>
       </Position3>
       <Position4>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1744" Column="1" TopLine="1734"/>
+        <Filename Value="angfrmintelligence.pas"/>
+        <Caret Line="199" Column="1" TopLine="190"/>
       </Position4>
       <Position5>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1750" Column="1" TopLine="1734"/>
+        <Filename Value="angfrmintelligence.pas"/>
+        <Caret Line="202" Column="1" TopLine="190"/>
       </Position5>
       <Position6>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1751" Column="1" TopLine="1734"/>
+        <Filename Value="angfrmintelligence.pas"/>
+        <Caret Line="208" Column="1" TopLine="190"/>
       </Position6>
       <Position7>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1753" Column="1" TopLine="1734"/>
+        <Filename Value="angfrmintelligence.pas"/>
+        <Caret Line="228" Column="1" TopLine="207"/>
       </Position7>
       <Position8>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1762" Column="1" TopLine="1737"/>
+        <Filename Value="angfrmintelligence.pas"/>
+        <Caret Line="116" Column="1" TopLine="100"/>
       </Position8>
       <Position9>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1764" Column="1" TopLine="1739"/>
+        <Filename Value="angfrmintelligence.pas"/>
+        <Caret Line="118" Column="1" TopLine="100"/>
       </Position9>
       <Position10>
-        <Filename Value="frmmain.pas"/>
-        <Caret Line="1766" Column="1" TopLine="1741"/>
+        <Filename Value="angfrmintelligence.pas"/>
+        <Caret Line="119" Column="1" TopLine="100"/>
       </Position10>
       <Position11>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="197" Column="1" TopLine="190"/>
+        <Caret Line="118" Column="1" TopLine="100"/>
       </Position11>
       <Position12>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="198" Column="1" TopLine="190"/>
+        <Caret Line="119" Column="1" TopLine="100"/>
       </Position12>
       <Position13>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="199" Column="1" TopLine="190"/>
+        <Caret Line="118" Column="1" TopLine="100"/>
       </Position13>
       <Position14>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="202" Column="1" TopLine="190"/>
+        <Caret Line="119" Column="1" TopLine="100"/>
       </Position14>
       <Position15>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="208" Column="1" TopLine="190"/>
+        <Caret Line="126" Column="24" TopLine="109"/>
       </Position15>
       <Position16>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="228" Column="1" TopLine="207"/>
+        <Caret Line="249" Column="26" TopLine="219"/>
       </Position16>
       <Position17>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="116" Column="1" TopLine="100"/>
+        <Caret Line="228" Column="5" TopLine="221"/>
       </Position17>
       <Position18>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="118" Column="1" TopLine="100"/>
+        <Caret Line="220" Column="32" TopLine="202"/>
       </Position18>
       <Position19>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="119" Column="1" TopLine="100"/>
+        <Caret Line="98" Column="57" TopLine="87"/>
       </Position19>
       <Position20>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="118" Column="1" TopLine="100"/>
+        <Caret Line="246" Column="107" TopLine="222"/>
       </Position20>
       <Position21>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="119" Column="1" TopLine="100"/>
+        <Caret Line="245" Column="15" TopLine="222"/>
       </Position21>
       <Position22>
-        <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="118" Column="1" TopLine="100"/>
+        <Filename Value="angsnippet.pas"/>
+        <Caret Line="98" Column="1" TopLine="85"/>
       </Position22>
       <Position23>
-        <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="119" Column="1" TopLine="100"/>
+        <Filename Value="angsnippet.pas"/>
+        <Caret Line="34" Column="66" TopLine="1"/>
       </Position23>
       <Position24>
-        <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="126" Column="24" TopLine="109"/>
+        <Filename Value="angsnippet.pas"/>
+        <Caret Line="176" Column="1" TopLine="161"/>
       </Position24>
       <Position25>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="249" Column="26" TopLine="219"/>
+        <Caret Line="247" Column="62" TopLine="224"/>
       </Position25>
       <Position26>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="228" Column="5" TopLine="221"/>
+        <Caret Line="240" Column="18" TopLine="224"/>
       </Position26>
       <Position27>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="220" Column="32" TopLine="202"/>
+        <Caret Line="145" Column="32" TopLine="137"/>
       </Position27>
       <Position28>
-        <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="98" Column="57" TopLine="87"/>
+        <Filename Value="angsnippet.pas"/>
+        <Caret Line="147" Column="12" TopLine="125"/>
       </Position28>
       <Position29>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="246" Column="107" TopLine="222"/>
+        <Caret Line="283" Column="29" TopLine="198"/>
       </Position29>
       <Position30>
         <Filename Value="angfrmintelligence.pas"/>
-        <Caret Line="245" Column="15" TopLine="222"/>
+        <Caret Line="146" Column="41" TopLine="141"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>

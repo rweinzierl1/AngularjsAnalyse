@@ -31,6 +31,7 @@ type
       iIndex: integer);
     procedure AddFilterKeysToListview(AngCompList: TAngComponentList;
       iIndex: integer; AngComponenttype: TAngComponenttype);
+    procedure AddHtmlGlobalsToListview(sl: TStringlist; iIndex: integer);
     procedure DoOnIntelligenceItemSelected;
     procedure SetOnIntelligenceItemSelected(AValue: TNotifyEvent);
     procedure setFocusToFirstElement;
@@ -141,6 +142,24 @@ begin
 end;
 
 
+
+procedure TfrmIntelligence.AddHtmlGlobalsToListview(sl: TStringlist;  iIndex: integer);
+var
+  boolOK: boolean;
+  i: integer;
+  myItem: TListitem;
+begin
+  for i := 0 to sl.Count - 1 do
+  begin
+      if (pos(sFilter, sl[i]) = 1) or (sFilter = '') then
+    begin
+      myItem := ListView1.Items.Add;
+      myItem.Caption := sl[i] ;
+      myItem.ImageIndex := iIndex;
+    end;
+  end;
+end;
+
 procedure TfrmIntelligence.setFocusToFirstElement;
 begin
   if listview1.Items.Count > 0 then
@@ -243,6 +262,9 @@ begin
     AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList,      constItemIndexDirective);
 
     AddFilterKeysToListview(AngIntellisence.AngComponentList, constItemIndexAngular,AngComponentDirective);
+
+    AddHtmlGlobalsToListview(AngIntellisence.slHtmlGlobalAttr,constItemIndexHTML);
+    AddHtmlGlobalsToListview(AngIntellisence.slHtmlEventhandlerAttributes ,constItemEvent);
 
   end;
 
