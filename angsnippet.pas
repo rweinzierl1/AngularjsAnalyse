@@ -91,7 +91,7 @@ type
 
    TAngIntellisence = class
      public
-           AngHTMLTagList: TAngHTMLTagList;
+    AngHTMLTagList: TAngHTMLTagList;
     AngSnippetList : TAngSnippetList;
     AngComponentList : TAngComponentList ;
     AngComponentProjectList : TAngComponentList ;

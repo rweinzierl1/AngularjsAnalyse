@@ -211,6 +211,7 @@ type
     procedure DeleteAllMarksWithIndexIndexMarkFound;
     property sPfad: string read FsPfad write SetsPfad;
     procedure AddAllProjectWordsToIntellisence;
+    function ActiveSynMemoIsHTMLAndCarentInSquareBrackets : boolean;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -1545,14 +1546,16 @@ begin
     i2 := OneDIWordFound.iImageindex;
     if i2 = constItemIndexDirective then
     begin
-      if pos('E', OneDIWordFound.sDirectiveRestrict) > 0 then
-      begin
         AngComponent := TAngComponent.Create;
-        AngComponent.sTag := '<' + sl[i] + '>';
+
+        if pos('E', OneDIWordFound.sDirectiveRestrict) > 0 then
+          AngComponent.sTag := '<' + sl[i] + '>'
+        else
+          AngComponent.sTag :=  sl[i];
+
         AngComponent.angComponenttyp := AngComponentDirective;
         self.AngIntellisence.AngComponentProjectList.AddObject(
           AngComponent.sTag, AngComponent);
-      end;
     end;
 
     if i2 = constItemIndexFilter then
@@ -1567,15 +1570,39 @@ begin
 
 end;
 
+function TFrmMainController.ActiveSynMemoIsHTMLAndCarentInSquareBrackets: boolean;
+var SynMemo : TSynMemo;
+    myPoint : TPoint;
+    s : string;
+    i,i2 : integer;
+begin
+
+  result := false;
+
+  if myActiveOneTabsheet.Tabsheet.ImageIndex =  constItemIndexHTML then
+    begin
+    SynMemo := myActiveOneTabsheet.SynMemo;
+    myPoint := SynMemo.LogicalCaretXY;
+    s := SynMemo.Lines[myPoint.y -1] ;
+    i2 := myPoint.x;
+    if length(s) < i2  then
+      i2 := length(s);
+
+    for i := i2 downto 1 do
+      begin
+      if s[i] = '<' then
+        result := true;
+      if s[i] = '>' then
+        exit;
+      end;
+    end;
+
+end;
+
 procedure TFrmMainController.ReplaceSnippetInserts(var sContent: string);
 begin
   sContent := ansireplacestr(sContent, '[[Date]]', Datetostr(now));
   sContent := ansireplacestr(sContent, '[[Datetime]]', Datetimetostr(now));
-
-
-
-
-
 
 end;
 

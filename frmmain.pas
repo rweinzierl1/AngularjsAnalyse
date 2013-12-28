@@ -1689,7 +1689,9 @@ end;
 
 procedure TfrmMainView.SynEditProcessedCommand(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+var boolFill : boolean;
 begin
+  boolFill := false;
 
   if (AChar = #27) or (Command in [2, 3, 5]) then   //ESC or left key ...
     IntelligenceFrmCloseAndFree;
@@ -1727,8 +1729,23 @@ begin
       if frmIntelligence = nil then
         OpenIntelligenceDlg;
     end;
-
   end;
+
+
+  if (AChar = ' ')  then
+  begin
+    if self.frmMainController.ActiveSynMemoIsHTMLAndCarentInSquareBrackets then
+    begin
+      if frmIntelligence <> nil then
+        if not frmIntelligence.Visible then
+          IntelligenceFrmCloseAndFree;
+      boolFill := true;
+      if frmIntelligence = nil then
+        OpenIntelligenceDlg;
+    end;
+  end;
+
+
 
   if frmIntelligence <> nil then
     if frmIntelligence.Visible then
@@ -1742,9 +1759,10 @@ begin
           end;
         end;
 
-      if trim(AChar) <> '' then
+      if (trim(AChar) <> '') or boolFill then
       begin
-        frmIntelligence.sFilter := frmIntelligence.sFilter + AChar;
+        if trim(AChar) <> '' then
+          frmIntelligence.sFilter := frmIntelligence.sFilter + AChar;
         frmIntelligence.FillWithHtml5Tags(self.frmMainController.AngIntellisence);
 
 

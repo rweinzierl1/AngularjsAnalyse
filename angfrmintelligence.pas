@@ -30,7 +30,7 @@ type
     procedure AddDirectiveKeysToListview(AngCompList: TAngComponentList;
       iIndex: integer);
     procedure AddFilterKeysToListview(AngCompList: TAngComponentList;
-      iIndex: integer);
+      iIndex: integer; AngComponenttype: TAngComponenttype);
     procedure DoOnIntelligenceItemSelected;
     procedure SetOnIntelligenceItemSelected(AValue: TNotifyEvent);
     procedure setFocusToFirstElement;
@@ -86,7 +86,7 @@ begin
 end;
 
 procedure TfrmIntelligence.AddFilterKeysToListview(AngCompList: TAngComponentList;
-  iIndex: integer);
+  iIndex: integer  ; AngComponenttype : TAngComponenttype);
 var
   AngComponent: TAngComponent;
   i: integer;
@@ -95,8 +95,8 @@ begin
   for i := 0 to AngCompList.Count - 1 do
   begin
     AngComponent := AngCompList.AngComponent(i);
-    if AngComponent.angComponenttyp = AngComponentfilter then
-      if pos(sFilter, AngComponent.sTag) = 1 then
+    if AngComponent.angComponenttyp = AngComponenttype  then
+      if (pos(sFilter, AngComponent.sTag) = 1) or (sFilter = '') then
       begin
         myItem := ListView1.Items.Add;
         myItem.Caption := AngComponent.sTag;
@@ -109,6 +109,8 @@ end;
 procedure TfrmIntelligence.AddDirectiveKeysToListview(AngCompList: TAngComponentList;
   iIndex: integer);
 var
+  boolOK: boolean;
+var
   AngComponent: TAngComponent;
   i: integer;
   myItem: TListitem;
@@ -116,14 +118,25 @@ begin
   for i := 0 to AngCompList.Count - 1 do
   begin
     AngComponent := AngCompList.AngComponent(i);
+    boolOK := False;
     if AngComponent.angComponenttyp = AngComponentDirective then
+    begin
       if pos(sFilter, AngComponent.sTag) = 1 then
-      begin
-        myItem := ListView1.Items.Add;
-        myItem.Caption := AngComponent.sTag;
-        myItem.SubItems.Add(AngComponent.sDescription);
-        myItem.ImageIndex := iIndex;
-      end;
+        boolOK := True;
+
+      if sFilter = '' then
+        if (copy(AngComponent.sTag, 1, 1) <> '<') then
+          boolOK := True;
+
+    end;
+
+    if boolOK then
+    begin
+      myItem := ListView1.Items.Add;
+      myItem.Caption := AngComponent.sTag;
+      myItem.SubItems.Add(AngComponent.sDescription);
+      myItem.ImageIndex := iIndex;
+    end;
   end;
 end;
 
@@ -151,9 +164,9 @@ begin
   end;
 
   if Key = #27 then
-    begin
+  begin
     Close;
-    end;
+  end;
 end;
 
 procedure TfrmIntelligence.Panel1MouseDown(Sender: TObject;
@@ -201,15 +214,16 @@ begin
 
   if copy(sFilter, 1, 1) = '|' then
   begin
-    AddFilterKeysToListview(AngIntellisence.AngComponentProjectList , constItemIndexFilter);
-    AddFilterKeysToListview(AngIntellisence.AngComponentList, constItemIndexAngular);
-  end;
-
-
+    AddFilterKeysToListview(AngIntellisence.AngComponentProjectList,
+      constItemIndexFilter ,AngComponentfilter);
+    AddFilterKeysToListview(AngIntellisence.AngComponentList, constItemIndexAngular,AngComponentfilter);
+  end
+  else
   if copy(sFilter, 1, 1) = '<' then
   begin
 
-    AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList , constItemIndexDirective);
+    AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList,
+      constItemIndexDirective);
 
     for i := 0 to AngIntellisence.AngHTMLTagList.Count - 1 do
     begin
@@ -223,10 +237,17 @@ begin
         myItem.ImageIndex := constItemIndexHTML;
       end;
     end;
+  end
+  else
+  begin
+    AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList,      constItemIndexDirective);
+
+    AddFilterKeysToListview(AngIntellisence.AngComponentList, constItemIndexAngular,AngComponentDirective);
+
   end;
 
 
- setFocusToFirstElement;
+  setFocusToFirstElement;
 
   ListView1.EndUpdate;
 end;
