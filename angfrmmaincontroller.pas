@@ -1577,7 +1577,6 @@ var
   s: string;
   i, i2: integer;
 begin
-
   Result := False;
 
   if myActiveOneTabsheet.Tabsheet.ImageIndex = constItemIndexHTML then
