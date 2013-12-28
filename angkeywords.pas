@@ -65,7 +65,8 @@ for i := 0 to slKeywords.Count -1 do
   begin
   myItem := ListView1.Items.Add;
   myItem.Caption := slKeywords[i] ;
-  myItem.ImageIndex := integer(slKeywords.Objects[i]) ;
+  myItem.ImageIndex :=  TOneDIWordFound(slKeywords.Objects[i]).iImageindex ;
+
 
 
   s := frmMainController.GetFilenameToKeyword(slKeywords[i]) ;

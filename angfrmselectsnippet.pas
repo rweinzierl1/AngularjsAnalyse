@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  ExtCtrls, StdCtrls, Buttons, angSnippet, angPKZ,angfrmSnippet;
+  ExtCtrls, StdCtrls, Buttons, angSnippet, angPKZ,angfrmSnippet,strutils;
 
 type
 
@@ -149,6 +149,9 @@ begin
   boolTake := true;
 
   sContent := frmSnippet.mContent.text;
+  //HIER NOCH falsch
+
+
 
   modalresult := mrOK;
 end;

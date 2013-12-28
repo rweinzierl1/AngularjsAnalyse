@@ -17,15 +17,21 @@ type
     bCancel: TBitBtn;
     cBoxsForFileType: TComboBox;
     cBoxLocation: TComboBox;
+    cBoxChanges: TComboBox;
     eShortcut: TEdit;
     eDescription: TEdit;
     lblContent: TLabel;
+    lblDescription1: TLabel;
     lblForFileType: TLabel;
     lblLocation: TLabel;
     lblShortcut: TLabel;
     lblDescription: TLabel;
     mContent: TMemo;
     procedure bOKClick(Sender: TObject);
+    procedure cBoxChangesChange(Sender: TObject);
+    procedure cBoxChangesMeasureItem(Control: TWinControl; Index: Integer;
+      var AHeight: Integer);
+    procedure cBoxChangesSelect(Sender: TObject);
   private
     { private declarations }
     myAngSnippet : TAngSnippet ;
@@ -82,6 +88,26 @@ procedure TfrmSnippet.bOKClick(Sender: TObject);
 begin
   if not DataFromViewToObject then exit;
   modalresult := mrOK;
+end;
+
+procedure TfrmSnippet.cBoxChangesChange(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmSnippet.cBoxChangesMeasureItem(Control: TWinControl;
+  Index: Integer; var AHeight: Integer);
+begin
+
+end;
+
+procedure TfrmSnippet.cBoxChangesSelect(Sender: TObject);
+begin
+  mContent.SelLength := 0;
+  mContent.setfocus;
+  mContent.SelText:= cBoxChanges.text;
+
+
 end;
 
 procedure TfrmSnippet.ShowSnippet(mAngSnippet: TAngSnippet);

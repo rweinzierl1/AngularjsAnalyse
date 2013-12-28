@@ -13,7 +13,7 @@ object frmSelectSnippet: TfrmSelectSnippet
   LCLVersion = '1.0.14.0'
   object ListView1: TListView
     Left = 0
-    Height = 189
+    Height = 140
     Top = 0
     Width = 546
     Align = alClient
@@ -87,8 +87,8 @@ object frmSelectSnippet: TfrmSelectSnippet
   end
   object pnlEdit: TPanel
     Left = 0
-    Height = 134
-    Top = 194
+    Height = 183
+    Top = 145
     Width = 546
     Align = alBottom
     TabOrder = 2
@@ -97,7 +97,7 @@ object frmSelectSnippet: TfrmSelectSnippet
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 189
+    Top = 140
     Width = 546
     Align = alBottom
     OnMoved = Splitter1Moved

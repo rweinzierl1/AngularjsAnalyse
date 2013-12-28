@@ -11,6 +11,27 @@ uses
 type
 
 
+  TOneDIWordFound = class(TObject)
+
+  public
+    iLineNr: integer;
+    iImageindex: integer;
+    sDirectiveRestrict: string;
+
+  end;
+
+
+  { TOneDIWordFoundList }
+
+  TOneDIWordFoundList = class(TStringList)
+
+  public
+    function OneDIWordFound(i: integer): TOneDIWordFound;
+    constructor Create;
+
+  end;
+
+
   TOneBookMark = class(TObject)
   public
     iBookmarkNr: integer;
@@ -20,10 +41,12 @@ type
     boolAktiveTab: boolean;
   end;
 
+
+
   TOneFileInfo = class
   public
     slFileInhalt: TStringList;
-    slDependencyInjektionNamen: TStringList;
+    slDependencyInjektionNamen: TOneDIWordFoundList;
     slScopeActions: TStringList;
     slngLines: TStringList;
     slngWords: TStringList;
@@ -110,9 +133,8 @@ type
   TFilesFoundList = class(TStringList)
   public
     function OneFileInfo(i: integer): TOneFileInfo;
-    constructor Create(boolOwnObject : boolean ; boolDuplicates : boolean);
+    constructor Create(boolOwnObject: boolean; boolDuplicates: boolean);
   end;
-
 
 
 
@@ -126,11 +148,13 @@ type
     slAllScope: TStringList;
     procedure LookForNgInString(sLine: string; oneFileInfo: TOneFileInfo);
     procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
-    function SchluesselwortInZeileGefundenUndStringInKlammern(
+
+    function KeysWordInLineAndStringInBrackets(iLineNr: integer;
       sZeile, sSchluesselwort: string; oneFileInfo: TOneFileInfo;
       iImageindex: integer): boolean;
     procedure AnalyzeFileContent(sDateiname: string; oneFileInfo: TOneFileInfo);
     procedure SearchForNGInFile(oneFileInfo: TOneFileInfo);
+    procedure SearchForRestrictInSlDirective;
     procedure SetsPfad(AValue: string);
 
 
@@ -153,7 +177,7 @@ type
 
     AngClipboardHistorieList: TAngClipboardHistorieList;
 
-
+    procedure ReplaceSnippetInserts(var sContent: string);
     function IsHTMLTagSelfClosing(s: string): boolean;
     function ChangeMinusToCamelCase(sSuchtext: string): string;
     function ChangeCamelCaseToMinusString(sSuchtext: string): string;
@@ -162,7 +186,7 @@ type
     function GetslAllScope: TStringList;
     procedure ClearAll;
     function findFileNameToDataPointer(p: TObject): string;
-    procedure AddOneFileInSL(sPath: string; treenode: TObject);
+    function AddOneFileInSL(sPath: string; treenode: TObject): TOneFileInfo;
     function FindOneFileInfoToDataPointer(p: TObject): TOneFileInfo;
     procedure FillSlWithFilesContainsThisWord(sl: TStringList; sSuchtext: string);
     procedure SaveAll;
@@ -194,6 +218,18 @@ type
 
 implementation
 
+{ TOneDIWordFoundList }
+
+function TOneDIWordFoundList.OneDIWordFound(i: integer): TOneDIWordFound;
+begin
+  Result := TOneDIWordFound(self.Objects[i]);
+end;
+
+constructor TOneDIWordFoundList.Create;
+begin
+  self.OwnsObjects := True;
+end;
+
 { TFilesFoundList }
 
 function TFilesFoundList.OneFileInfo(i: integer): TOneFileInfo;
@@ -201,19 +237,18 @@ begin
   Result := TOneFileInfo(self.Objects[i]);
 end;
 
-constructor TFilesFoundList.Create(boolOwnObject: boolean;
-  boolDuplicates: boolean);
+constructor TFilesFoundList.Create(boolOwnObject: boolean; boolDuplicates: boolean);
 begin
   if boolOwnObject then
-  self.OwnsObjects := True;
+    self.OwnsObjects := True;
 
 
 
   if not boolDuplicates then
-    begin
-    self.Sorted:=true;
-    self.Duplicates:= dupIgnore;
-    end;
+  begin
+    self.Sorted := True;
+    self.Duplicates := dupIgnore;
+  end;
 
 end;
 
@@ -438,7 +473,7 @@ end;
 constructor TOneFileInfo.Create;
 begin
   slFileInhalt := TStringList.Create;
-  slDependencyInjektionNamen := TStringList.Create;
+  slDependencyInjektionNamen := TOneDIWordFoundList.Create;
   slScopeActions := TStringList.Create;
   slngLines := TStringList.Create;
   slngWords := TStringList.Create;
@@ -463,16 +498,16 @@ end;
 constructor TFrmMainController.Create;
 begin
   sPfad := '';
-  slAllFilesFound := TFilesFoundList.Create(true,true);
+  slAllFilesFound := TFilesFoundList.Create(True, True);
 
 
-  slController := TFilesFoundList.Create(false,false);
-  slModule := TFilesFoundList.Create(false,false);
-  slService := TFilesFoundList.Create(false,false);
-  slFactory := TFilesFoundList.Create(false,false);
-  slFilter := TFilesFoundList.Create(false,false);
-  slDirective := TFilesFoundList.Create(false,false);
-  slConfig := TFilesFoundList.Create(false,false);
+  slController := TFilesFoundList.Create(False, False);
+  slModule := TFilesFoundList.Create(False, False);
+  slService := TFilesFoundList.Create(False, False);
+  slFactory := TFilesFoundList.Create(False, False);
+  slFilter := TFilesFoundList.Create(False, False);
+  slDirective := TFilesFoundList.Create(False, False);
+  slConfig := TFilesFoundList.Create(False, False);
   slDJKeyWords := TStringList.Create;
   slAllScope := TStringList.Create;
 
@@ -513,12 +548,14 @@ begin
   inherited Destroy;
 end;
 
-function TFrmMainController.SchluesselwortInZeileGefundenUndStringInKlammern(
+function TFrmMainController.KeysWordInLineAndStringInBrackets(iLineNr: integer;
   sZeile, sSchluesselwort: string; oneFileInfo: TOneFileInfo;
   iImageindex: integer): boolean;
 var
   i: integer;
   s2: string;
+
+  OneDIWordFound: TOneDIWordFound;
 begin
   Result := False;
 
@@ -526,8 +563,6 @@ begin
   if i > 0 then
   begin
     s2 := copy(sZeile, i + length(sSchluesselwort), length(sZeile));
-
-
 
 
     if s2 <> '' then
@@ -563,7 +598,13 @@ begin
             Result := False; //TODO make it better
 
           if Result then
-            oneFileInfo.slDependencyInjektionNamen.AddObject(s2, TObject(iImageindex));
+          begin
+            OneDIWordFound := TOneDIWordFound.Create;
+            OneDIWordFound.iImageindex := iImageindex;
+            OneDIWordFound.iLineNr := iLineNr;
+            oneFileInfo.slDependencyInjektionNamen.AddObject(s2, OneDIWordFound);
+
+          end;
 
           if pos('function', trim(s2)) = 1 then    //anonyme Funktion
             Result := True;
@@ -636,8 +677,8 @@ begin
 
 
       if not ZeileVerarbeitet then
-        if SchluesselwortInZeileGefundenUndStringInKlammern(
-          s, '.controller', oneFileInfo, constItemIndexController) then
+        if KeysWordInLineAndStringInBrackets(i, s, '.controller',
+          oneFileInfo, constItemIndexController) then
         begin
           if not boolControllerGefunden then
             slController.addobject(sDateiNameOhneRootPfad, oneFileInfo);
@@ -646,73 +687,74 @@ begin
           ZeileVerarbeitet := True;
         end;
 
-      if not boolFilterGefunden then
-        if not ZeileVerarbeitet then
-          if SchluesselwortInZeileGefundenUndStringInKlammern(
-            s, '.filter', oneFileInfo, constItemIndexFilter) then
-          begin
+
+      if not ZeileVerarbeitet then
+        if KeysWordInLineAndStringInBrackets(i, s, '.filter',
+          oneFileInfo, constItemIndexFilter) then
+        begin
+          if not boolFilterGefunden then
             slFilter.addobject(sDateiNameOhneRootPfad, oneFileInfo);
-            boolFilterGefunden := True;
-            ZeileVerarbeitet := True;
-          end;
+          boolFilterGefunden := True;
+          ZeileVerarbeitet := True;
+        end;
 
-      if not boolServiceGefunden then
-        if not ZeileVerarbeitet then
-          if SchluesselwortInZeileGefundenUndStringInKlammern(
-            s, '.service', oneFileInfo, constItemIndexService) then
-          begin
+
+      if not ZeileVerarbeitet then
+        if KeysWordInLineAndStringInBrackets(i, s, '.service',
+          oneFileInfo, constItemIndexService) then
+        begin
+          if not boolServiceGefunden then
             slService.addobject(sDateiNameOhneRootPfad, oneFileInfo);
-            boolServiceGefunden := True;
-            ZeileVerarbeitet := True;
-          end;
+          boolServiceGefunden := True;
+          ZeileVerarbeitet := True;
+        end;
 
-     // if not boolDirectiveGefunden then
-        if not ZeileVerarbeitet then
-          if SchluesselwortInZeileGefundenUndStringInKlammern(
-            s, '.directive', oneFileInfo, constItemIndexDirective) then
-          begin
+      if not ZeileVerarbeitet then
+        if KeysWordInLineAndStringInBrackets(i, s, '.directive',
+          oneFileInfo, constItemIndexDirective) then
+        begin
+          if not boolDirectiveGefunden then
             slDirective.addobject(sDateiNameOhneRootPfad, oneFileInfo);
-            boolDirectiveGefunden := True;
-            ZeileVerarbeitet := True;
-          end;
+          boolDirectiveGefunden := True;
+          ZeileVerarbeitet := True;
+        end;
 
-      if not boolFactoryGefunden then
-        if not ZeileVerarbeitet then
-          if SchluesselwortInZeileGefundenUndStringInKlammern(
-            s, '.factory', oneFileInfo, constItemIndexFactory) then
-          begin
+
+      if not ZeileVerarbeitet then
+        if KeysWordInLineAndStringInBrackets(i, s, '.factory',
+          oneFileInfo, constItemIndexFactory) then
+        begin
+          if not boolFactoryGefunden then
             slFactory.addobject(sDateiNameOhneRootPfad, oneFileInfo);
-            boolFactoryGefunden := True;
-            ZeileVerarbeitet := True;
-          end;
+          boolFactoryGefunden := True;
+          ZeileVerarbeitet := True;
+        end;
 
-      if not boolConfigGefunden then
-        if not ZeileVerarbeitet then
-          if SchluesselwortInZeileGefundenUndStringInKlammern(
-            s, '.config', oneFileInfo, constItemIndexConfig) then
-          begin
+
+      if not ZeileVerarbeitet then
+        if KeysWordInLineAndStringInBrackets(i, s, '.config',
+          oneFileInfo, constItemIndexConfig) then
+        begin
+          if not boolConfigGefunden then
             slConfig.addobject(sDateiNameOhneRootPfad, oneFileInfo);
-            boolConfigGefunden := True;
-            ZeileVerarbeitet := True;
-          end;
+          boolConfigGefunden := True;
+          ZeileVerarbeitet := True;
+        end;
 
-      if not boolModuleGefunden then
-        if not ZeileVerarbeitet then
-          if SchluesselwortInZeileGefundenUndStringInKlammern(
-            s, 'angular.module', oneFileInfo, constItemIndexModule) then
-          begin
+
+      if not ZeileVerarbeitet then
+        if KeysWordInLineAndStringInBrackets(i, s, 'angular.module',
+          oneFileInfo, constItemIndexModule) then
+        begin
+          if not boolModuleGefunden then
             slModule.addobject(sDateiNameOhneRootPfad, oneFileInfo);
-            boolModuleGefunden := True;
-            ZeileVerarbeitet := True;
-          end;
+          boolModuleGefunden := True;
+          ZeileVerarbeitet := True;
+        end;
 
       LookForScopeInString(s, oneFileInfo);
-      // LookForNgInString(s, oneFileInfo );
-
     end;
-
   end;
-
 end;
 
 procedure TFrmMainController.SearchForNGInFile(oneFileInfo: TOneFileInfo);
@@ -835,7 +877,8 @@ begin
   slConfig.Clear;
 end;
 
-procedure TFrmMainController.AddOneFileInSL(sPath: string; treenode: TObject);
+function TFrmMainController.AddOneFileInSL(sPath: string;
+  treenode: TObject): TOneFileInfo;
 var
   oneFileInfo: TOneFileInfo;
 begin
@@ -846,6 +889,8 @@ begin
   slAllFilesFound.AddObject(sPath, oneFileInfo);
 
   AnalyzeFileContent(sPath, oneFileInfo);
+
+  Result := oneFileInfo;
 
 end;
 
@@ -1083,6 +1128,7 @@ function TFrmMainController.GetslDJKeyWords: TStringList;
 var
   i, n: integer;
   oneFileInfo: TOneFileInfo;
+  sl: TOneDIWordFoundList;
 begin
   slDJKeyWords.Clear;
   slDJKeyWords.sorted := True;
@@ -1090,9 +1136,11 @@ begin
   for i := 0 to slAllFilesFound.Count - 1 do
   begin
     oneFileInfo := slAllFilesFound.OneFileInfo(i);
-    for n := 0 to oneFileInfo.slDependencyInjektionNamen.Count - 1 do
-      slDJKeyWords.AddObject(oneFileInfo.slDependencyInjektionNamen[n],
-        oneFileInfo.slDependencyInjektionNamen.objects[n]);
+    sl := oneFileInfo.slDependencyInjektionNamen;
+
+
+    for n := 0 to sl.Count - 1 do
+      slDJKeyWords.AddObject(sl[n], sl.OneDIWordFound(n));
 
   end;
 
@@ -1193,7 +1241,7 @@ begin
     begin
       sDateiNameOhneRootPfad :=
         copy(slAllFilesFound[i], length(self.sPfad) + 1, length(slAllFilesFound[i]));
-      sl.AddObject(sDateiNameOhneRootPfad, oneFileInfo.pTreenodeInView);
+      sl.AddObject(sDateiNameOhneRootPfad, oneFileInfo);
 
     end;
   end;
@@ -1314,8 +1362,9 @@ function TFrmMainController.GetImageindexForFileIfItContainsOnlyTheSameType(
 var
   i, n, i1: integer;
   oneFileInfo: TOneFileInfo;
-  sl: TStringList;
   iResult: integer;
+  OneDIWordFound: TOneDIWordFound;
+  sl: TOneDIWordFoundList;
 begin
   iResult := -1;
 
@@ -1326,9 +1375,11 @@ begin
       oneFileInfo := slAllFilesFound.OneFileInfo(i);
       sl := oneFileInfo.slDependencyInjektionNamen;
 
+
       for n := 0 to sl.Count - 1 do
       begin
-        i1 := integer(sl.Objects[n]);
+        OneDIWordFound := sl.OneDIWordFound(n);
+        i1 := OneDIWordFound.iImageindex;
         if iResult = -1 then
           iResult := i1
         else
@@ -1425,29 +1476,105 @@ begin
   end;
 end;
 
+procedure TFrmMainController.SearchForRestrictInSlDirective;
+var
+  i, n, i1, i2: integer;
+  OneFileInfo: TOneFileInfo;
+  OneDIWordFound: TOneDIWordFound;
+  found: boolean;
+  s, s2,s3: string;
+begin
+  for i := 0 to self.slDirective.Count - 1 do
+  begin
+    OneFileInfo := slDirective.OneFileInfo(i);
+
+    for n := 0 to OneFileInfo.slDependencyInjektionNamen.Count - 1 do
+    begin
+
+      OneDIWordFound := OneFileInfo.slDependencyInjektionNamen.OneDIWordFound(n);
+      found := False;
+      s2 := OneFileInfo.slDependencyInjektionNamen[n];
+      for i1 := 0 to OneFileInfo.slFileInhalt.Count - 1 do
+      begin
+        if not found then
+          if pos(s2, OneFileInfo.slFileInhalt[i1]) > 0 then
+            found := True;
+        if found and (OneDIWordFound.sDirectiveRestrict = '') then
+        begin
+          i2 := pos('restrict:', OneFileInfo.slFileInhalt[i1]);
+
+          if i2 > 0 then
+          begin
+            s := OneFileInfo.slFileInhalt[i1];
+            s := ansireplacestr(s,'"',#39);
+            Delete(s, 1, i2);
+            i2 := pos(#39, s);
+            if i2 > 0 then
+            begin
+              Delete(s, 1, i2);
+              i2 := pos(#39, s);
+              if i2 > 0 then
+              begin
+                s3 := copy(s, 1, i2-1);
+                OneDIWordFound.sDirectiveRestrict :=s3 ;
+                break;
+              end;
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+end;
+
 procedure TFrmMainController.AddAllProjectWordsToIntellisence;
 var
   i, i2: integer;
   AngComponent: TAngComponent;
   sl: TStringList;
+  OneDIWordFound: TOneDIWordFound;
 begin
-
-
+  self.SearchForRestrictInSlDirective();
   sl := GetslDJKeyWords();
 
 
   for i := 0 to sl.Count - 1 do
   begin
-    i2 := integer(sl.Objects[i]);
+    OneDIWordFound := TOneDIWordFound(sl.Objects[i]);
+    i2 := OneDIWordFound.iImageindex;
+    if i2 = constItemIndexDirective then
+    begin
+      if pos('E', OneDIWordFound.sDirectiveRestrict) > 0 then
+      begin
+        AngComponent := TAngComponent.Create;
+        AngComponent.sTag := '<' + sl[i] + '>';
+        AngComponent.angComponenttyp := AngComponentDirective;
+        self.AngIntellisence.AngComponentProjectList.AddObject(
+          AngComponent.sTag, AngComponent);
+      end;
+    end;
+
     if i2 = constItemIndexFilter then
     begin
       AngComponent := TAngComponent.Create;
       AngComponent.sTag := '|' + sl[i];
-      AngComponent.angComponenttyp := AngComponentfilter ;
+      AngComponent.angComponenttyp := AngComponentfilter;
       self.AngIntellisence.AngComponentProjectList.AddObject(
         AngComponent.sTag, AngComponent);
     end;
   end;
+
+end;
+
+procedure TFrmMainController.ReplaceSnippetInserts(var sContent: string);
+begin
+  sContent := ansireplacestr(sContent, '[[Date]]', Datetostr(now));
+  sContent := ansireplacestr(sContent, '[[Datetime]]', Datetimetostr(now));
+
+
+
+
 
 
 end;

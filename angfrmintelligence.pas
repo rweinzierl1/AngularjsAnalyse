@@ -27,6 +27,8 @@ type
     FOnIntelligenceItemSelected: TNotifyEvent;
     { private declarations }
     xMouseDown, YMouseDown: integer;
+    procedure AddDirectiveKeysToListview(AngCompList: TAngComponentList;
+      iIndex: integer);
     procedure AddFilterKeysToListview(AngCompList: TAngComponentList;
       iIndex: integer);
     procedure DoOnIntelligenceItemSelected;
@@ -103,6 +105,28 @@ begin
       end;
   end;
 end;
+
+procedure TfrmIntelligence.AddDirectiveKeysToListview(AngCompList: TAngComponentList;
+  iIndex: integer);
+var
+  AngComponent: TAngComponent;
+  i: integer;
+  myItem: TListitem;
+begin
+  for i := 0 to AngCompList.Count - 1 do
+  begin
+    AngComponent := AngCompList.AngComponent(i);
+    if AngComponent.angComponenttyp = AngComponentDirective then
+      if pos(sFilter, AngComponent.sTag) = 1 then
+      begin
+        myItem := ListView1.Items.Add;
+        myItem.Caption := AngComponent.sTag;
+        myItem.SubItems.Add(AngComponent.sDescription);
+        myItem.ImageIndex := iIndex;
+      end;
+  end;
+end;
+
 
 procedure TfrmIntelligence.setFocusToFirstElement;
 begin
@@ -184,6 +208,9 @@ begin
 
   if copy(sFilter, 1, 1) = '<' then
   begin
+
+    AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList , constItemIndexDirective);
+
     for i := 0 to AngIntellisence.AngHTMLTagList.Count - 1 do
     begin
       AngHTMLTag := AngIntellisence.AngHTMLTagList.AngHTMLTag(i);

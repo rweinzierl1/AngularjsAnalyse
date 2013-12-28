@@ -832,9 +832,14 @@ begin
 
   if frmSelectSnippet.modalresult = mrOk then
     if frmSelectSnippet.booltake then
+      begin
+
+      frmMainController.ReplaceSnippetInserts(frmSelectSnippet.sContent);
       frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(
         frmSelectSnippet.sContent);
 
+
+      end;
   frmSelectSnippet.Free;
 
 end;
@@ -1334,6 +1339,7 @@ var
   OneFileInfo: TOneFileInfo;
   treenodeFilestructure: TTreenode;
   sFilename: string;
+  OneDIWordFound : TOneDIWordFound;
 begin
 
   for i := 0 to sl.Count - 1 do
@@ -1359,16 +1365,17 @@ begin
     begin
       for n := 0 to OneFileInfo.slDependencyInjektionNamen.Count - 1 do
       begin
-        iIdx := integer(OneFileInfo.slDependencyInjektionNamen.Objects[n] );
+        OneDIWordFound := OneFileInfo.slDependencyInjektionNamen.OneDIWordFound(n);
+
 
         treenodeDISchluessel :=
           TreeView1.Items.AddChild(treenode, OneFileInfo.slDependencyInjektionNamen[n]);
-        treenodeDISchluessel.ImageIndex := iIdx;
+        treenodeDISchluessel.ImageIndex := OneDIWordFound.iImageindex ;
 
         treenodeDISchluessel :=
           TreeView1.Items.AddChild(treenodeFilestructure,
           OneFileInfo.slDependencyInjektionNamen[n]);
-        treenodeDISchluessel.ImageIndex := iIdx;
+        treenodeDISchluessel.ImageIndex := OneDIWordFound.iImageindex ;
 
       end;
 
@@ -1442,7 +1449,7 @@ begin
   for i := 0 to sl.Count - 1 do
   begin
     treenode := TreeView1.Items.AddChild(treenodeDependencyInjectionWords, sl[i]);
-    treenode.ImageIndex := integer(sl.Objects[i]);
+    treenode.ImageIndex := TOneDIWordFound(sl.Objects[i]).iImageindex ;
 
     SynAnySyn1.Constants.add(uppercase(sl[i]));
   end;
@@ -1672,6 +1679,8 @@ begin
     if Value = AngSnippet.sShortcut then
     begin
       Value := AngSnippet.sContent;
+
+      frmMainController.ReplaceSnippetInserts(Value);
 
     end;
   end;
@@ -1995,7 +2004,6 @@ begin
         treenodeNeu := TreeView1.Items.AddChild(treenode, sl[i]);
         treenodeNeu.ImageIndex := frmMainController.CalculateIndexOfFileExtension(sl[i]);
         treenodeNeu.Data := sl.Objects[i];
-        //In Data immer den Zeiger auf den Konten aller Dateien ablegen
       end;
 
       sl.Free;
@@ -2010,6 +2018,7 @@ var
   sPfad: string;
   parentNode: TTreenode;
   s: string;
+  OneFileInfo : TOneFileInfo;
 begin
   IntelligenceFrmCloseAndFree;
   treenode := TreeView1.Selected;
@@ -2030,7 +2039,9 @@ begin
   if treenode.Data = nil then
     exit;
 
-  sPfad := frmMainController.findFileNameToDataPointer(TObject(treenode.Data));
+  OneFileInfo := TOneFileInfo(treenode.Data);
+
+  sPfad := frmMainController.findFileNameToDataPointer(OneFileInfo.pTreenodeInView);
 
   ShowFileInPagecontrolAsTabsheet(sPfad);
 
@@ -2067,8 +2078,7 @@ begin
     begin
       myItem := TreeView1.Items.AddChild(myItemRoot, sr.Name);
       myItem.ImageIndex := frmMainController.CalculateIndexOfFileExtension(sr.Name);
-      myItem.Data := myItem;
-      frmMainController.AddOneFileInSL(sPfad + sAngSeparator + sr.Name, myItem);
+      myItem.Data := frmMainController.AddOneFileInSL(sPfad + sAngSeparator + sr.Name, myItem);
 
     end;
     i := Findnext(sr);
