@@ -5,50 +5,52 @@ unit angSnippet;
 interface
 
 uses
-  Classes, SysUtils, angPkz,inifiles,strutils ;
+  Classes, SysUtils, angPkz, inifiles, strutils;
 
 type
-  TAngComponenttype = (AngComponentService,AngComponentfunction,AngComponentfilter,AngComponentDirective,AngComponentproperty );
+  TAngComponenttype = (AngComponentService, AngComponentfunction,
+    AngComponentfilter, AngComponentDirective, AngComponentproperty);
 
   TAngComponent = class
-     public
-    sTag : string;
-    sDescription : string;
-    angComponenttyp : TAngComponenttype;
+  public
+    sTag: string;
+    sDescription: string;
+    angComponenttyp: TAngComponenttype;
   end;
 
 
   { TAngComponentList }
 
   TAngComponentList = class(TStringList)
-    public
-    function  AngComponent(i : integer) : TAngComponent;
-    constructor create;
+  public
+    function AngComponent(i: integer): TAngComponent;
+    constructor Create;
     procedure LoadFromFile;
 
-   end;
+  end;
 
 
 
   TAngHTMLTag = class
-    public
-    sTag : string;
-    sDescription : string;
+  public
+    sTag: string;
+    sDescription: string;
   end;
 
-   { TAngHTMLTagList }
+  { TAngHTMLTagList }
 
-   TAngHTMLTagList = class(TStringList)
-    public
-    function  AngHTMLTag(i : integer) : TAngHTMLTag;
-    constructor create;
+  TAngHTMLTagList = class(TStringList)
+  public
+    function AngHTMLTag(i: integer): TAngHTMLTag;
+    constructor Create;
     procedure LoadFromFile;
 
-   end;
+  end;
 
 
   TSnippetLocation = (snippetProject, snippetUser, snippetGlobal);
-  TSnippetForFiletype = (snippetFileHTML, snippetFileCSS, snippetFileJS, snippetFileALL );
+  TSnippetForFiletype = (snippetFileHTML, snippetFileCSS, snippetFileJS,
+    snippetFileALL);
 
   { TAngSnippet }
 
@@ -63,12 +65,12 @@ type
     sContent: string;
     sLongDescription: string;
     SnippetLocation: TSnippetLocation;
-    property sFilename: string read FsFilename write SetsFilename ;
+    property sFilename: string read FsFilename write SetsFilename;
 
-    function ForFileTypeOK(myType : TSnippetForFiletype) : boolean;
+    function ForFileTypeOK(myType: TSnippetForFiletype): boolean;
     procedure MakeShortcutFromSContent;
-    procedure MakeFilenameFromShortcut(sProjectPath : string);
-    constructor create;
+    procedure MakeFilenameFromShortcut(sProjectPath: string);
+    constructor Create;
     function LoadfromFile(): boolean;
     procedure SaveToFile();
   end;
@@ -77,153 +79,161 @@ type
 
   TAngSnippetList = class(TStringList)
   private
-   procedure LoadFromFixedpath;
+    procedure LoadFromFixedpath;
   public
 
     function AngSnippet(i: integer): TAngSnippet;
     procedure LoadFromDir(sPath: string; snippetLocation: TSnippetLocation);
-    procedure DeleteSnippet(AngSnippet1 : TAngSnippet);
+    procedure DeleteSnippet(AngSnippet1: TAngSnippet);
     constructor Create;
   end;
 
 
-   { TAngIntellisence }
+  { TAngIntellisence }
 
-   TAngIntellisence = class
-     public
+  TAngIntellisence = class
+  public
     AngHTMLTagList: TAngHTMLTagList;
-    AngSnippetList : TAngSnippetList;
-    AngComponentList : TAngComponentList ;
-    AngComponentProjectList : TAngComponentList ;
-    slHtmlGlobalAttr  : TStringlist;
-    slHtmlEventhandlerAttributes : TStringlist;
+    AngSnippetList: TAngSnippetList;
+    AngComponentList: TAngComponentList;
+    AngComponentProjectList: TAngComponentList;
+    slHtmlGlobalAttr: TStringList;
+    slHtmlEventhandlerAttributes: TStringList;
 
-    constructor create;
-    destructor destroy; override;
-   end;
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 
 implementation
 
 
-function GetPathFromSnippingLoaction(sProjectPath : string;  SnippetLocation1 :TSnippetLocation ): string;
+function GetPathFromSnippingLoaction(sProjectPath: string;
+  SnippetLocation1: TSnippetLocation): string;
 begin
   case SnippetLocation1 of
-    snippetProject :
-      begin
-      if  sProjectPath <> '' then
+    snippetProject:
+    begin
+      if sProjectPath <> '' then
         if sProjectPath[length(sProjectPath)] <> sAngSeparator then
-          sProjectPath := sProjectPath +  sAngSeparator;
+          sProjectPath := sProjectPath + sAngSeparator;
 
-        result := sProjectPath + '.AngularAnalyse'+ sAngSeparator+'Snippet'+ sAngSeparator;
-
-      end;
-    snippetUser    :  begin
-      result := extractfilepath(GetAppConfigFile(False)) + 'Snippet'+
-        sAngSeparator ;
-      end
-    else
-    result := extractfilepath(paramstr(0)) + 'Snippet'+ sAngSeparator;
+      Result := sProjectPath + '.AngularAnalyse' + sAngSeparator + 'Snippet' +
+        sAngSeparator;
 
     end;
+    snippetUser:
+    begin
+      Result := extractfilepath(GetAppConfigFile(False)) + 'Snippet' +
+        sAngSeparator;
+    end
+    else
+      Result := extractfilepath(ParamStr(0)) + 'Snippet' + sAngSeparator;
+
+  end;
 end;
 
 { TAngIntellisence }
 
-constructor TAngIntellisence.create;
-var sFilename : string;
+constructor TAngIntellisence.Create;
+var
+  sFilename: string;
 begin
-  AngSnippetList := TAngSnippetList.Create ;
-  AngHTMLTagList := TAngHTMLTagList.create;
-  AngComponentList := TAngComponentList.create ;
+  AngSnippetList := TAngSnippetList.Create;
+  AngHTMLTagList := TAngHTMLTagList.Create;
+  AngComponentList := TAngComponentList.Create;
   AngComponentList.LoadFromFile;
-  AngComponentProjectList := TAngComponentList.create ;
+  AngComponentProjectList := TAngComponentList.Create;
 
-  slHtmlGlobalAttr  := TStringlist.create ;
+  slHtmlGlobalAttr := TStringList.Create;
 
-  sFilename := extractfilepath(paramstr(0)) + 'Snippet' + sAngSeparator + 'HtmlGlobalAttr.txt';
+  sFilename := extractfilepath(ParamStr(0)) + 'Snippet' + sAngSeparator +
+    'HtmlGlobalAttr.txt';
   if fileexists(sFilename) then
     slHtmlGlobalAttr.LoadFromFile(sFilename);
 
-  slHtmlEventhandlerAttributes := TStringlist.create;
-  sFilename := extractfilepath(paramstr(0)) + 'Snippet' + sAngSeparator + 'HtmlEventhandlerAttributes.txt';
+  slHtmlEventhandlerAttributes := TStringList.Create;
+  sFilename := extractfilepath(ParamStr(0)) + 'Snippet' + sAngSeparator +
+    'HtmlEventhandlerAttributes.txt';
 
   if fileexists(sFilename) then
     slHtmlEventhandlerAttributes.LoadFromFile(sFilename);
 
 end;
 
-destructor TAngIntellisence.destroy;
+destructor TAngIntellisence.Destroy;
 begin
-    AngSnippetList.free ;
-  AngHTMLTagList.free;
-  AngComponentList.free ;
-  AngComponentProjectList.free ;
-  slHtmlGlobalAttr.free ;
-  slHtmlEventhandlerAttributes.free;
-  inherited destroy;
+  AngSnippetList.Free;
+  AngHTMLTagList.Free;
+  AngComponentList.Free;
+  AngComponentProjectList.Free;
+  slHtmlGlobalAttr.Free;
+  slHtmlEventhandlerAttributes.Free;
+  inherited Destroy;
 end;
 
 { TAngComponentList }
 
 function TAngComponentList.AngComponent(i: integer): TAngComponent;
 begin
-  result := TAngComponent( self.Objects[i]);
+  Result := TAngComponent(self.Objects[i]);
 end;
 
-constructor TAngComponentList.create;
+constructor TAngComponentList.Create;
 begin
-self.OwnsObjects:=true;
+  self.OwnsObjects := True;
 end;
 
 procedure TAngComponentList.LoadFromFile;
-var sl : TStringlist;
-  sl2 : TStringlist;
-  sFilename : string;
-  i : integer;
-  AngComponent1 : TAngComponent;
+var
+  sl: TStringList;
+  sl2: TStringList;
+  sFilename: string;
+  i: integer;
+  AngComponent1: TAngComponent;
 begin
-  sFilename := extractfilepath(paramstr(0)) + 'Snippet' + sAngSeparator + 'AngularComponents.ACP';
+  sFilename := extractfilepath(ParamStr(0)) + 'Snippet' + sAngSeparator +
+    'AngularComponents.ACP';
 
   if fileexists(sFilename) then
-    begin
-    sl2 := TStringlist.create;
-    sl := TStringlist.create;
+  begin
+    sl2 := TStringList.Create;
+    sl := TStringList.Create;
     sl.LoadFromFile(sFilename);
 
-    for i := 0 to sl.count -1 do
+    for i := 0 to sl.Count - 1 do
+    begin
+      sl2.Text := ansireplacetext(sl[i], #9, #13#10);
+      if sl2.Count >= 3 then
       begin
-      sl2.text := ansireplacetext( sl[i] , #9,#13#10);
-      if sl2.count >= 3 then
-        begin
-        AngComponent1 := TAngComponent.create;
-        AngComponent1.sTag:=sl2[0];
-        AngComponent1.sDescription :=sl2[1];
+        AngComponent1 := TAngComponent.Create;
+        AngComponent1.sTag := sl2[0];
+        AngComponent1.sDescription := sl2[1];
         if sl2[2] = 'directive' then
-          AngComponent1.angComponenttyp:=AngComponentDirective;
+          AngComponent1.angComponenttyp := AngComponentDirective;
         if sl2[2] = 'filter' then
-          begin
-          AngComponent1.angComponenttyp:=AngComponentfilter;
-          AngComponent1.sTag :=  '|' + AngComponent1.sTag ;
-          end;
-        if sl2[2] = 'function' then
-          AngComponent1.angComponenttyp:=AngComponentfunction;
-        if sl2[2] = 'property' then
-          AngComponent1.angComponenttyp:=AngComponentproperty;
-        if sl2[2] = 'service' then
-          AngComponent1.angComponenttyp:=AngComponentService;
-
-
-
-
-        self.AddObject(AngComponent1.sTag,AngComponent1 );
+        begin
+          AngComponent1.angComponenttyp := AngComponentfilter;
+          AngComponent1.sTag := '|' + AngComponent1.sTag;
         end;
+        if sl2[2] = 'function' then
+          AngComponent1.angComponenttyp := AngComponentfunction;
+        if sl2[2] = 'property' then
+          AngComponent1.angComponenttyp := AngComponentproperty;
+        if sl2[2] = 'service' then
+          AngComponent1.angComponenttyp := AngComponentService;
 
+
+
+
+        self.AddObject(AngComponent1.sTag, AngComponent1);
       end;
 
-    sl.free;
-    sl2.free;
     end;
+
+    sl.Free;
+    sl2.Free;
+  end;
 
 end;
 
@@ -231,219 +241,227 @@ end;
 
 function TAngHTMLTagList.AngHTMLTag(i: integer): TAngHTMLTag;
 begin
-  result := TAngHTMLTag( self.Objects[i]);
+  Result := TAngHTMLTag(self.Objects[i]);
 end;
 
-constructor TAngHTMLTagList.create;
+constructor TAngHTMLTagList.Create;
 begin
-  self.OwnsObjects:=true;
+  self.OwnsObjects := True;
   LoadFromFile;
 end;
 
 procedure TAngHTMLTagList.LoadFromFile;
-var sl : TStringlist;
-  sl2 : TStringlist;
-  sFilename : string;
-  i : integer;
-  AngHTMLTag1 : TAngHTMLTag;
+var
+  sl: TStringList;
+  sl2: TStringList;
+  sFilename: string;
+  i: integer;
+  AngHTMLTag1: TAngHTMLTag;
 begin
-  sFilename := extractfilepath(paramstr(0)) + 'Snippet' + sAngSeparator + 'TagReferenz.ATR';
+  sFilename := extractfilepath(ParamStr(0)) + 'Snippet' + sAngSeparator +
+    'TagReferenz.ATR';
 
   if fileexists(sFilename) then
-    begin
-    sl2 := TStringlist.create;
-    sl := TStringlist.create;
+  begin
+    sl2 := TStringList.Create;
+    sl := TStringList.Create;
     sl.LoadFromFile(sFilename);
 
-    for i := 0 to sl.count -1 do
+    for i := 0 to sl.Count - 1 do
+    begin
+      sl2.Text := ansireplacetext(sl[i], #9, #13#10);
+      if sl2.Count >= 2 then
       begin
-      sl2.text := ansireplacetext( sl[i] , #9,#13#10);
-      if sl2.count >= 2 then
-        begin
-        AngHTMLTag1 := TAngHTMLTag.create;
-        AngHTMLTag1.sTag:=sl2[0];
-        AngHTMLTag1.sDescription :=sl2[1];
-        self.AddObject(AngHTMLTag1.sTag,AngHTMLTag1 );
-        end;
-
+        AngHTMLTag1 := TAngHTMLTag.Create;
+        AngHTMLTag1.sTag := sl2[0];
+        AngHTMLTag1.sDescription := sl2[1];
+        self.AddObject(AngHTMLTag1.sTag, AngHTMLTag1);
       end;
 
-    sl.free;
-    sl2.free;
     end;
 
+    sl.Free;
+    sl2.Free;
+  end;
 
 end;
 
 procedure TAngSnippet.SetsFilename(AValue: string);
 begin
-  if FsFilename=AValue then Exit;
-  FsFilename:=AValue;
+  if FsFilename = AValue then
+    Exit;
+  FsFilename := AValue;
 end;
 
 function TAngSnippet.ForFileTypeOK(myType: TSnippetForFiletype): boolean;
 begin
-  result := false;
+  Result := False;
   if myType = snippetFileALL then
-    result := true;
+    Result := True;
 
   if self.ForFileType = myType then
-    result := true;
+    Result := True;
 end;
 
 procedure TAngSnippet.MakeShortcutFromSContent;
-var i : integer;
-s,s2 : string;
+var
+  i: integer;
+  s, s2: string;
 begin
 
-s := trim(self.sContent);
-s2 := '';
+  s := trim(self.sContent);
+  s2 := '';
 
-for i := 1 to length(s) do
+  for i := 1 to length(s) do
   begin
-  if (s[i] in ['A'..'Z']) or (s[i] in ['a'..'z']) then
-    s2 := s2 + s[i];
-  if length(s2) = 10 then break;
+    if (s[i] in ['A'..'Z']) or (s[i] in ['a'..'z']) then
+      s2 := s2 + s[i];
+    if length(s2) = 10 then
+      break;
   end;
 
 
-self.sShortcut:= s2;
+  self.sShortcut := s2;
 
 end;
 
 
 
 procedure TAngSnippet.MakeFilenameFromShortcut(sProjectPath: string);
-var sPath : string;
-  sFilename1,sFilename2 : string;
-  i : integer;
+var
+  sPath: string;
+  sFilename1, sFilename2: string;
+  i: integer;
 begin
 
+  sPath := GetPathFromSnippingLoaction(sProjectPath, SnippetLocation);
 
-sPath := GetPathFromSnippingLoaction(sProjectPath,SnippetLocation);
 
+  forcedirectories(sPath);
 
-forcedirectories(sPath);
+  sFilename1 := '';
 
-sFilename1 := '';
-
-for i := 1 to length(self.sShortcut) do
+  for i := 1 to length(self.sShortcut) do
   begin
-  if (sShortcut[i] in ['A'..'Z']) or (sShortcut[i] in ['a'..'z']) then
-    sFilename1 := sFilename1 + sShortcut[i]
-  else
-    sFilename1 := sFilename1 + '_';
+    if (sShortcut[i] in ['A'..'Z']) or (sShortcut[i] in ['a'..'z']) then
+      sFilename1 := sFilename1 + sShortcut[i]
+    else
+      sFilename1 := sFilename1 + '_';
   end;
 
-i := 1;
-sFilename2 := sPath + sFilename1 + '.AaS';
-while fileexists(sFilename2) do
+  i := 1;
+  sFilename2 := sPath + sFilename1 + '.AaS';
+  while fileexists(sFilename2) do
   begin
-  sFilename2 := sPath + sFilename1 + inttostr(i) +'.AaS';
-  inc(i);
+    sFilename2 := sPath + sFilename1 + IntToStr(i) + '.AaS';
+    Inc(i);
   end;
 
-sFilename := sFilename2;
+  sFilename := sFilename2;
 
 end;
 
-constructor TAngSnippet.create;
+constructor TAngSnippet.Create;
 begin
   SnippetLocation := snippetUser;
 end;
 
 function TAngSnippet.LoadfromFile(): boolean;
-var myIni : Tinifile;
-  sl : TStringlist;
-  i : integer;
+var
+  myIni: Tinifile;
+  sl: TStringList;
+  i: integer;
   s: string;
 begin
 
-myIni := Tinifile.create(sFilename);
+  myIni := Tinifile.Create(sFilename);
 
-sShortcut := myIni.ReadString('init','Shortcut','');
-sDescription := myIni.ReadString('init','Description','');
+  sShortcut := myIni.ReadString('init', 'Shortcut', '');
+  sDescription := myIni.ReadString('init', 'Description', '');
 
-i := myIni.ReadInteger('init','ForFileType',0);
+  i := myIni.ReadInteger('init', 'ForFileType', 0);
 
-case i of
-  0  : ForFileType := snippetFileHTML;
-  1  : ForFileType := snippetFileCSS;
-  2  : ForFileType := snippetFileJS;
-  else   ForFileType := snippetFileALL;
+  case i of
+    0: ForFileType := snippetFileHTML;
+    1: ForFileType := snippetFileCSS;
+    2: ForFileType := snippetFileJS;
+    else
+      ForFileType := snippetFileALL;
 
   end;
 
 
 
 
-sl := TStringlist.create;
-myIni.ReadSectionRaw('Content',sl);
+  sl := TStringList.Create;
+  myIni.ReadSectionRaw('Content', sl);
 
-for i := 0 to sl.count -1 do
+  for i := 0 to sl.Count - 1 do
   begin
-  s :=   sl[i];
-  sl[i] := copy(s,2,length(s));
+    s := sl[i];
+    sl[i] := copy(s, 2, length(s));
 
   end;
-sContent := sl.text;
+  sContent := sl.Text;
 
 
-myIni.ReadSectionRaw('LongDescription',sl);
+  myIni.ReadSectionRaw('LongDescription', sl);
 
-for i := 0 to sl.count -1 do
-  sl[i] := copy(sl[i],2,length(sl[i]));
-self.sLongDescription := sl.text;
+  for i := 0 to sl.Count - 1 do
+    sl[i] := copy(sl[i], 2, length(sl[i]));
+  self.sLongDescription := sl.Text;
 
-sl.free;
+  sl.Free;
 
-myIni.free;
+  myIni.Free;
 
-result :=  sShortcut <> '';
+  Result := sShortcut <> '';
 end;
 
 procedure TAngSnippet.SaveToFile();
-var sl,sl2 : TStringlist;
-  i : integer;
+var
+  sl, sl2: TStringList;
+  i: integer;
 begin
-sl := TStringlist.create;
-sl2 := TStringlist.create;
+  sl := TStringList.Create;
+  sl2 := TStringList.Create;
 
-sl.add('[init]');
-sl.add('Shortcut='+sShortcut);
-sl.add('Description='+sDescription);
+  sl.add('[init]');
+  sl.add('Shortcut=' + sShortcut);
+  sl.add('Description=' + sDescription);
 
 
 
-case ForFileType of
-  snippetFileHTML : sl.add('ForFileType=0');
-  snippetFileCSS: sl.add('ForFileType=1');
-  snippetFileJS: sl.add('ForFileType=2');
-  else   sl.add('ForFileType=3');
+  case ForFileType of
+    snippetFileHTML: sl.add('ForFileType=0');
+    snippetFileCSS: sl.add('ForFileType=1');
+    snippetFileJS: sl.add('ForFileType=2');
+    else
+      sl.add('ForFileType=3');
 
   end;
 
 
-sl.add(' ');
-sl.add('[Content]');
-sl2.text := self.sContent;
+  sl.add(' ');
+  sl.add('[Content]');
+  sl2.Text := self.sContent;
 
-for i := 0 to sl2.Count -1 do
-  sl.add('_'+sl2[i]);
+  for i := 0 to sl2.Count - 1 do
+    sl.add('_' + sl2[i]);
 
-sl.add('[LongDescription]');
-sl2.text := self.sLongDescription ;
+  sl.add('[LongDescription]');
+  sl2.Text := self.sLongDescription;
 
-for i := 0 to sl2.Count -1 do
-  sl.add('_'+sl2[i]);
+  for i := 0 to sl2.Count - 1 do
+    sl.add('_' + sl2[i]);
 
 
 
-sl2.free;
+  sl2.Free;
 
-sl.SaveToFile(self.sFilename);
+  sl.SaveToFile(self.sFilename);
 
-sl.free;
+  sl.Free;
 end;
 
 { TAngSnippetList }
@@ -454,14 +472,14 @@ begin
 end;
 
 procedure TAngSnippetList.LoadFromFixedpath;
-var sPath: string;
+var
+  sPath: string;
 begin
-sPath := GetPathFromSnippingLoaction( '',snippetUser);
-LoadFromDir(sPath,snippetUser);
+  sPath := GetPathFromSnippingLoaction('', snippetUser);
+  LoadFromDir(sPath, snippetUser);
 
-sPath := GetPathFromSnippingLoaction( '',snippetGlobal);
-LoadFromDir(sPath,snippetGlobal);
-
+  sPath := GetPathFromSnippingLoaction('', snippetGlobal);
+  LoadFromDir(sPath, snippetGlobal);
 
 end;
 
@@ -472,21 +490,21 @@ var
   myAngSnippet: TAngSnippet;
 begin
 
-for i := self.Count -1 downto 0 do
+  for i := self.Count - 1 downto 0 do
   begin
-  myAngSnippet := self.AngSnippet(i);
-  if myAngSnippet.SnippetLocation = snippetLocation then
-    self.Delete(i);
+    myAngSnippet := self.AngSnippet(i);
+    if myAngSnippet.SnippetLocation = snippetLocation then
+      self.Delete(i);
   end;
 
-  i := FindFirst(sPath  + '*', faAnyFile, sr);
+  i := FindFirst(sPath + '*', faAnyFile, sr);
   while (i = 0) do
   begin
     if (sr.attr and faDirectory = faDirectory) then
     begin
       if copy(sr.Name, 1, 1) <> '.' then
       begin
-        LoadFromDir(sPath  + sr.Name+ sAngSeparator, snippetLocation);
+        LoadFromDir(sPath + sr.Name + sAngSeparator, snippetLocation);
       end;
     end
     else
@@ -509,11 +527,12 @@ for i := self.Count -1 downto 0 do
 end;
 
 procedure TAngSnippetList.DeleteSnippet(AngSnippet1: TAngSnippet);
-var i : integer;
+var
+  i: integer;
 begin
-for i := self.Count - 1 downto 0 do
-  if self.AngSnippet(i) = AngSnippet1 then
-    self.Delete(i);
+  for i := self.Count - 1 downto 0 do
+    if self.AngSnippet(i) = AngSnippet1 then
+      self.Delete(i);
 
 end;
 

@@ -211,7 +211,7 @@ type
     procedure DeleteAllMarksWithIndexIndexMarkFound;
     property sPfad: string read FsPfad write SetsPfad;
     procedure AddAllProjectWordsToIntellisence;
-    function ActiveSynMemoIsHTMLAndCarentInSquareBrackets : boolean;
+    function ActiveSynMemoIsHTMLAndCarentInSquareBrackets: boolean;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -1483,7 +1483,7 @@ var
   OneFileInfo: TOneFileInfo;
   OneDIWordFound: TOneDIWordFound;
   found: boolean;
-  s, s2,s3: string;
+  s, s2, s3: string;
 begin
   for i := 0 to self.slDirective.Count - 1 do
   begin
@@ -1507,7 +1507,7 @@ begin
           if i2 > 0 then
           begin
             s := OneFileInfo.slFileInhalt[i1];
-            s := ansireplacestr(s,'"',#39);
+            s := ansireplacestr(s, '"', #39);
             Delete(s, 1, i2);
             i2 := pos(#39, s);
             if i2 > 0 then
@@ -1516,8 +1516,8 @@ begin
               i2 := pos(#39, s);
               if i2 > 0 then
               begin
-                s3 := copy(s, 1, i2-1);
-                OneDIWordFound.sDirectiveRestrict :=s3 ;
+                s3 := copy(s, 1, i2 - 1);
+                OneDIWordFound.sDirectiveRestrict := s3;
                 break;
               end;
             end;
@@ -1546,16 +1546,16 @@ begin
     i2 := OneDIWordFound.iImageindex;
     if i2 = constItemIndexDirective then
     begin
-        AngComponent := TAngComponent.Create;
+      AngComponent := TAngComponent.Create;
 
-        if pos('E', OneDIWordFound.sDirectiveRestrict) > 0 then
-          AngComponent.sTag := '<' + sl[i] + '>'
-        else
-          AngComponent.sTag :=  sl[i];
+      if pos('E', OneDIWordFound.sDirectiveRestrict) > 0 then
+        AngComponent.sTag := '<' + sl[i] + '>'
+      else
+        AngComponent.sTag := sl[i];
 
-        AngComponent.angComponenttyp := AngComponentDirective;
-        self.AngIntellisence.AngComponentProjectList.AddObject(
-          AngComponent.sTag, AngComponent);
+      AngComponent.angComponenttyp := AngComponentDirective;
+      self.AngIntellisence.AngComponentProjectList.AddObject(
+        AngComponent.sTag, AngComponent);
     end;
 
     if i2 = constItemIndexFilter then
@@ -1571,31 +1571,32 @@ begin
 end;
 
 function TFrmMainController.ActiveSynMemoIsHTMLAndCarentInSquareBrackets: boolean;
-var SynMemo : TSynMemo;
-    myPoint : TPoint;
-    s : string;
-    i,i2 : integer;
+var
+  SynMemo: TSynMemo;
+  myPoint: TPoint;
+  s: string;
+  i, i2: integer;
 begin
 
-  result := false;
+  Result := False;
 
-  if myActiveOneTabsheet.Tabsheet.ImageIndex =  constItemIndexHTML then
-    begin
+  if myActiveOneTabsheet.Tabsheet.ImageIndex = constItemIndexHTML then
+  begin
     SynMemo := myActiveOneTabsheet.SynMemo;
     myPoint := SynMemo.LogicalCaretXY;
-    s := SynMemo.Lines[myPoint.y -1] ;
+    s := SynMemo.Lines[myPoint.y - 1];
     i2 := myPoint.x;
-    if length(s) < i2  then
+    if length(s) < i2 then
       i2 := length(s);
 
     for i := i2 downto 1 do
-      begin
+    begin
       if s[i] = '<' then
-        result := true;
+        Result := True;
       if s[i] = '>' then
         exit;
-      end;
     end;
+  end;
 
 end;
 

@@ -12,7 +12,7 @@ uses
   Clipbrd, ActnList, shellapi, SynEditMiscClasses, SynEditMarkupSpecialLine,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types,
   angSnippet, angfrmSnippet, angFrmSelectSnippet, SynCompletion, LCLType, SynEditKeyCmds,
-  angFrmIntelligence,angFrmClipboardHistorie ;
+  angFrmIntelligence, angFrmClipboardHistorie;
 
 type
 
@@ -612,21 +612,21 @@ begin
 end;
 
 procedure TfrmMainView.mnuCloseAllOthersClick(Sender: TObject);
-var myTab : TTabsheet;
-i : integer;
+var
+  myTab: TTabSheet;
+  i: integer;
 begin
 
   myTab := self.PageControl1.ActivePage;
 
-for i := self.PageControl1.PageCount -1 downto 0 do
+  for i := self.PageControl1.PageCount - 1 downto 0 do
   begin
-  if self.PageControl1.Pages[i] <>myTab then
+    if self.PageControl1.Pages[i] <> myTab then
     begin
-    self.PageControl1.ActivePageIndex:=i;
-    DoCloseActivePagecontrolPage(True);
+      self.PageControl1.ActivePageIndex := i;
+      DoCloseActivePagecontrolPage(True);
 
     end;
-
 
   end;
 end;
@@ -678,7 +678,8 @@ begin
     AngSnippet.MakeFilenameFromShortcut(frmMainController.sPfad);
     AngSnippet.SaveToFile();
 
-    self.frmMainController.AngIntellisence.AngSnippetList.AddObject(AngSnippet.sShortcut, AngSnippet);
+    self.frmMainController.AngIntellisence.AngSnippetList.AddObject(
+      AngSnippet.sShortcut, AngSnippet);
 
   end
   else
@@ -827,19 +828,19 @@ procedure TfrmMainView.mnuManageSnippetClick(Sender: TObject);
 begin
   frmSelectSnippet := TfrmSelectSnippet.Create(self);
 
-  frmSelectSnippet.ShowSnippingList(self.frmMainController.AngIntellisence.AngSnippetList);
+  frmSelectSnippet.ShowSnippingList(
+    self.frmMainController.AngIntellisence.AngSnippetList);
   frmSelectSnippet.Showmodal;
 
   if frmSelectSnippet.modalresult = mrOk then
     if frmSelectSnippet.booltake then
-      begin
+    begin
 
       frmMainController.ReplaceSnippetInserts(frmSelectSnippet.sContent);
       frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(
         frmSelectSnippet.sContent);
 
-
-      end;
+    end;
   frmSelectSnippet.Free;
 
 end;
@@ -895,13 +896,14 @@ end;
 
 procedure TfrmMainView.mnuPasteFromHistorieClick(Sender: TObject);
 begin
-  frmPasteHistorie := TfrmPasteHistorie.create(self);
-  frmPasteHistorie.FillListbox(self.frmMainController.AngClipboardHistorieList );
+  frmPasteHistorie := TfrmPasteHistorie.Create(self);
+  frmPasteHistorie.FillListbox(self.frmMainController.AngClipboardHistorieList);
 
   frmPasteHistorie.ShowModal;
-  if frmPasteHistorie.ModalResult = mrOK then
-    self.frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(frmPasteHistorie.Memo1.Text ) ;
-  frmPasteHistorie.free;
+  if frmPasteHistorie.ModalResult = mrOk then
+    self.frmMainController.myActiveOneTabsheet.SynMemo.InsertTextAtCaret(
+      frmPasteHistorie.Memo1.Text);
+  frmPasteHistorie.Free;
 end;
 
 procedure TfrmMainView.mnuPreferencesClick(Sender: TObject);
@@ -1334,12 +1336,12 @@ end;
 procedure TfrmMainView.AddAngularJSFilesAsTreenode(myTreeNode: TTreenode;
   sl: TStringList; iImageindex: integer);
 var
-  i, i2, n,iIdx: integer;
+  i, i2, n, iIdx: integer;
   treenode, treenodeDISchluessel: TTreenode;
   OneFileInfo: TOneFileInfo;
   treenodeFilestructure: TTreenode;
   sFilename: string;
-  OneDIWordFound : TOneDIWordFound;
+  OneDIWordFound: TOneDIWordFound;
 begin
 
   for i := 0 to sl.Count - 1 do
@@ -1370,12 +1372,12 @@ begin
 
         treenodeDISchluessel :=
           TreeView1.Items.AddChild(treenode, OneFileInfo.slDependencyInjektionNamen[n]);
-        treenodeDISchluessel.ImageIndex := OneDIWordFound.iImageindex ;
+        treenodeDISchluessel.ImageIndex := OneDIWordFound.iImageindex;
 
         treenodeDISchluessel :=
           TreeView1.Items.AddChild(treenodeFilestructure,
           OneFileInfo.slDependencyInjektionNamen[n]);
-        treenodeDISchluessel.ImageIndex := OneDIWordFound.iImageindex ;
+        treenodeDISchluessel.ImageIndex := OneDIWordFound.iImageindex;
 
       end;
 
@@ -1449,7 +1451,7 @@ begin
   for i := 0 to sl.Count - 1 do
   begin
     treenode := TreeView1.Items.AddChild(treenodeDependencyInjectionWords, sl[i]);
-    treenode.ImageIndex := TOneDIWordFound(sl.Objects[i]).iImageindex ;
+    treenode.ImageIndex := TOneDIWordFound(sl.Objects[i]).iImageindex;
 
     SynAnySyn1.Constants.add(uppercase(sl[i]));
   end;
@@ -1689,9 +1691,10 @@ end;
 
 procedure TfrmMainView.SynEditProcessedCommand(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
-var boolFill : boolean;
+var
+  boolFill: boolean;
 begin
-  boolFill := false;
+  boolFill := False;
 
   if (AChar = #27) or (Command in [2, 3, 5]) then   //ESC or left key ...
     IntelligenceFrmCloseAndFree;
@@ -1732,14 +1735,14 @@ begin
   end;
 
 
-  if (AChar = ' ')  then
+  if (AChar = ' ') then
   begin
     if self.frmMainController.ActiveSynMemoIsHTMLAndCarentInSquareBrackets then
     begin
       if frmIntelligence <> nil then
         if not frmIntelligence.Visible then
           IntelligenceFrmCloseAndFree;
-      boolFill := true;
+      boolFill := True;
       if frmIntelligence = nil then
         OpenIntelligenceDlg;
     end;
@@ -1751,13 +1754,13 @@ begin
     if frmIntelligence.Visible then
     begin
       if Command = 501 then
-        begin
+      begin
         if length(frmIntelligence.sFilter) > 0 then
-          begin
-          delete(frmIntelligence.sFilter,length(frmIntelligence.sFilter) ,1);
+        begin
+          Delete(frmIntelligence.sFilter, length(frmIntelligence.sFilter), 1);
           frmIntelligence.FillWithHtml5Tags(self.frmMainController.AngIntellisence);
-          end;
         end;
+      end;
 
       if (trim(AChar) <> '') or boolFill then
       begin
@@ -1871,7 +1874,7 @@ procedure TfrmMainView.SynEdit1CutCopy(Sender: TObject; var AText: string;
   var AMode: TSynSelectionMode; ALogStartPos: TPoint;
   var AnAction: TSynCopyPasteAction);
 begin
-   self.frmMainController.AngClipboardHistorieList.AddToHistorie(AText) ;
+  self.frmMainController.AngClipboardHistorieList.AddToHistorie(AText);
 end;
 
 
@@ -1879,7 +1882,7 @@ procedure TfrmMainView.SynEdit1Paste(Sender: TObject; var AText: string;
   var AMode: TSynSelectionMode; ALogStartPos: TPoint;
   var AnAction: TSynCopyPasteAction);
 begin
-  self.frmMainController.AngClipboardHistorieList.AddToHistorie(AText) ;
+  self.frmMainController.AngClipboardHistorieList.AddToHistorie(AText);
 end;
 
 
@@ -2036,7 +2039,7 @@ var
   sPfad: string;
   parentNode: TTreenode;
   s: string;
-  OneFileInfo : TOneFileInfo;
+  OneFileInfo: TOneFileInfo;
 begin
   IntelligenceFrmCloseAndFree;
   treenode := TreeView1.Selected;
@@ -2096,7 +2099,8 @@ begin
     begin
       myItem := TreeView1.Items.AddChild(myItemRoot, sr.Name);
       myItem.ImageIndex := frmMainController.CalculateIndexOfFileExtension(sr.Name);
-      myItem.Data := frmMainController.AddOneFileInSL(sPfad + sAngSeparator + sr.Name, myItem);
+      myItem.Data := frmMainController.AddOneFileInSL(sPfad +
+        sAngSeparator + sr.Name, myItem);
 
     end;
     i := Findnext(sr);
@@ -2263,10 +2267,6 @@ begin
   m.ImageIndex := iImageindex;
   m.Visible := True;
   frmMainController.myActiveOneTabsheet.SynMemo.Marks.Add(m);
-
-
-
-
 
 
 

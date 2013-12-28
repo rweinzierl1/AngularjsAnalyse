@@ -31,7 +31,7 @@ type
       iIndex: integer);
     procedure AddFilterKeysToListview(AngCompList: TAngComponentList;
       iIndex: integer; AngComponenttype: TAngComponenttype);
-    procedure AddHtmlGlobalsToListview(sl: TStringlist; iIndex: integer);
+    procedure AddHtmlGlobalsToListview(sl: TStringList; iIndex: integer);
     procedure DoOnIntelligenceItemSelected;
     procedure SetOnIntelligenceItemSelected(AValue: TNotifyEvent);
     procedure setFocusToFirstElement;
@@ -87,7 +87,7 @@ begin
 end;
 
 procedure TfrmIntelligence.AddFilterKeysToListview(AngCompList: TAngComponentList;
-  iIndex: integer  ; AngComponenttype : TAngComponenttype);
+  iIndex: integer; AngComponenttype: TAngComponenttype);
 var
   AngComponent: TAngComponent;
   i: integer;
@@ -96,7 +96,7 @@ begin
   for i := 0 to AngCompList.Count - 1 do
   begin
     AngComponent := AngCompList.AngComponent(i);
-    if AngComponent.angComponenttyp = AngComponenttype  then
+    if AngComponent.angComponenttyp = AngComponenttype then
       if (pos(sFilter, AngComponent.sTag) = 1) or (sFilter = '') then
       begin
         myItem := ListView1.Items.Add;
@@ -143,7 +143,7 @@ end;
 
 
 
-procedure TfrmIntelligence.AddHtmlGlobalsToListview(sl: TStringlist;  iIndex: integer);
+procedure TfrmIntelligence.AddHtmlGlobalsToListview(sl: TStringList; iIndex: integer);
 var
   boolOK: boolean;
   i: integer;
@@ -151,10 +151,10 @@ var
 begin
   for i := 0 to sl.Count - 1 do
   begin
-      if (pos(sFilter, sl[i]) = 1) or (sFilter = '') then
+    if (pos(sFilter, sl[i]) = 1) or (sFilter = '') then
     begin
       myItem := ListView1.Items.Add;
-      myItem.Caption := sl[i] ;
+      myItem.Caption := sl[i];
       myItem.ImageIndex := iIndex;
     end;
   end;
@@ -234,8 +234,9 @@ begin
   if copy(sFilter, 1, 1) = '|' then
   begin
     AddFilterKeysToListview(AngIntellisence.AngComponentProjectList,
-      constItemIndexFilter ,AngComponentfilter);
-    AddFilterKeysToListview(AngIntellisence.AngComponentList, constItemIndexAngular,AngComponentfilter);
+      constItemIndexFilter, AngComponentfilter);
+    AddFilterKeysToListview(AngIntellisence.AngComponentList,
+      constItemIndexAngular, AngComponentfilter);
   end
   else
   if copy(sFilter, 1, 1) = '<' then
@@ -259,12 +260,15 @@ begin
   end
   else
   begin
-    AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList,      constItemIndexDirective);
+    AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList,
+      constItemIndexDirective);
 
-    AddFilterKeysToListview(AngIntellisence.AngComponentList, constItemIndexAngular,AngComponentDirective);
+    AddFilterKeysToListview(AngIntellisence.AngComponentList,
+      constItemIndexAngular, AngComponentDirective);
 
-    AddHtmlGlobalsToListview(AngIntellisence.slHtmlGlobalAttr,constItemIndexHTML);
-    AddHtmlGlobalsToListview(AngIntellisence.slHtmlEventhandlerAttributes ,constItemEvent);
+    AddHtmlGlobalsToListview(AngIntellisence.slHtmlGlobalAttr, constItemIndexHTML);
+    AddHtmlGlobalsToListview(AngIntellisence.slHtmlEventhandlerAttributes,
+      constItemEvent);
 
   end;
 

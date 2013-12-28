@@ -23,8 +23,8 @@
         <UnitName Value="frmMain"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1686"/>
-        <CursorPos X="39" Y="1746"/>
+        <TopLine Value="2238"/>
+        <CursorPos X="62" Y="2269"/>
         <UsageCount Value="177"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -36,7 +36,7 @@
         <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
         <TopLine Value="33"/>
-        <CursorPos X="15" Y="59"/>
+        <CursorPos X="23" Y="59"/>
         <UsageCount Value="169"/>
         <Loaded Value="True"/>
       </Unit2>
@@ -44,10 +44,11 @@
         <Filename Value="angfrmmaincontroller.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="angFrmMainController"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1534"/>
-        <CursorPos X="1" Y="1549"/>
+        <TopLine Value="1568"/>
+        <CursorPos X="7" Y="1599"/>
         <UsageCount Value="165"/>
         <Loaded Value="True"/>
       </Unit3>
@@ -108,8 +109,8 @@
         <UnitName Value="angSnippet"/>
         <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="125"/>
-        <CursorPos X="12" Y="147"/>
+        <TopLine Value="504"/>
+        <CursorPos X="22" Y="535"/>
         <UsageCount Value="72"/>
         <Bookmarks Count="1">
           <Item0 X="12" Y="147" ID="1"/>
@@ -147,15 +148,14 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="angFrmIntelligence"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="138"/>
-        <CursorPos X="53" Y="154"/>
+        <TopLine Value="241"/>
+        <CursorPos X="23" Y="271"/>
         <UsageCount Value="52"/>
         <Bookmarks Count="2">
           <Item0 X="1" Y="120" ID="2"/>
-          <Item1 X="28" Y="146" ID="3"/>
+          <Item1 X="1" Y="146" ID="3"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
