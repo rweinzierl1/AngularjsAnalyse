@@ -9,7 +9,12 @@ uses
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
   SynEditMarks, strutils, SynEditTypes,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
-  Clipbrd, ActnList, shellapi, SynEditMiscClasses, SynEditMarkupSpecialLine,
+  Clipbrd, ActnList, Process,
+  {$ifdef linux}
+  {$else}
+  shellapi,
+  {$endif}
+  SynEditMiscClasses, SynEditMarkupSpecialLine,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types,
   angSnippet, angfrmSnippet, angFrmSelectSnippet, SynCompletion, LCLType, SynEditKeyCmds,
   angFrmIntelligence, angFrmClipboardHistorie;
@@ -187,6 +192,7 @@ type
     procedure ChangeSchema(Sender: TObject);
     function CloseAllTabsheets: boolean;
     procedure DoCloseActivePagecontrolPage(boolSaveChanges: boolean);
+    procedure DoProcess(sPfad: string);
     procedure DoRecentPathPM(Sender: TObject);
     procedure DoSaveActivePage;
     procedure InsertIntoSysMemoIntelligenceText;
@@ -866,11 +872,26 @@ begin
 
 end;
 
+procedure TfrmMainView.DoProcess(sPfad: string);
+var
+  AProcess: TProcess;
+begin
+  AProcess := TProcess.Create(nil);
+
+  AProcess.CommandLine := 'xdg-open "' + sPfad + '"';
+
+  AProcess.Options := AProcess.Options + [poWaitOnExit];
+
+  AProcess.Execute;
+
+  AProcess.Free;
+end;
+
+
 procedure TfrmMainView.mnuOpenShellClick(Sender: TObject);
 var
   treenode: TTreenode;
   sPfad: string;
-  //parentNode: TTreenode;
   s: string;
 begin
 
@@ -878,19 +899,22 @@ begin
   if treenode = nil then
     exit;
 
-
   if treenode = treenodeSearchInPath then
     exit;
 
   if treenode.Data = nil then
     exit;
 
-  sPfad := frmMainController.findFileNameToDataPointer(TObject(treenode.Data));
+  sPfad := frmMainController.findFileNameToDataPointer(
+    TOneFileInfo(treenode.Data).pTreenodeInView);
 
   sPfad := extractfilepath(sPfad);
 
-
+  {$ifdef linux}
+  DoProcess(sPfad);
+  {$else}
   ShellExecute(0, 'open', PChar(sPfad), nil, nil, 5);  //5 =  SW_SHOW
+  {$endif}
 
 end;
 
@@ -2188,6 +2212,9 @@ begin
 
   treenodeSearchInPath.Expand(False);
 
+  TreeView1.Selected := treenodeSearch.GetLastChild;
+  TreeView1.Selected := treenodeSearch;
+
 end;
 
 procedure TfrmMainView.AddTreenodeNgToNode(OneFileInfo: TOneFileInfo;
@@ -2267,6 +2294,7 @@ begin
   m.ImageIndex := iImageindex;
   m.Visible := True;
   frmMainController.myActiveOneTabsheet.SynMemo.Marks.Add(m);
+
 
 
 
