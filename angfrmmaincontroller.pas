@@ -43,6 +43,8 @@ type
 
 
 
+  { TOneFileInfo }
+
   TOneFileInfo = class
   public
     slFileInhalt: TStringList;
@@ -52,6 +54,7 @@ type
     slngWords: TStringList;
     iImageindex: integer;
     modifiedDateTime: TDatetime;
+    slNgModels : TStringList;
 
     pTreenodeInView: TObject;
     constructor Create;
@@ -146,7 +149,7 @@ type
     FsPfad: string;
     slDJKeyWords: TStringList;
     slAllScope: TStringList;
-    procedure LookForNgInString(sLine: string; oneFileInfo: TOneFileInfo);
+    procedure LookForNgInString(const sLine: string; oneFileInfo: TOneFileInfo);
     procedure LookForScopeInString(sLine: string; oneFileInfo: TOneFileInfo);
 
     function KeysWordInLineAndStringInBrackets(iLineNr: integer;
@@ -471,6 +474,8 @@ end;
 
 { TOneFileInfo }
 
+
+
 constructor TOneFileInfo.Create;
 begin
   slFileInhalt := TStringList.Create;
@@ -481,6 +486,9 @@ begin
   slngWords.Sorted := True;
   slngWords.Duplicates := dupIgnore;
   iImageindex := -1;
+  slNgModels := TStringList.create;
+    slNgModels.Sorted := True;
+  slNgModels.Duplicates := dupIgnore;
 
 end;
 
@@ -491,6 +499,7 @@ begin
   slScopeActions.Free;
   slngLines.Free;
   slngWords.Free;
+  slNgModels.Free ;
   inherited Destroy;
 end;
 
@@ -790,55 +799,103 @@ begin
   self.AngIntellisence.AngComponentProjectList.Clear;
 end;
 
-procedure TFrmMainController.LookForNgInString(sLine: string;
+procedure TFrmMainController.LookForNgInString(const sLine: string;
   oneFileInfo: TOneFileInfo);
 var
   i, i2, i3: integer;
-  sWord: string;
+  sWord,s2,s3: string;
   boolOK: boolean;
 begin
+
+  s3 := sLIne;
   repeat
-    i := pos('ng-', sLine);
+    i := pos('ng-', s3);
     if i > 0 then
     begin
       boolOK := True;
-      i2 := pos('//', sLine);
+      i2 := pos('//', s3);
       if i2 > 0 then
         if i2 < i then
           boolOK := False; //Todo To simple
 
-      if copy(trim(sLine), 1, 1) = '*' then
+      if copy(trim(s3), 1, 1) = '*' then
         boolOK := False; //Todo To simple
 
       if i > 1 then
-        if (sline[i - 1] in ['A'..'Z']) or (sline[i - 1] in ['a'..'z']) then
-          if sline[i - 1] <> ' ' then
+        if (s3[i - 1] in ['A'..'Z']) or (s3[i - 1] in ['a'..'z']) then
+          if s3[i - 1] <> ' ' then
             boolOK := False;
 
 
       if boolOK then
       begin
-        oneFileInfo.slngLines.Add(trim(sLine));
+        oneFileInfo.slngLines.Add(trim(s3));
 
         sWord := '';
-        for i3 := i to length(sLine) do
+        for i3 := i to length(s3) do
         begin
-          if (sline[i3] in ['A'..'Z']) or (sline[i3] in ['a'..'z']) or
-            (sline[i3] = '-') then
-            sWord := sWord + sline[i3]
+          if (s3[i3] in ['A'..'Z']) or (s3[i3] in ['a'..'z']) or
+            (s3[i3] = '-') then
+            sWord := sWord + s3[i3]
           else
             break;
         end;
 
         oneFileInfo.slngWords.add(sWord);
 
+        if sWord = 'ng-model' then
+          begin
+          s2 := copy(s3,i+length(sWord) , length(s3));
+          s2 := ansireplacestr(s2,#39,'"');
+          s2 := ansireplacestr(s2,'""','"');
+
+          if pos('"',s2) > 0 then
+            begin
+            delete(s2,1,pos('"',s2) );
+            if pos('"',s2) > 0 then
+             begin
+             s2 := copy(s2,1,pos('"',s2) -1);
+             oneFileInfo.slNgModels.Add(s2);
+             end;
+            end;
+          end;
+
       end;
 
 
-      Delete(sline, 1, i);
+      Delete(s3, 1, i);
     end;
 
   until i = 0;
+
+  s3 := sLine;
+
+    repeat
+    i := pos('{{', s3);
+
+    if i > 0 then
+      begin
+      s2 := copy(sLine,i +2 , length(s3));
+      if pos('}}',s2) > 0 then
+        begin
+        s2 := copy(s2,1, pos('}}',s2) -1);
+
+        boolOK := true;
+        for i3 := 1 to length(s2) do
+          if not ( (s2[i3] in ['A'..'Z']) or (s2[i3] in ['a'..'z']) or
+            (s2[i3] = '.') or (s2[i3] in ['0'..'9']) )  then
+              boolOK := false;
+
+        if boolOK then
+            oneFileInfo.slNgModels.Add(s2);
+        end;
+
+      end;
+
+    Delete(s3, 1, i);
+     until i = 0;
+
+
 end;
 
 procedure TFrmMainController.LookForScopeInString(sLine: string;
@@ -1531,10 +1588,12 @@ end;
 
 procedure TFrmMainController.AddAllProjectWordsToIntellisence;
 var
-  i, i2: integer;
+  i, i2,i3: integer;
   AngComponent: TAngComponent;
   sl: TStringList;
   OneDIWordFound: TOneDIWordFound;
+  OneFileInfo : TOneFileInfo;
+  s: string;
 begin
   self.SearchForRestrictInSlDirective();
   sl := GetslDJKeyWords();
@@ -1567,6 +1626,20 @@ begin
         AngComponent.sTag, AngComponent);
     end;
   end;
+
+
+  self.AngIntellisence.slModels.clear;
+  for i := 0 to self.slAllFilesFound.Count -1 do
+    begin
+    OneFileInfo := slAllFilesFound.OneFileInfo(i);
+    if  OneFileInfo.slNgModels.Count > 0 then
+      begin;
+      for i3 := 0 to OneFileInfo.slNgModels.Count -1 do
+        self.AngIntellisence.slModels.Add(OneFileInfo.slNgModels[i3] );
+      end;
+    end;
+
+
 
 end;
 

@@ -1,32 +1,34 @@
 object frmIntelligence: TfrmIntelligence
   Left = 546
-  Height = 208
+  Height = 217
   Top = 331
-  Width = 425
+  Width = 593
   BorderIcons = []
   BorderStyle = bsNone
   Caption = 'frmIntelligence'
-  ClientHeight = 208
-  ClientWidth = 425
+  ClientHeight = 217
+  ClientWidth = 593
   Color = clPurple
   FormStyle = fsStayOnTop
   OnCreate = FormCreate
   LCLVersion = '1.0.14.0'
   object ListView1: TListView
     Left = 0
-    Height = 208
+    Height = 217
     Top = 0
-    Width = 425
+    Width = 593
     Align = alClient
     Color = 14206908
     Columns = <    
       item
+        AutoSize = True
         Caption = 'Snippet'
-        Width = 150
+        Width = 54
       end    
       item
+        AutoSize = True
         Caption = 'Desciption'
-        Width = 250
+        Width = 516
       end>
     Font.CharSet = ANSI_CHARSET
     Font.Height = -11
@@ -45,9 +47,9 @@ object frmIntelligence: TfrmIntelligence
   end
   object Panel1: TPanel
     Cursor = crSizeNESW
-    Left = 409
+    Left = 577
     Height = 8
-    Top = 200
+    Top = 209
     Width = 16
     Anchors = [akRight, akBottom]
     Caption = '...'

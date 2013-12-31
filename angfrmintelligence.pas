@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ComCtrls, angSnippet, angPkz;
+  ExtCtrls, ComCtrls, Menus, angSnippet, angPkz;
 
 type
 
@@ -40,6 +40,7 @@ type
     sSelText: string;
     boolCallbackActive: boolean;
     sFilter: string;
+    iItemindex: integer;
 
     procedure SetSelTextToPublic;
     procedure FillWithHtml5Tags(AngIntellisence: TAngIntellisence);
@@ -226,51 +227,74 @@ var
   myItem: TListitem;
   i: integer;
   AngHTMLTag: TAngHTMLTag;
+  s : string;
 begin
   ListView1.Clear;
   ListView1.BeginUpdate;
 
 
-  if copy(sFilter, 1, 1) = '|' then
+  if iItemindex = constItemIndexHTML then
   begin
-    AddFilterKeysToListview(AngIntellisence.AngComponentProjectList,
-      constItemIndexFilter, AngComponentfilter);
-    AddFilterKeysToListview(AngIntellisence.AngComponentList,
-      constItemIndexAngular, AngComponentfilter);
-  end
-  else
-  if copy(sFilter, 1, 1) = '<' then
-  begin
-
-    AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList,
-      constItemIndexDirective);
-
-    for i := 0 to AngIntellisence.AngHTMLTagList.Count - 1 do
+    if copy(sFilter, 1, 1) = '|' then
     begin
-      AngHTMLTag := AngIntellisence.AngHTMLTagList.AngHTMLTag(i);
+      AddFilterKeysToListview(AngIntellisence.AngComponentProjectList,
+        constItemIndexFilter, AngComponentfilter);
+      AddFilterKeysToListview(AngIntellisence.AngComponentList,
+        constItemIndexAngular, AngComponentfilter);
+    end
+    else
+    if copy(sFilter, 1, 1) = '<' then
+    begin
 
-      if pos(sFilter, AngHTMLTag.sTag) = 1 then
+      AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList,
+        constItemIndexDirective);
+
+      for i := 0 to AngIntellisence.AngHTMLTagList.Count - 1 do
       begin
-        myItem := ListView1.Items.Add;
-        myItem.Caption := AngHTMLTag.sTag;
-        myItem.SubItems.Add(AngHTMLTag.sDescription);
-        myItem.ImageIndex := constItemIndexHTML;
+        AngHTMLTag := AngIntellisence.AngHTMLTagList.AngHTMLTag(i);
+
+        if pos(sFilter, AngHTMLTag.sTag) = 1 then
+        begin
+          myItem := ListView1.Items.Add;
+          myItem.Caption := AngHTMLTag.sTag;
+          myItem.SubItems.Add(AngHTMLTag.sDescription);
+          myItem.ImageIndex := constItemIndexHTML;
+        end;
       end;
+    end
+    else
+    begin
+      AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList,
+        constItemIndexDirective);
+
+      AddFilterKeysToListview(AngIntellisence.AngComponentList,
+        constItemIndexAngular, AngComponentDirective);
+
+      AddHtmlGlobalsToListview(AngIntellisence.slHtmlGlobalAttr, constItemIndexHTML);
+      AddHtmlGlobalsToListview(AngIntellisence.slHtmlEventhandlerAttributes,
+        constItemEvent);
+
     end;
+
   end
   else
   begin
-    AddDirectiveKeysToListview(AngIntellisence.AngComponentProjectList,
-      constItemIndexDirective);
 
-    AddFilterKeysToListview(AngIntellisence.AngComponentList,
-      constItemIndexAngular, AngComponentDirective);
+        for i := 0 to AngIntellisence.slModels.Count - 1 do
+      begin
+        s := AngIntellisence.slModels[i];
 
-    AddHtmlGlobalsToListview(AngIntellisence.slHtmlGlobalAttr, constItemIndexHTML);
-    AddHtmlGlobalsToListview(AngIntellisence.slHtmlEventhandlerAttributes,
-      constItemEvent);
+        if pos(sFilter, s) = 1 then
+        begin
+          myItem := ListView1.Items.Add;
+          myItem.Caption := s;
+          myItem.ImageIndex := constItemModel ;
+        end;
+      end;
+
 
   end;
+
 
 
   setFocusToFirstElement;

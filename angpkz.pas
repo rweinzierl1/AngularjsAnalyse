@@ -57,6 +57,7 @@ const
   constItemInsertSnippet = 38;
   constItemCopyHistorie = 39;
   constItemEvent = 40;
+  constItemModel = 41;
 
 implementation
 

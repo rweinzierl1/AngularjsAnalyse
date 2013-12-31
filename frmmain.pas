@@ -180,12 +180,16 @@ type
     treenodeScopeGleich: TTreenode;
     treenodeScopeGleichFunction: TTreenode;
     frmSelectSnippet: TfrmSelectSnippet;
+    treenodeModel: TTreenode;
 
     frmMainController: TFrmMainController;
     procedure AddAllRecentPathtoPopupmenu;
     procedure AddAngularJSKeyWordsInTreeview;
     procedure AddEditMarkToLine(iImageindex, iLine: integer);
+    procedure AddModelsInfoInTreeview;
     procedure AddSearchInPathToTree(const s: string);
+    procedure AddTreenodeModelToNode(const OneFileInfo: TOneFileInfo;
+      const treenode: TTreenode);
     procedure AddTreenodeNgToNode(OneFileInfo: TOneFileInfo; treenode: TTreenode);
     procedure AddTreenodeScopeToNode(const OneFileInfo: TOneFileInfo;
       const treenode: TTreenode);
@@ -198,7 +202,7 @@ type
     procedure InsertIntoSysMemoIntelligenceText;
     procedure IntelligenceItemSelected(Sender: TObject);
     procedure MarkLineContainsThisWord(sWord: string);
-    procedure OpenIntelligenceDlg;
+    procedure OpenIntelligenceDlg(iIndex : integer);
     function SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
     procedure AddAngularJSFilesAsTreenode(myTreeNode: TTreenode;
       sl: TStringList; iImageindex: integer);
@@ -806,7 +810,7 @@ end;
 
 
 
-procedure TfrmMainView.OpenIntelligenceDlg;
+procedure TfrmMainView.OpenIntelligenceDlg(iIndex: integer);
 begin
   frmIntelligence := TfrmIntelligence.Create(self);
 
@@ -822,6 +826,7 @@ begin
 
   frmIntelligence.OnIntelligenceItemSelected := @IntelligenceItemSelected;
 
+  frmIntelligence.iItemindex := iIndex;
   frmIntelligence.Show;
 
   self.frmMainController.myActiveOneTabsheet.SynMemo.SetFocus;
@@ -1111,52 +1116,70 @@ begin
 
   treenodeModule := TreeView1.Items.AddChild(nil, 'angular.module');
   treenodeModule.ImageIndex := constItemIndexModule;
+  treenodeModule.SelectedIndex := treenodeModule.ImageIndex ;
   treenodeController := TreeView1.Items.AddChild(nil, '.controller');
   treenodeController.ImageIndex := constItemIndexController;
+  treenodeController.SelectedIndex := treenodeController.ImageIndex ;
   treenodeService := TreeView1.Items.AddChild(nil, '.service');
   treenodeService.ImageIndex := constItemIndexService;
+  treenodeService.SelectedIndex := treenodeService.ImageIndex ;
   treenodeFactory := TreeView1.Items.AddChild(nil, '.factory');
   treenodeFactory.ImageIndex := constItemIndexFactory;
+  treenodeFactory.SelectedIndex := treenodeFactory.ImageIndex ;
   treenodeFilter := TreeView1.Items.AddChild(nil, '.filter');
   treenodeFilter.ImageIndex := constItemIndexFilter;
+  treenodeFilter.SelectedIndex := treenodeFilter.ImageIndex ;
   treenodeDirectives := TreeView1.Items.AddChild(nil, '.directive');
   treenodeDirectives.ImageIndex := constItemIndexDirective;
+  treenodeDirectives.SelectedIndex := treenodeDirectives.ImageIndex ;
   treenodeConfig := TreeView1.Items.AddChild(nil, '.config');
   treenodeConfig.ImageIndex := constItemIndexConfig;
+  treenodeConfig.SelectedIndex := treenodeConfig.ImageIndex ;
 
   treenodeHTML := TreeView1.Items.AddChild(nil, 'HTML');
   treenodeHTML.ImageIndex := constItemIndexHTML;
+  treenodeHTML.SelectedIndex := treenodeHTML.ImageIndex ;
 
 
   treenodeDependencyInjectionWords :=
     TreeView1.Items.AddChild(nil, 'Dependency Injection Key Words');
   treenodeDependencyInjectionWords.ImageIndex := constItemIndexKey;
-
+  treenodeDependencyInjectionWords.SelectedIndex := treenodeDependencyInjectionWords.ImageIndex ;
 
   treenodeAngularWords := TreeView1.Items.AddChild(nil, 'AngularJS Keywords');
   treenodeAngularWords.ImageIndex := constItemIndexAngular;
-
+   treenodeAngularWords.SelectedIndex := treenodeAngularWords.ImageIndex ;
 
 
   treenodeScope := TreeView1.Items.AddChild(nil, 'scope.');
   treenodeScope.ImageIndex := constItemScope;
+  treenodeScope.SelectedIndex := treenodeScope.ImageIndex ;
 
   treenodeScopeGleichFunction :=
     TreeView1.Items.AddChild(treenodeScope, 'scope. = function');
   treenodeScopeGleichFunction.ImageIndex := constItemScope;
+  treenodeScopeGleichFunction.SelectedIndex := treenodeScopeGleichFunction.ImageIndex ;
 
   treenodeScopeGleich := TreeView1.Items.AddChild(treenodeScope, 'scope. =');
   treenodeScopeGleich.ImageIndex := constItemScope;
+  treenodeScopeGleich.SelectedIndex := treenodeScopeGleich.ImageIndex ;
 
   treenodeScopeNurPunkt := TreeView1.Items.AddChild(treenodeScope, 'scope.');
   treenodeScopeNurPunkt.ImageIndex := constItemScope;
+  treenodeScopeNurPunkt.SelectedIndex := treenodeScopeNurPunkt.ImageIndex ;
 
+  treenodeModel := TreeView1.Items.AddChild(nil, 'Model');
+  treenodeModel.ImageIndex := constItemModel;
+  treenodeModel.SelectedIndex := treenodeModel.ImageIndex ;
 
   treenodeAllFiles := TreeView1.Items.AddChild(nil, 'All Files');
   treenodeAllFiles.ImageIndex := constItemIndexFolder;
+  treenodeAllFiles.SelectedIndex := treenodeAllFiles.ImageIndex ;
 
   treenodeSearchInPath := TreeView1.Items.AddChild(nil, 'Search In Path (dblClick)');
   treenodeSearchInPath.ImageIndex := constItemIndexSearchInPath;
+  treenodeSearchInPath.SelectedIndex := treenodeSearchInPath.ImageIndex ;
+
 
 end;
 
@@ -1236,6 +1259,28 @@ begin
 
 
   sl.Free;
+end;
+
+
+
+procedure TfrmMainView.AddModelsInfoInTreeview;
+var
+  sl: TStringList;
+  i: integer;
+  treenodeAngularSchluessel: TTreenode;
+begin
+
+
+
+  for i := 0 to self.frmMainController.AngIntellisence.slModels.Count - 1 do
+  begin
+    treenodeAngularSchluessel :=
+      TreeView1.Items.AddChild(treenodeModel, self.frmMainController.AngIntellisence.slModels[i]);
+    treenodeAngularSchluessel.ImageIndex := constItemModel;
+
+  end;
+
+
 end;
 
 procedure TfrmMainView.AddAllRecentPathtoPopupmenu;
@@ -1419,6 +1464,15 @@ begin
         AddTreenodeScopeToNode(OneFileInfo, treenodeFilestructure);
       end;
 
+      if OneFileInfo.slNgModels.Count > 0 then
+      begin
+        AddTreenodeModelToNode(OneFileInfo, treenode);
+        AddTreenodeModelToNode(OneFileInfo, treenodeFilestructure);
+      end;
+
+
+
+
     end;
   end;
 
@@ -1507,6 +1561,7 @@ begin
       begin
         treenode := TreeView1.Items.AddChild(treenodeScopeNurPunkt, sl[i]);
         treenode.ImageIndex := constItemScope;
+        treenode.SelectedIndex := constItemScope;
       end;
     end;
 
@@ -1515,13 +1570,14 @@ begin
   AddAngularJSKeyWordsInTreeview;
 
 
+
   TreeView1.EndUpdate;
 
   mnuFind.Enabled := True;
 
 
   self.frmMainController.AddAllProjectWordsToIntellisence;
-
+  AddModelsInfoInTreeview;
 end;
 
 
@@ -1717,6 +1773,7 @@ procedure TfrmMainView.SynEditProcessedCommand(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
 var
   boolFill: boolean;
+  point : TPoint;
 begin
   boolFill := False;
 
@@ -1754,9 +1811,31 @@ begin
           IntelligenceFrmCloseAndFree;
 
       if frmIntelligence = nil then
-        OpenIntelligenceDlg;
+        OpenIntelligenceDlg(constItemIndexHTML);
     end;
   end;
+
+
+  if (AChar = '.') then
+  begin
+    if self.frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex in
+      [constItemIndexController, constItemIndexService,
+      constItemIndexFactory, constItemIndexFilter, constItemIndexModule,
+      constItemIndexJavascript] then
+    begin
+      if frmIntelligence <> nil then
+        if not frmIntelligence.Visible then
+          IntelligenceFrmCloseAndFree;
+
+      if frmIntelligence = nil then
+        begin
+        OpenIntelligenceDlg(constItemIndexJavascript);
+        point := self.frmMainController.myActiveOneTabsheet.SynMemo.CaretXY;
+        frmIntelligence.sFilter := self.frmMainController.myActiveOneTabsheet.SynMemo.GetWordAtRowCol(point);
+        end;
+    end;
+  end;
+
 
 
   if (AChar = ' ') then
@@ -1768,7 +1847,7 @@ begin
           IntelligenceFrmCloseAndFree;
       boolFill := True;
       if frmIntelligence = nil then
-        OpenIntelligenceDlg;
+        OpenIntelligenceDlg(constItemIndexHTML);
     end;
   end;
 
@@ -2248,10 +2327,28 @@ begin
 
   for n := 0 to OneFileInfo.slScopeActions.Count - 1 do
   begin
-
     treenodeScopeLokal :=
       TreeView1.Items.AddChild(treenodeScope1, OneFileInfo.slScopeActions[n]);
     treenodeScopeLokal.ImageIndex := constItemScope;
+  end;
+end;
+
+
+procedure TfrmMainView.AddTreenodeModelToNode(const OneFileInfo: TOneFileInfo;
+  const treenode: TTreenode);
+var
+  treenodeModel1: TTreenode;
+  treenodeModelLokal: TTreenode;
+  n: integer;
+begin
+  treenodeModel1 := TreeView1.Items.AddChild(treenode, 'Model');
+  treenodeModel1.ImageIndex := constItemModel;
+
+  for n := 0 to OneFileInfo.slNgModels.Count - 1 do
+  begin
+    treenodeModelLokal :=
+      TreeView1.Items.AddChild(treenodeModel1, OneFileInfo.slNgModels[n]);
+    treenodeModelLokal.ImageIndex := constItemModel;
   end;
 end;
 

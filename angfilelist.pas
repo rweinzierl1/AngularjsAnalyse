@@ -24,6 +24,7 @@ type
     ng: string;
     DI: string;
     Types : string;
+    Model : string;
     oneFileInfo: TOneFileInfo;
     constructor Create;
   end;
@@ -38,12 +39,14 @@ type
     eFilterTypes: TEdit;
     eFilterPath: TEdit;
     eFilterNg: TEdit;
+    eFilterModel: TEdit;
     lblDI: TLabel;
     lblTypes: TLabel;
     lblPath: TLabel;
     lblCount: TLabel;
     lblNg: TLabel;
     lblFiles: TLabel;
+    lblTypes1: TLabel;
     ListView1: TListView;
     mnuCopyClipboard: TMenuItem;
     Panel1: TPanel;
@@ -147,6 +150,8 @@ begin
 
       FileListFileInfo.Types := frmMainController.GetAngularTypesForFile(FileListFileInfo.sPath);
 
+      FileListFileInfo.Model := Ansireplacestr(oneFileInfo.slNgModels.Text, #13#10, ' | '); ;
+
       slFilesToView.AddObject(s, FileListFileInfo);
 
     end;
@@ -183,6 +188,8 @@ begin
       myitem.Data := FileListFileInfo.oneFileInfo;
 
       myitem.SubItems.add(datetimetostr( FileListFileInfo.oneFileInfo.modifiedDateTime)  );
+
+      myitem.SubItems.add(FileListFileInfo.Model);
 
 
       myitem.ImageIndex := FileListFileInfo.iImageindex;
@@ -274,6 +281,15 @@ begin
     if eFilterTypes.Text <> '' then
       if pos(uppercase(eFilterTypes.Text), uppercase(FileListFileInfo.Types )) = 0 then
         FileListFileInfo.Visible := False;
+
+    if eFilterModel.Text <> '' then
+      if pos(uppercase(eFilterModel.Text), uppercase(FileListFileInfo.Model )) = 0 then
+        FileListFileInfo.Visible := False;
+
+
+
+
+
 
   end;
   ShowFiltered;

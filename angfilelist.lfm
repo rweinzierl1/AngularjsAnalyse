@@ -62,7 +62,7 @@ object frmFileList: TfrmFileList
       item
         AutoSize = True
         Caption = 'File'
-        Width = 30
+        Width = 802
       end    
       item
         AutoSize = True
@@ -89,7 +89,10 @@ object frmFileList: TfrmFileList
       item
         AutoSize = True
         Caption = 'Modified'
-        Width = 497
+        Width = 60
+      end    
+      item
+        Caption = 'ngModel'
       end>
     GridLines = True
     PopupMenu = pmAngFileList
@@ -713,6 +716,27 @@ object frmFileList: TfrmFileList
       Align = alLeft
       Caption = 'Files:'
       ParentColor = False
+    end
+    object lblTypes1: TLabel
+      Left = 644
+      Height = 22
+      Top = 1
+      Width = 38
+      Align = alLeft
+      Caption = 'Model:'
+      ParentColor = False
+    end
+    object eFilterModel: TEdit
+      Left = 682
+      Height = 22
+      Hint = 'Types'
+      Top = 1
+      Width = 97
+      Align = alLeft
+      OnKeyUp = eFilterKeyUp
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 5
     end
   end
   object pmAngFileList: TPopupMenu

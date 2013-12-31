@@ -99,6 +99,7 @@ type
     AngComponentProjectList: TAngComponentList;
     slHtmlGlobalAttr: TStringList;
     slHtmlEventhandlerAttributes: TStringList;
+    slModels : TStringList;
 
     constructor Create;
     destructor Destroy; override;
@@ -159,6 +160,10 @@ begin
   if fileexists(sFilename) then
     slHtmlEventhandlerAttributes.LoadFromFile(sFilename);
 
+  slModels := TStringList.create ;
+  slModels.Sorted:= True;
+  slModels.Duplicates:= DupIgnore;
+
 end;
 
 destructor TAngIntellisence.Destroy;
@@ -169,6 +174,7 @@ begin
   AngComponentProjectList.Free;
   slHtmlGlobalAttr.Free;
   slHtmlEventhandlerAttributes.Free;
+  slModels.free;
   inherited Destroy;
 end;
 
