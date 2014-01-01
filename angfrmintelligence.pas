@@ -284,7 +284,7 @@ begin
       begin
         s := AngIntellisence.slModels[i];
 
-        if pos(sFilter, s) = 1 then
+        if (pos(sFilter, s) = 1) or (sFilter = '') then
         begin
           myItem := ListView1.Items.Add;
           myItem.Caption := s;

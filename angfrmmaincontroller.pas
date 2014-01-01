@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, angPKZ, ComCtrls, SynMemo, strutils, Graphics,
-  inifiles, SynEditMarks, angSnippet, SynCompletion, angPasteHistorie;
+  inifiles, SynEditMarks, angSnippet, SynCompletion, angPasteHistorie,LCLType;
 
 type
 
@@ -54,7 +54,7 @@ type
     slngWords: TStringList;
     iImageindex: integer;
     modifiedDateTime: TDatetime;
-    slNgModels : TStringList;
+    slNgModels: TStringList;
 
     pTreenodeInView: TObject;
     constructor Create;
@@ -215,6 +215,9 @@ type
     property sPfad: string read FsPfad write SetsPfad;
     procedure AddAllProjectWordsToIntellisence;
     function ActiveSynMemoIsHTMLAndCarentInSquareBrackets: boolean;
+    function ActiveSynMemoIsHTMLAndNgModelInLine(AChar: TUTF8Char): boolean;
+    procedure FillslDJKeyWords;
+    function GetOneFileInfoToDIName(sDI: string): TOneFileInfo;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -486,8 +489,8 @@ begin
   slngWords.Sorted := True;
   slngWords.Duplicates := dupIgnore;
   iImageindex := -1;
-  slNgModels := TStringList.create;
-    slNgModels.Sorted := True;
+  slNgModels := TStringList.Create;
+  slNgModels.Sorted := True;
   slNgModels.Duplicates := dupIgnore;
 
 end;
@@ -499,7 +502,7 @@ begin
   slScopeActions.Free;
   slngLines.Free;
   slngWords.Free;
-  slNgModels.Free ;
+  slNgModels.Free;
   inherited Destroy;
 end;
 
@@ -803,7 +806,7 @@ procedure TFrmMainController.LookForNgInString(const sLine: string;
   oneFileInfo: TOneFileInfo);
 var
   i, i2, i3: integer;
-  sWord,s2,s3: string;
+  sWord, s2, s3: string;
   boolOK: boolean;
 begin
 
@@ -844,21 +847,21 @@ begin
         oneFileInfo.slngWords.add(sWord);
 
         if sWord = 'ng-model' then
-          begin
-          s2 := copy(s3,i+length(sWord) , length(s3));
-          s2 := ansireplacestr(s2,#39,'"');
-          s2 := ansireplacestr(s2,'""','"');
+        begin
+          s2 := copy(s3, i + length(sWord), length(s3));
+          s2 := ansireplacestr(s2, #39, '"');
+          s2 := ansireplacestr(s2, '""', '"');
 
-          if pos('"',s2) > 0 then
+          if pos('"', s2) > 0 then
+          begin
+            Delete(s2, 1, pos('"', s2));
+            if pos('"', s2) > 0 then
             begin
-            delete(s2,1,pos('"',s2) );
-            if pos('"',s2) > 0 then
-             begin
-             s2 := copy(s2,1,pos('"',s2) -1);
-             oneFileInfo.slNgModels.Add(s2);
-             end;
+              s2 := copy(s2, 1, pos('"', s2) - 1);
+              oneFileInfo.slNgModels.Add(s2);
             end;
           end;
+        end;
 
       end;
 
@@ -870,31 +873,30 @@ begin
 
   s3 := sLine;
 
-    repeat
+  repeat
     i := pos('{{', s3);
 
     if i > 0 then
+    begin
+      s2 := copy(sLine, i + 2, length(s3));
+      if pos('}}', s2) > 0 then
       begin
-      s2 := copy(sLine,i +2 , length(s3));
-      if pos('}}',s2) > 0 then
-        begin
-        s2 := copy(s2,1, pos('}}',s2) -1);
+        s2 := copy(s2, 1, pos('}}', s2) - 1);
 
-        boolOK := true;
+        boolOK := True;
         for i3 := 1 to length(s2) do
-          if not ( (s2[i3] in ['A'..'Z']) or (s2[i3] in ['a'..'z']) or
-            (s2[i3] = '.') or (s2[i3] in ['0'..'9']) )  then
-              boolOK := false;
+          if not ((s2[i3] in ['A'..'Z']) or (s2[i3] in ['a'..'z']) or
+            (s2[i3] = '.') or (s2[i3] in ['0'..'9'])) then
+            boolOK := False;
 
         if boolOK then
-            oneFileInfo.slNgModels.Add(s2);
-        end;
-
+          oneFileInfo.slNgModels.Add(s2);
       end;
 
-    Delete(s3, 1, i);
-     until i = 0;
+    end;
 
+    Delete(s3, 1, i);
+  until i = 0;
 
 end;
 
@@ -1181,9 +1183,36 @@ begin
 
 end;
 
+function TFrmMainController.GetOneFileInfoToDIName(sDI : string) : TOneFileInfo;
 
-function TFrmMainController.GetslDJKeyWords: TStringList;
-var
+  var
+  i, n: integer;
+  oneFileInfo: TOneFileInfo;
+  sl: TOneDIWordFoundList;
+begin
+
+  result := nil;
+  for i := 0 to slAllFilesFound.Count - 1 do
+  begin
+    oneFileInfo := slAllFilesFound.OneFileInfo(i);
+    sl := oneFileInfo.slDependencyInjektionNamen;
+    for n := 0 to sl.Count - 1 do
+      begin
+      if sl[n] = sDI then
+        begin
+        result :=  oneFileInfo;
+        exit;
+        end;
+      end;
+  end;
+
+
+end;
+
+
+Procedure TFrmMainController.FillslDJKeyWords;
+
+  var
   i, n: integer;
   oneFileInfo: TOneFileInfo;
   sl: TOneDIWordFoundList;
@@ -1201,6 +1230,13 @@ begin
       slDJKeyWords.AddObject(sl[n], sl.OneDIWordFound(n));
 
   end;
+
+
+end;
+
+
+function TFrmMainController.GetslDJKeyWords: TStringList;
+  begin
 
   Result := slDJKeyWords;
 end;
@@ -1588,11 +1624,11 @@ end;
 
 procedure TFrmMainController.AddAllProjectWordsToIntellisence;
 var
-  i, i2,i3: integer;
+  i, i2, i3: integer;
   AngComponent: TAngComponent;
   sl: TStringList;
   OneDIWordFound: TOneDIWordFound;
-  OneFileInfo : TOneFileInfo;
+  OneFileInfo: TOneFileInfo;
   s: string;
 begin
   self.SearchForRestrictInSlDirective();
@@ -1628,18 +1664,17 @@ begin
   end;
 
 
-  self.AngIntellisence.slModels.clear;
-  for i := 0 to self.slAllFilesFound.Count -1 do
-    begin
+  self.AngIntellisence.slModels.Clear;
+  for i := 0 to self.slAllFilesFound.Count - 1 do
+  begin
     OneFileInfo := slAllFilesFound.OneFileInfo(i);
-    if  OneFileInfo.slNgModels.Count > 0 then
-      begin;
-      for i3 := 0 to OneFileInfo.slNgModels.Count -1 do
-        self.AngIntellisence.slModels.Add(OneFileInfo.slNgModels[i3] );
-      end;
+    if OneFileInfo.slNgModels.Count > 0 then
+    begin
+      ;
+      for i3 := 0 to OneFileInfo.slNgModels.Count - 1 do
+        self.AngIntellisence.slModels.Add(OneFileInfo.slNgModels[i3]);
     end;
-
-
+  end;
 
 end;
 
@@ -1669,6 +1704,52 @@ begin
         exit;
     end;
   end;
+
+end;
+
+
+function TFrmMainController.ActiveSynMemoIsHTMLAndNgModelInLine(AChar: TUTF8Char
+  ): boolean;
+var
+  SynMemo: TSynMemo;
+  myPoint: TPoint;
+  s: string;
+  i, i2, i3, i4, i5: integer;
+begin
+  Result := False;
+
+  if myActiveOneTabsheet.Tabsheet.ImageIndex = constItemIndexHTML then
+  begin
+    SynMemo := myActiveOneTabsheet.SynMemo;
+    myPoint := SynMemo.LogicalCaretXY;
+    s := SynMemo.Lines[myPoint.y - 1];
+    i2 := myPoint.x;
+    s := copy(s, 1, i2);
+
+    i3 := pos('ng-model', s);
+
+
+
+    if i3 > 0 then
+    begin
+      Result := True;
+      for i5 := length(s) downto i3 do
+        if s[i5] = '"' then
+          Result := False;
+      if Result then
+        exit;
+    end;
+
+    if AChar = '{' then
+      if s <> '' then
+        if copy(s,length(s),1) = '{' then
+          result := true;
+
+
+
+
+    end;
+
 
 end;
 

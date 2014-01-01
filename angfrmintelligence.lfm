@@ -23,12 +23,12 @@ object frmIntelligence: TfrmIntelligence
       item
         AutoSize = True
         Caption = 'Snippet'
-        Width = 54
+        Width = 589
       end    
       item
         AutoSize = True
         Caption = 'Desciption'
-        Width = 516
+        Width = 72
       end>
     Font.CharSet = ANSI_CHARSET
     Font.Height = -11

@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynHighlighterHTML, SynMemo, SynEdit,
   SynPluginSyncroEdit, SynHighlighterAny, SynHighlighterCss, Forms, Controls,
-  SynEditMarks, strutils, SynEditTypes,
+  SynEditMarks, strutils, SynEditTypes, SynEditMouseCmds,
   Graphics, Dialogs, ComCtrls, Menus, ExtCtrls, StdCtrls, angPKZ,
   Clipbrd, ActnList, Process,
   {$ifdef linux}
@@ -17,7 +17,7 @@ uses
   SynEditMiscClasses, SynEditMarkupSpecialLine,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types,
   angSnippet, angfrmSnippet, angFrmSelectSnippet, SynCompletion, LCLType, SynEditKeyCmds,
-  angFrmIntelligence, angFrmClipboardHistorie;
+  angFrmIntelligence, angFrmClipboardHistorie ,angfrmImage;
 
 type
 
@@ -202,7 +202,7 @@ type
     procedure InsertIntoSysMemoIntelligenceText;
     procedure IntelligenceItemSelected(Sender: TObject);
     procedure MarkLineContainsThisWord(sWord: string);
-    procedure OpenIntelligenceDlg(iIndex : integer);
+    procedure OpenIntelligenceDlg(iIndex: integer);
     function SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
     procedure AddAngularJSFilesAsTreenode(myTreeNode: TTreenode;
       sl: TStringList; iImageindex: integer);
@@ -219,6 +219,9 @@ type
     procedure SynEdit1CutCopy(Sender: TObject; var AText: string;
       var AMode: TSynSelectionMode; ALogStartPos: TPoint;
       var AnAction: TSynCopyPasteAction);
+    procedure SynEdit1MouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: integer);
+    procedure SynEdit1MouseMove(Sender: TObject; Shift: TShiftState; X, Y: integer);
     procedure SynEdit1Paste(Sender: TObject; var AText: string;
       var AMode: TSynSelectionMode; ALogStartPos: TPoint;
       var AnAction: TSynCopyPasteAction);
@@ -1116,70 +1119,70 @@ begin
 
   treenodeModule := TreeView1.Items.AddChild(nil, 'angular.module');
   treenodeModule.ImageIndex := constItemIndexModule;
-  treenodeModule.SelectedIndex := treenodeModule.ImageIndex ;
+  treenodeModule.SelectedIndex := treenodeModule.ImageIndex;
   treenodeController := TreeView1.Items.AddChild(nil, '.controller');
   treenodeController.ImageIndex := constItemIndexController;
-  treenodeController.SelectedIndex := treenodeController.ImageIndex ;
+  treenodeController.SelectedIndex := treenodeController.ImageIndex;
   treenodeService := TreeView1.Items.AddChild(nil, '.service');
   treenodeService.ImageIndex := constItemIndexService;
-  treenodeService.SelectedIndex := treenodeService.ImageIndex ;
+  treenodeService.SelectedIndex := treenodeService.ImageIndex;
   treenodeFactory := TreeView1.Items.AddChild(nil, '.factory');
   treenodeFactory.ImageIndex := constItemIndexFactory;
-  treenodeFactory.SelectedIndex := treenodeFactory.ImageIndex ;
+  treenodeFactory.SelectedIndex := treenodeFactory.ImageIndex;
   treenodeFilter := TreeView1.Items.AddChild(nil, '.filter');
   treenodeFilter.ImageIndex := constItemIndexFilter;
-  treenodeFilter.SelectedIndex := treenodeFilter.ImageIndex ;
+  treenodeFilter.SelectedIndex := treenodeFilter.ImageIndex;
   treenodeDirectives := TreeView1.Items.AddChild(nil, '.directive');
   treenodeDirectives.ImageIndex := constItemIndexDirective;
-  treenodeDirectives.SelectedIndex := treenodeDirectives.ImageIndex ;
+  treenodeDirectives.SelectedIndex := treenodeDirectives.ImageIndex;
   treenodeConfig := TreeView1.Items.AddChild(nil, '.config');
   treenodeConfig.ImageIndex := constItemIndexConfig;
-  treenodeConfig.SelectedIndex := treenodeConfig.ImageIndex ;
+  treenodeConfig.SelectedIndex := treenodeConfig.ImageIndex;
 
   treenodeHTML := TreeView1.Items.AddChild(nil, 'HTML');
   treenodeHTML.ImageIndex := constItemIndexHTML;
-  treenodeHTML.SelectedIndex := treenodeHTML.ImageIndex ;
+  treenodeHTML.SelectedIndex := treenodeHTML.ImageIndex;
 
 
   treenodeDependencyInjectionWords :=
     TreeView1.Items.AddChild(nil, 'Dependency Injection Key Words');
   treenodeDependencyInjectionWords.ImageIndex := constItemIndexKey;
-  treenodeDependencyInjectionWords.SelectedIndex := treenodeDependencyInjectionWords.ImageIndex ;
+  treenodeDependencyInjectionWords.SelectedIndex :=
+    treenodeDependencyInjectionWords.ImageIndex;
 
   treenodeAngularWords := TreeView1.Items.AddChild(nil, 'AngularJS Keywords');
   treenodeAngularWords.ImageIndex := constItemIndexAngular;
-   treenodeAngularWords.SelectedIndex := treenodeAngularWords.ImageIndex ;
+  treenodeAngularWords.SelectedIndex := treenodeAngularWords.ImageIndex;
 
 
   treenodeScope := TreeView1.Items.AddChild(nil, 'scope.');
   treenodeScope.ImageIndex := constItemScope;
-  treenodeScope.SelectedIndex := treenodeScope.ImageIndex ;
+  treenodeScope.SelectedIndex := treenodeScope.ImageIndex;
 
   treenodeScopeGleichFunction :=
     TreeView1.Items.AddChild(treenodeScope, 'scope. = function');
   treenodeScopeGleichFunction.ImageIndex := constItemScope;
-  treenodeScopeGleichFunction.SelectedIndex := treenodeScopeGleichFunction.ImageIndex ;
+  treenodeScopeGleichFunction.SelectedIndex := treenodeScopeGleichFunction.ImageIndex;
 
   treenodeScopeGleich := TreeView1.Items.AddChild(treenodeScope, 'scope. =');
   treenodeScopeGleich.ImageIndex := constItemScope;
-  treenodeScopeGleich.SelectedIndex := treenodeScopeGleich.ImageIndex ;
+  treenodeScopeGleich.SelectedIndex := treenodeScopeGleich.ImageIndex;
 
   treenodeScopeNurPunkt := TreeView1.Items.AddChild(treenodeScope, 'scope.');
   treenodeScopeNurPunkt.ImageIndex := constItemScope;
-  treenodeScopeNurPunkt.SelectedIndex := treenodeScopeNurPunkt.ImageIndex ;
+  treenodeScopeNurPunkt.SelectedIndex := treenodeScopeNurPunkt.ImageIndex;
 
   treenodeModel := TreeView1.Items.AddChild(nil, 'Model');
   treenodeModel.ImageIndex := constItemModel;
-  treenodeModel.SelectedIndex := treenodeModel.ImageIndex ;
+  treenodeModel.SelectedIndex := treenodeModel.ImageIndex;
 
   treenodeAllFiles := TreeView1.Items.AddChild(nil, 'All Files');
   treenodeAllFiles.ImageIndex := constItemIndexFolder;
-  treenodeAllFiles.SelectedIndex := treenodeAllFiles.ImageIndex ;
+  treenodeAllFiles.SelectedIndex := treenodeAllFiles.ImageIndex;
 
   treenodeSearchInPath := TreeView1.Items.AddChild(nil, 'Search In Path (dblClick)');
   treenodeSearchInPath.ImageIndex := constItemIndexSearchInPath;
-  treenodeSearchInPath.SelectedIndex := treenodeSearchInPath.ImageIndex ;
-
+  treenodeSearchInPath.SelectedIndex := treenodeSearchInPath.ImageIndex;
 
 end;
 
@@ -1270,16 +1273,14 @@ var
   treenodeAngularSchluessel: TTreenode;
 begin
 
-
-
   for i := 0 to self.frmMainController.AngIntellisence.slModels.Count - 1 do
   begin
     treenodeAngularSchluessel :=
-      TreeView1.Items.AddChild(treenodeModel, self.frmMainController.AngIntellisence.slModels[i]);
+      TreeView1.Items.AddChild(treenodeModel,
+      self.frmMainController.AngIntellisence.slModels[i]);
     treenodeAngularSchluessel.ImageIndex := constItemModel;
 
   end;
-
 
 end;
 
@@ -1470,9 +1471,6 @@ begin
         AddTreenodeModelToNode(OneFileInfo, treenodeFilestructure);
       end;
 
-
-
-
     end;
   end;
 
@@ -1524,6 +1522,8 @@ begin
 
 
   SynAnySyn1.Constants.Clear;
+
+  frmMainController.FillslDJKeyWords;
 
   sl := frmMainController.GetslDJKeyWords;
   for i := 0 to sl.Count - 1 do
@@ -1772,10 +1772,12 @@ end;
 procedure TfrmMainView.SynEditProcessedCommand(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
 var
-  boolFill: boolean;
-  point : TPoint;
+  boolAddCharToFilter: boolean;
+  boolFillIntelliseceList: boolean;
+  point: TPoint;
 begin
-  boolFill := False;
+  boolAddCharToFilter := (trim(AChar) <> '');
+  boolFillIntelliseceList := boolAddCharToFilter;
 
   if (AChar = #27) or (Command in [2, 3, 5]) then   //ESC or left key ...
     IntelligenceFrmCloseAndFree;
@@ -1819,20 +1821,20 @@ begin
   if (AChar = '.') then
   begin
     if self.frmMainController.myActiveOneTabsheet.Tabsheet.ImageIndex in
-      [constItemIndexController, constItemIndexService,
-      constItemIndexFactory, constItemIndexFilter, constItemIndexModule,
-      constItemIndexJavascript] then
+      [constItemIndexController, constItemIndexService, constItemIndexFactory,
+      constItemIndexFilter, constItemIndexModule, constItemIndexJavascript] then
     begin
       if frmIntelligence <> nil then
         if not frmIntelligence.Visible then
           IntelligenceFrmCloseAndFree;
 
       if frmIntelligence = nil then
-        begin
+      begin
         OpenIntelligenceDlg(constItemIndexJavascript);
         point := self.frmMainController.myActiveOneTabsheet.SynMemo.CaretXY;
-        frmIntelligence.sFilter := self.frmMainController.myActiveOneTabsheet.SynMemo.GetWordAtRowCol(point);
-        end;
+        frmIntelligence.sFilter :=
+          self.frmMainController.myActiveOneTabsheet.SynMemo.GetWordAtRowCol(point);
+      end;
     end;
   end;
 
@@ -1845,12 +1847,27 @@ begin
       if frmIntelligence <> nil then
         if not frmIntelligence.Visible then
           IntelligenceFrmCloseAndFree;
-      boolFill := True;
+      boolFillIntelliseceList := True;
       if frmIntelligence = nil then
         OpenIntelligenceDlg(constItemIndexHTML);
     end;
   end;
 
+
+  if (AChar = '"') or (AChar = '{') then
+  begin
+    if self.frmMainController.ActiveSynMemoIsHTMLAndNgModelInLine(AChar) then
+    begin
+      if frmIntelligence <> nil then
+        if not frmIntelligence.Visible then
+          IntelligenceFrmCloseAndFree;
+
+      boolAddCharToFilter := False;
+      boolFillIntelliseceList := True;
+      if frmIntelligence = nil then
+        OpenIntelligenceDlg(constItemIndexJavascript);  //TODO Better solution necassary
+    end;
+  end;
 
 
   if frmIntelligence <> nil then
@@ -1865,13 +1882,12 @@ begin
         end;
       end;
 
-      if (trim(AChar) <> '') or boolFill then
+      if boolAddCharToFilter then
+        frmIntelligence.sFilter := frmIntelligence.sFilter + AChar;
+
+      if boolFillIntelliseceList then
       begin
-        if trim(AChar) <> '' then
-          frmIntelligence.sFilter := frmIntelligence.sFilter + AChar;
         frmIntelligence.FillWithHtml5Tags(self.frmMainController.AngIntellisence);
-
-
         if frmIntelligence.ListView1.Items.Count = 0 then
           IntelligenceFrmCloseAndFree;
 
@@ -1988,11 +2004,83 @@ begin
   self.frmMainController.AngClipboardHistorieList.AddToHistorie(AText);
 end;
 
+procedure TfrmMainView.SynEdit1MouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: integer);
+var
+  p: TPoint;
+  s: string;
+  SynEdit1: TSynedit;
+  OneFileInfo: TOneFileInfo;
+  sPfad : string;
+begin
+  if shift = [ssCtrl..SSLeft] then
+  begin
+    SynEdit1 := TSynedit(Sender);
+    p.x := X;
+    p.y := Y;
+
+    p := SynEdit1.PhysicalToLogicalPos(SynEdit1.PixelsToRowColumn(p));
+
+    s := SynEdit1.GetWordAtRowCol(p);
+
+
+    if s <> '' then
+      if self.frmMainController.GetslDJKeyWords.IndexOf(s) >= 0 then
+      begin
+        OneFileInfo := self.frmMainController.GetOneFileInfoToDIName(s);
+        if OneFileInfo <> nil then
+        begin
+          sPfad := frmMainController.findFileNameToDataPointer(
+            OneFileInfo.pTreenodeInView);
+          ShowFileInPagecontrolAsTabsheet(sPfad);
+          MarkLineContainsThisWord(s);
+        end;
+      end;
+
+  end;
+
+end;
+
+procedure TfrmMainView.SynEdit1MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: integer);
+var
+  p: TPoint;
+  s: string;
+  SynEdit1: TSynedit;
+begin
+  if shift = [ssCtrl] then
+  begin
+    SynEdit1 := TSynedit(Sender);
+    p.x := X;
+    p.y := Y;
+
+    p := SynEdit1.PhysicalToLogicalPos(SynEdit1.PixelsToRowColumn(p));
+
+    s := SynEdit1.GetWordAtRowCol(p);
+
+    if s <> '' then
+      if self.frmMainController.GetslDJKeyWords.IndexOf(s) >= 0 then
+      begin
+        SynEdit1.MouseLinkColor.Style := [fsUnderline];
+        SynEdit1.MouseLinkColor.Foreground := clBlue;
+      end
+      else
+      begin
+        SynEdit1.MouseLinkColor.Style := [];
+        SynEdit1.MouseLinkColor.Foreground := clNone;
+
+      end;
+
+  end;
+
+end;
+
 
 function TfrmMainView.SearchTabsheetOrCreateNew(sMyFileName: string): boolean;
 var
   i, i2, i3: integer;
   myOneTabsheet: TOneTabsheet;
+  SynEditMouseAction: TSynEditMouseAction;
 begin
   Result := False;
 
@@ -2045,6 +2133,16 @@ begin
 
   myOneTabsheet.SynMemo.OnCutCopy := @SynEdit1CutCopy;
   myOneTabsheet.SynMemo.OnPaste := @SynEdit1Paste;
+
+  myOneTabsheet.SynMemo.OnMouseDown := @SynEdit1MouseDown;
+  myOneTabsheet.SynMemo.OnMouseMove := @SynEdit1MouseMove;
+
+  SynEditMouseAction := myOneTabsheet.SynMemo.MouseActions.Add;
+  SynEditMouseAction.Command := emcMouseLink;
+  SynEditMouseAction.Shift := [ssCtrl];
+  SynEditMouseAction.ShiftMask := [ssCtrl];
+
+
 
   myOneTabsheet.SynMemo.RightEdge := 0;
 
@@ -2143,6 +2241,7 @@ var
   parentNode: TTreenode;
   s: string;
   OneFileInfo: TOneFileInfo;
+  sExt : string;
 begin
   IntelligenceFrmCloseAndFree;
   treenode := TreeView1.Selected;
@@ -2160,12 +2259,23 @@ begin
     end;
   end;
 
+
   if treenode.Data = nil then
     exit;
 
   OneFileInfo := TOneFileInfo(treenode.Data);
 
   sPfad := frmMainController.findFileNameToDataPointer(OneFileInfo.pTreenodeInView);
+
+   sExt := uppercase(ExtractFileExt(sPfad));
+  if (sExt = '.JPG') or (sExt = '.PNG') or (sExt = '.ICO') or (sExt = '.GIF') or (sExt = '.BMP') then
+    begin
+    frmImage := TfrmImage.create(self);
+    frmImage.Image1.Picture.LoadFromFile(sPfad);
+    frmImage.showmodal;
+    frmImage.free;
+    exit;
+    end;
 
   ShowFileInPagecontrolAsTabsheet(sPfad);
 
@@ -2391,6 +2501,13 @@ begin
   m.ImageIndex := iImageindex;
   m.Visible := True;
   frmMainController.myActiveOneTabsheet.SynMemo.Marks.Add(m);
+
+
+
+
+
+
+
 
 
 

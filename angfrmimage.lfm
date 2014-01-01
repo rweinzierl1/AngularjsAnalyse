@@ -1,0 +1,18 @@
+object frmImage: TfrmImage
+  Left = 623
+  Height = 214
+  Top = 245
+  Width = 258
+  Caption = 'frmImage'
+  ClientHeight = 214
+  ClientWidth = 258
+  Position = poScreenCenter
+  LCLVersion = '1.0.14.0'
+  object Image1: TImage
+    Left = 0
+    Height = 214
+    Top = 0
+    Width = 258
+    Align = alClient
+  end
+end
