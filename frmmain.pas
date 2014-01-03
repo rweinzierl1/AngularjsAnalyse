@@ -17,7 +17,7 @@ uses
   SynEditMiscClasses, SynEditMarkupSpecialLine,
   angFrmMainController, angDatamodul, angKeyWords, angfrmBookmarks, angFileList, types,
   angSnippet, angfrmSnippet, angFrmSelectSnippet, SynCompletion, LCLType, SynEditKeyCmds,
-  angFrmIntelligence, angFrmClipboardHistorie ,angfrmImage;
+  angFrmIntelligence, angFrmClipboardHistorie, angfrmImage;
 
 type
 
@@ -36,6 +36,7 @@ type
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    mnuNewFile: TMenuItem;
     mnuPasteFromHistorie: TMenuItem;
     mnuCloseAllOthers: TMenuItem;
     mnuCloseWithoutSave: TMenuItem;
@@ -130,6 +131,7 @@ type
     procedure mnuIntelligenceClick(Sender: TObject);
     procedure mnuManageSnippetClick(Sender: TObject);
     procedure mnuLargerClick(Sender: TObject);
+    procedure mnuNewFileClick(Sender: TObject);
     procedure mnuOpenAFileClick(Sender: TObject);
     procedure mnuOpenMarkedFileNameClick(Sender: TObject);
     procedure mnuOpenShellClick(Sender: TObject);
@@ -194,6 +196,7 @@ type
     procedure AddTreenodeScopeToNode(const OneFileInfo: TOneFileInfo;
       const treenode: TTreenode);
     procedure ChangeSchema(Sender: TObject);
+    function ChildNodeExists(treenode: TTreenode; s: string): boolean;
     function CloseAllTabsheets: boolean;
     procedure DoCloseActivePagecontrolPage(boolSaveChanges: boolean);
     procedure DoProcess(sPfad: string);
@@ -296,9 +299,6 @@ begin
       begin
         OneTabsheet := frmMainController.slOpendTabsheets.OneTabsheet(n);
         OneTabsheet.setActiveColorScheme(OneColorScheme);
-
-        self.Color := OneColorScheme.Color; //Avoid Blinking of Pagecontrol change
-
       end;
     end;
   end;
@@ -861,6 +861,46 @@ end;
 
 procedure TfrmMainView.mnuLargerClick(Sender: TObject);
 begin
+
+end;
+
+procedure TfrmMainView.mnuNewFileClick(Sender: TObject);
+var
+  treenode: TTreenode;
+  sPfad: string;
+  s: string;
+  sl : Tstringlist;
+  myItem : TTreenode;
+begin
+
+  treenode := TreeView1.Selected;
+  if treenode = nil then
+    exit;
+
+  if treenode = treenodeSearchInPath then
+    exit;
+
+  if treenode.Data = nil then
+    exit;
+
+  sPfad := frmMainController.findFileNameToDataPointer(
+    TOneFileInfo(treenode.Data).pTreenodeInView);
+
+  sPfad := extractfilepath(sPfad);
+  s := '';
+
+  if inputquery('Filename','New Filename',s) then
+    begin
+    sl := Tstringlist.create;
+    sl.savetofile(sPfad +s);
+    sl.free;
+
+
+    myItem := TreeView1.Items.AddChild(treenode.Parent , s);
+      myItem.ImageIndex := frmMainController.CalculateIndexOfFileExtension(s);
+      myItem.Data := frmMainController.AddOneFileInSL(sPfad +s, myItem);
+    ShowFileInPagecontrolAsTabsheet(sPfad +s);
+    end;
 
 end;
 
@@ -1638,22 +1678,6 @@ begin
   end;
 
 
-{ sSel := SynMemo.SelText;
-
- if length(sSel) > 2 then
-   begin
-   SynPreview := TSynMemo(Sender);
-   i := pos(sSel,SynPreview.lines[line]);
-   if i > 0 then
-     begin
-     Markup.StartX:=i;
-     Markup.EndX  := i + length(sSel);
-     Markup.Background := clOlive ;
-     //Special := True;
-     end;
-
-   end;   }
-
 end;
 
 
@@ -2011,7 +2035,7 @@ var
   s: string;
   SynEdit1: TSynedit;
   OneFileInfo: TOneFileInfo;
-  sPfad : string;
+  sPfad: string;
 begin
   if shift = [ssCtrl..SSLeft] then
   begin
@@ -2108,7 +2132,10 @@ begin
   myOneTabsheet.SynMemoPreview.Width := 70;
   myOneTabsheet.SynMemoPreview.Font.Quality := fqProof;
   myOneTabsheet.SynMemoPreview.Font.Size := 1;
+  {$ifdef linux}
+  {$else}
   myOneTabsheet.SynMemoPreview.Font.Name := 'Consolas';
+  {$endif}
   myOneTabsheet.SynMemoPreview.ScrollBars := ssNone;
   myOneTabsheet.SynMemoPreview.Gutter.Visible := False;
   myOneTabsheet.SynMemoPreview.ReadOnly := True;
@@ -2157,7 +2184,12 @@ begin
 
   myOneTabsheet.SynMemo.Font.Quality := fqProof;
   myOneTabsheet.SynMemo.Font.Size := frmMainController.UserPropertys.iFontsize;
+
+    {$ifdef linux}
+  {$else}
   myOneTabsheet.SynMemo.Font.Name := 'Consolas';
+  {$endif}
+
 
   myOneTabsheet.SynMemo.OnStatusChange := @SynMemo1StatusChange;
 
@@ -2241,7 +2273,7 @@ var
   parentNode: TTreenode;
   s: string;
   OneFileInfo: TOneFileInfo;
-  sExt : string;
+  sExt: string;
 begin
   IntelligenceFrmCloseAndFree;
   treenode := TreeView1.Selected;
@@ -2267,15 +2299,16 @@ begin
 
   sPfad := frmMainController.findFileNameToDataPointer(OneFileInfo.pTreenodeInView);
 
-   sExt := uppercase(ExtractFileExt(sPfad));
-  if (sExt = '.JPG') or (sExt = '.PNG') or (sExt = '.ICO') or (sExt = '.GIF') or (sExt = '.BMP') then
-    begin
-    frmImage := TfrmImage.create(self);
+  sExt := uppercase(ExtractFileExt(sPfad));
+  if (sExt = '.JPG') or (sExt = '.PNG') or (sExt = '.ICO') or
+    (sExt = '.GIF') or (sExt = '.BMP') then
+  begin
+    frmImage := TfrmImage.Create(self);
     frmImage.Image1.Picture.LoadFromFile(sPfad);
     frmImage.showmodal;
-    frmImage.free;
+    frmImage.Free;
     exit;
-    end;
+  end;
 
   ShowFileInPagecontrolAsTabsheet(sPfad);
 
@@ -2406,15 +2439,40 @@ begin
 
 end;
 
+function TfrmMainView.ChildNodeExists(treenode: TTreenode; s: string): boolean;
+var i : integer;
+myChildNode : TTreenode;
+begin
+  result := false;
+  myChildNode := treenode.GetFirstChild;
+
+  while myChildNode <> nil do
+    begin
+    if myChildNode.Text = s then
+      result := true;
+
+    myChildNode := myChildNode.GetNextSibling;
+    end;
+
+
+end;
+
 procedure TfrmMainView.AddTreenodeNgToNode(OneFileInfo: TOneFileInfo;
   treenode: TTreenode);
 var
   n: integer;
   treenodeScope1: TTreenode;
   treenodeScopeLokal: TTreenode;
+  s : string;
+
 begin
-  treenodeScope1 := TreeView1.Items.AddChild(treenode, 'ng   ' +
-    ansireplacestr(OneFileInfo.slngWords.Text, #13#10, ' | '));
+  s :=  'ng   ' +
+    ansireplacestr(OneFileInfo.slngWords.Text, #13#10, ' | ');
+
+  if ChildNodeExists(treenode,s ) then exit;
+
+
+  treenodeScope1 := TreeView1.Items.AddChild(treenode,s);
   treenodeScope1.ImageIndex := constItemIndexAngular;
 
   for n := 0 to OneFileInfo.slngLines.Count - 1 do
@@ -2431,8 +2489,12 @@ var
   treenodeScope1: TTreenode;
   treenodeScopeLokal: TTreenode;
   n: integer;
+  s : string;
 begin
-  treenodeScope1 := TreeView1.Items.AddChild(treenode, 'scope.');
+  s :=  'scope.';
+  if ChildNodeExists(treenode,s ) then exit;
+
+  treenodeScope1 := TreeView1.Items.AddChild(treenode,s);
   treenodeScope1.ImageIndex := constItemScope;
 
   for n := 0 to OneFileInfo.slScopeActions.Count - 1 do
@@ -2450,8 +2512,12 @@ var
   treenodeModel1: TTreenode;
   treenodeModelLokal: TTreenode;
   n: integer;
+  s : string;
 begin
-  treenodeModel1 := TreeView1.Items.AddChild(treenode, 'Model');
+    s :=  'Model';
+  if ChildNodeExists(treenode,s ) then exit;
+
+  treenodeModel1 := TreeView1.Items.AddChild(treenode, s);
   treenodeModel1.ImageIndex := constItemModel;
 
   for n := 0 to OneFileInfo.slNgModels.Count - 1 do
@@ -2501,7 +2567,6 @@ begin
   m.ImageIndex := iImageindex;
   m.Visible := True;
   frmMainController.myActiveOneTabsheet.SynMemo.Marks.Add(m);
-
 
 
 

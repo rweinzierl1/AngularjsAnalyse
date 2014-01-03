@@ -144,6 +144,7 @@
         <Filename Value="angfrmimage.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmImage"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="angfrmImage"/>
       </Unit14>

@@ -769,6 +769,11 @@ object frmMainView: TfrmMainView
       Caption = 'Open Path in Shell'
       OnClick = mnuOpenShellClick
     end
+    object mnuNewFile: TMenuItem
+      Caption = 'New File'
+      ImageIndex = 1
+      OnClick = mnuNewFileClick
+    end
   end
   object ActionList1: TActionList
     Images = DataModule1.ImageList1
